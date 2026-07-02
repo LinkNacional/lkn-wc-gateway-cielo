@@ -169,7 +169,7 @@ fetch('/wp-json/lknWCGatewayCielo/checkCard?cardbin=411111', {
 
 - **Migration Guide:** [MIGRATION_GUIDE_v1.29.1.md](./MIGRATION_GUIDE_v1.29.1.md)
 - **Technical Docs:** [SECURITY_FIXES.md](./SECURITY_FIXES.md)
-- **GitHub Issues:** https://github.com/LinkNacional/wc_cielo_payment_gateway/issues
+- **GitHub Issues:** https://github.com/LinkNacional/lkn-wc-gateway-cielo/issues
 - **Email:** contato@linknacional.com.br
 
 ---

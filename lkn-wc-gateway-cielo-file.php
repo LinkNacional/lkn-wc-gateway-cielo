@@ -33,7 +33,7 @@ if (! defined('LKN_WC_GATEWAY_CIELO_DIR_URL')) {
 }
 
 if (! defined('LKN_WC_GATEWAY_CIELO_BASENAME')) {
-    define('LKN_WC_GATEWAY_CIELO_BASENAME', 'wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php');
+    define('LKN_WC_GATEWAY_CIELO_BASENAME', 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php');
 }
 
 if (! defined('LKN_WC_GATEWAY_CIELO_URL')) {
@@ -49,7 +49,7 @@ if (! defined('LKN_WC_CIELO_TRANSLATION_PATH')) {
 }
 
 if (! defined('LKN_WC_CIELO_FILE_BASENAME')) {
-    define('LKN_WC_CIELO_FILE_BASENAME', 'wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php');
+    define('LKN_WC_CIELO_FILE_BASENAME', 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php');
 }
 
 if (! defined('LKN_WC_CIELO_BASE_FILE')) {

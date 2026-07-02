@@ -282,7 +282,7 @@ Todas as constantes de caminho/versão são definidas em `lkn-wc-gateway-cielo-f
 | `LKN_WC_CIELO_FILE` | Caminho absoluto do bootstrap |
 | `LKN_WC_GATEWAY_CIELO_DIR` | Diretório raiz com trailing `/` |
 | `LKN_WC_GATEWAY_CIELO_DIR_URL` | URL do diretório do plugin |
-| `LKN_WC_GATEWAY_CIELO_BASENAME` | Basename para WordPress (`wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php`) |
+| `LKN_WC_GATEWAY_CIELO_BASENAME` | Basename para WordPress (`lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php`) |
 | `LKN_WC_CIELO_MIN_WC_VERSION` | Versão mínima do WooCommerce (`5.0.0`) |
 
 **Nunca** defina constantes com o mesmo prefixo sem verificar `if (!defined(...))` antes.

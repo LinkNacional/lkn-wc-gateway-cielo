@@ -353,7 +353,7 @@ add_action('my_custom_cron_job', function() {
 ### Precisa de Ajuda?
 
 1. **Documentação completa:** Ver SECURITY_FIXES.md
-2. **Issues GitHub:** https://github.com/LinkNacional/wc_cielo_payment_gateway/issues
+2. **Issues GitHub:** https://github.com/LinkNacional/lkn-wc-gateway-cielo/issues
 3. **Email:** contato@linknacional.com.br
 
 ### Reportar Bugs de Segurança

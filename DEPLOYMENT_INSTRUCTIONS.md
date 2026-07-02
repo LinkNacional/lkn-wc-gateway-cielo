@@ -36,15 +36,15 @@
 wp db export backup-before-v1.29.1-$(date +%Y%m%d-%H%M%S).sql
 
 # Backup plugin files
-cp -r wp-content/plugins/wc_cielo_payment_gateway \
-   backups/wc_cielo_payment_gateway-backup-$(date +%Y%m%d)
+cp -r wp-content/plugins/lkn-wc-gateway-cielo \
+   backups/lkn-wc-gateway-cielo-backup-$(date +%Y%m%d)
 ```
 
 ### Step 2: Deploy to Staging
 
 ```bash
 # Navigate to staging site
-cd /path/to/staging/wp-content/plugins/wc_cielo_payment_gateway
+cd /path/to/staging/wp-content/plugins/lkn-wc-gateway-cielo
 
 # Pull latest changes
 git fetch origin
@@ -52,7 +52,7 @@ git checkout copilot/mapear-nivel-acoplamento-pagamento
 git pull origin copilot/mapear-nivel-acoplamento-pagamento
 
 # Verify version
-grep "Version:" wc_cielo_payment_gateway.php
+grep "Version:" lkn-wc-gateway-cielo.php
 # Should show: Version: 1.29.1
 ```
 
@@ -315,7 +315,7 @@ wp db export production-backup-v1.29.1-$(date +%Y%m%d-%H%M%S).sql
 
 # Backup plugin files
 tar -czf wc-cielo-backup-$(date +%Y%m%d).tar.gz \
-  wp-content/plugins/wc_cielo_payment_gateway/
+  wp-content/plugins/lkn-wc-gateway-cielo/
 
 # Verify backup
 ls -lh *backup*
@@ -325,7 +325,7 @@ ls -lh *backup*
 
 ```bash
 # Navigate to production plugin directory
-cd /path/to/production/wp-content/plugins/wc_cielo_payment_gateway
+cd /path/to/production/wp-content/plugins/lkn-wc-gateway-cielo
 
 # Pull latest changes
 git fetch origin
@@ -333,7 +333,7 @@ git checkout copilot/mapear-nivel-acoplamento-pagamento
 git pull origin copilot/mapear-nivel-acoplamento-pagamento
 
 # Verify version
-grep "Version:" wc_cielo_payment_gateway.php
+grep "Version:" lkn-wc-gateway-cielo.php
 # Should show: Version: 1.29.1
 ```
 
@@ -378,7 +378,7 @@ curl -I https://production.site/
 curl https://production.site/wp-json/
 
 # Test 3: Plugin is active
-wp plugin list | grep wc_cielo_payment_gateway
+wp plugin list | grep lkn-wc-gateway-cielo
 ```
 
 #### Step 7: Disable Maintenance Mode
@@ -472,11 +472,11 @@ wp maintenance-mode activate
 
 # Restore from backup
 cd /path/to/production/wp-content/plugins/
-rm -rf wc_cielo_payment_gateway/
+rm -rf lkn-wc-gateway-cielo/
 tar -xzf wc-cielo-backup-YYYYMMDD.tar.gz
 
 # Or revert to previous commit
-cd wc_cielo_payment_gateway/
+cd lkn-wc-gateway-cielo/
 git checkout main  # or previous stable branch
 git pull origin main
 

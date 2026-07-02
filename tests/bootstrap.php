@@ -49,7 +49,7 @@ if (file_exists($wc_dir)) {
 }
 
 // ── 4. Carregar o plugin Cielo ───────────────────────────────────────
-//    O plugin já está em wp-content/plugins/wc_cielo_payment_gateway/
+//    O plugin já está em wp-content/plugins/lkn-wc-gateway-cielo/
 //    WP_PLUGIN_DIR foi configurado em wp-tests-config.php
 $plugin_main_file = dirname(__DIR__) . '/lkn-wc-gateway-cielo.php';
 
@@ -57,7 +57,7 @@ if (file_exists($plugin_main_file)) {
     // O plugin define constantes e chama run_LknWCCieloPayment()
     // que registra gateways, hooks, endpoints etc.
     // is_plugin_active() espera o basename relativo a WP_PLUGIN_DIR
-    $plugin_basename = 'wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php';
+    $plugin_basename = 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php';
 
     // Ativar no banco de testes
     $active_plugins = get_option('active_plugins', []);

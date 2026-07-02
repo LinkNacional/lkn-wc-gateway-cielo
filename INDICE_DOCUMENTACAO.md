@@ -68,7 +68,7 @@ Guia visual com **759 linhas** contendo:
 ## 🗂️ Estrutura dos Documentos
 
 ```
-📁 wc_cielo_payment_gateway/
+📁 lkn-wc-gateway-cielo/
 ├── 📄 RESUMO_EXECUTIVO.md          (212 linhas, 5.8KB)
 │   └── Visão geral para tomada de decisão
 │
@@ -237,7 +237,7 @@ Ver seção "6. Mapeamento de Mocks" no **GUIA_VISUAL_REFERENCIA.md** para:
 **Mapeamento criado por:** Análise automatizada  
 **Data:** 2026-03-14  
 **Versão do Plugin:** 1.29.0  
-**Repositório:** https://github.com/LinkNacional/wc_cielo_payment_gateway
+**Repositório:** https://github.com/LinkNacional/lkn-wc-gateway-cielo
 
 ---
 
