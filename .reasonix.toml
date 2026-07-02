@@ -1,0 +1,150 @@
+# .reasonix.toml — Ciclo de desenvolvimento obrigatório
+# READ SPEC → RED (teste falho) → GREEN (código) → AUDIT (segurança) → REFACTOR
+# Nenhuma fase pode ser pulada. Cada fase exige evidência antes da próxima.
+
+[workflow]
+# Ordem imutável das fases
+phases = ["read_spec", "red", "green", "audit", "plugin-check", "refactor"]
+# Bloqueia avanço sem evidência da fase atual
+require_evidence = true
+# Máximo de arquivos por fase GREEN antes de novo AUDIT
+max_files_per_green = 3
+
+# ---------------------------------------------------------------------------
+# FASE 1: READ SPEC
+# ---------------------------------------------------------------------------
+[workflow.phases.read_spec]
+description = "Ler documentação relevante antes de qualquer código"
+required = [
+    "Ler AGENTS.md (regras de arquitetura, segurança, anti-padrões)",
+    "Ler CHANGELOG.md se a task envolve feature existente",
+    "Ler MAPEAMENTO_TECNICO_ACOPLAMENTO.md se a task envolve hooks ou integrações",
+    "Ler README.txt se a task envolve funcionalidade documentada",
+]
+evidence = "Citar seção/linha do documento lido no commit message ou comentário"
+gate = "Nenhum arquivo pode ser criado ou editado antes desta fase concluída"
+
+# ---------------------------------------------------------------------------
+# FASE 2: RED — Teste que falha
+# ---------------------------------------------------------------------------
+[workflow.phases.red]
+description = "Escrever teste unitário que comprova a falha/bug antes de corrigir"
+required = [
+    "Teste deve falhar comprovando o bug ou a ausência da feature",
+    "Teste deve ser executado com `composer test` e mostrar FAIL",
+    "Teste cobre: caso feliz, caso de erro, edge case relevante",
+]
+forbidden = [
+    "Nunca escrever teste que já passa (mock errado, teste vazio)",
+    "Nunca pular teste para 'código simples' — sem exceções",
+    "Nunca mockar a classe sendo testada",
+]
+evidence = "Output do `composer test --filter NomeDoTeste` mostrando FAIL"
+gate = "Teste deve EXISTIR no disco e FALHAR antes de qualquer código de produção"
+
+# ---------------------------------------------------------------------------
+# FASE 3: GREEN — Código mínimo que faz o teste passar
+# ---------------------------------------------------------------------------
+[workflow.phases.green]
+description = "Escrever apenas o código necessário para o teste passar"
+required = [
+    "Código mínimo — nada além do que o teste exige",
+    "Todo $_POST com sanitize_text_field(wp_unslash(...))",
+    "Toda string de saída com esc_*() ou wp_kses_*()",
+    "Nonce verification em process_payment() e validate_fields()",
+    "Text domain 'lkn-wc-gateway-cielo' em todas as strings traduzíveis",
+]
+forbidden = [
+    "Nunca adicionar feature não solicitada 'por conveniência'",
+    "Nunca alterar código fora do escopo da task",
+    "Nunca deixar debug code (var_dump, console.log, error_log) no commit",
+    "Nunca usar WC_Subscriptions_Order — usar wcs_order_contains_subscription()",
+    "Nunca hardcodar CardOnFile.Usage como 'First'",
+    "Nunca reutilizar nome de hook entre gateways diferentes",
+]
+evidence = "Output do `composer test --filter NomeDoTeste` mostrando PASS"
+gate = "Teste previamente RED agora passa. Nenhum outro teste quebrou."
+
+# ---------------------------------------------------------------------------
+# FASE 4: AUDIT — Validação de segurança
+# ---------------------------------------------------------------------------
+[workflow.phases.audit]
+description = "Auditar segurança do código antes de considerar pronto"
+required = [
+    "Verificar nonce em todos os entry points (process_payment, validate_fields)",
+    "Verificar sanitização de todos os $_POST, $_GET, $_REQUEST",
+    "Verificar escaping de saída (esc_attr, esc_html__, esc_url)",
+    "Verificar se dados de cartão não vazam em logs (CVV, número completo)",
+    "Verificar permissão em endpoints REST (current_user_can)",
+    "Rodar `composer test` completo — nenhum teste pode quebrar",
+    "Verificar anti-padrões do AGENTS.md seção 4",
+]
+forbidden = [
+    "Nunca logar número completo de cartão ou CVV",
+    "Nunca armazenar CVV em user_meta ou post_meta",
+    "Nunca deixar MerchantId/MerchantKey sem censura em logs",
+]
+evidence = "Lista de verificação dos 7 itens above. Output do `composer test` completo."
+gate = "Todos os 7 checks passam. Testes suite completa passam."
+
+# ---------------------------------------------------------------------------
+# FASE 4.5: PLUGIN-CHECK — Validação via WordPress Plugin Check (PCP)
+# ---------------------------------------------------------------------------
+[workflow.phases."plugin-check"]
+description = "Rodar WordPress Plugin Check em modo estrito — zero erros, zero warnings"
+required = [
+    "Executar `rtk ./.reasonix/skills/plugin-check.sh`",
+    "Se exit code = 1, corrigir TODOS os erros e warnings reportados",
+    "Re-executar até exit code = 0 (zero errors, zero warnings)",
+]
+forbidden = [
+    "Nunca avançar para REFACTOR com plugin-check sujo",
+    "Nunca suprimir warnings com comentários de ignore sem justificativa documentada",
+]
+evidence = "Output do script com exit 0"
+gate = "Plugin Check passa limpo — zero errors, zero warnings (exit 0)"
+
+# ---------------------------------------------------------------------------
+# FASE 5: REFACTOR — Melhorar sem quebrar
+# ---------------------------------------------------------------------------
+[workflow.phases.refactor]
+description = "Melhorar estrutura interna sem alterar comportamento externo"
+required = [
+    "Extrair funções longas (>40 linhas) para métodos privados com nome descritivo",
+    "Eliminar duplicação de código entre gateways",
+    "Garantir que hooks seguem o padrão de nomenclatura (seção 1.4 do AGENTS.md)",
+    "Rodar `composer test` completo após cada extração",
+]
+forbidden = [
+    "Nunca alterar assinatura de hooks públicos (ações/filtros documentados)",
+    "Nunca alterar comportamento externo — refactor é interno",
+    "Nunca refatorar sem cobertura de teste do código afetado",
+]
+evidence = "Output do `composer test` completo passando após refactor"
+gate = "Mesmos testes passam. Nenhum hook público alterado. Cobertura >= anterior."
+
+# ---------------------------------------------------------------------------
+# REGRAS GLOBAIS — aplicam-se a TODAS as fases
+# ---------------------------------------------------------------------------
+[global]
+# Anti-padrões proibidos em qualquer fase (ver AGENTS.md seção 4)
+forbidden_patterns = [
+    "get_option('...', 'disabled ') com espaço no default",
+    "Variável indefinida usada como condição ($save_token sem definição)",
+    "WC_Subscriptions_Order — usar wcs_order_contains_subscription()",
+    "CardOnFile.Usage hardcoded como 'First'",
+    "Hook com mesmo nome entre gateways diferentes",
+    "use de classe externa sem class_exists() antes do uso",
+]
+
+# Todo commit deve passar nestes checks
+pre_commit_checks = [
+    "composer test",            # Testes unitários
+    "vendor/bin/phan",           # Análise estática
+]
+
+# Arquivos que DEVEM ser lidos antes de começar qualquer task
+required_reading = [
+    "AGENTS.md",
+    ".reasonix.toml",
+]

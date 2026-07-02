@@ -53,6 +53,7 @@ final class LknWCGatewayCieloGooglePayBlocks extends AbstractPaymentMethodType
         return array(
             'title' => $this->gateway->title,
             'description' => $this->gateway->description,
+            'supports' => $this->gateway->supports,
             'env' => $this->gateway->get_option('env', 'TEST'),
             'googleMerchantId' => $this->gateway->get_option('google_merchant_id'),
             'googleMerchantName' => $this->gateway->get_option('google_merchant_name'),

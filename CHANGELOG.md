@@ -1,3 +1,6 @@
+# 1.34.0 - 02/07/2026
+* Ajuste: compatibilidade com o Woocommerce subscription.
+
 # 1.33.6 - 25/06/2026
 * Ajuste: versão de teste na documentação.
 

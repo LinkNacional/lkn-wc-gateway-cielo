@@ -17,7 +17,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  * Rename this for your plugin and update it as you release new versions.
  */
 if (! defined('LKN_WC_CIELO_VERSION')) {
-    define('LKN_WC_CIELO_VERSION', '1.33.6');
+    define('LKN_WC_CIELO_VERSION', '1.34.0');
 }
 
 if (! defined('LKN_WC_CIELO_FILE')) {
@@ -33,7 +33,7 @@ if (! defined('LKN_WC_GATEWAY_CIELO_DIR_URL')) {
 }
 
 if (! defined('LKN_WC_GATEWAY_CIELO_BASENAME')) {
-    define('LKN_WC_GATEWAY_CIELO_BASENAME', 'wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php');
+    define('LKN_WC_GATEWAY_CIELO_BASENAME', 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php');
 }
 
 if (! defined('LKN_WC_GATEWAY_CIELO_URL')) {
@@ -49,7 +49,7 @@ if (! defined('LKN_WC_CIELO_TRANSLATION_PATH')) {
 }
 
 if (! defined('LKN_WC_CIELO_FILE_BASENAME')) {
-    define('LKN_WC_CIELO_FILE_BASENAME', 'wc_cielo_payment_gateway/lkn-wc-gateway-cielo.php');
+    define('LKN_WC_CIELO_FILE_BASENAME', 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php');
 }
 
 if (! defined('LKN_WC_CIELO_BASE_FILE')) {

@@ -259,6 +259,7 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
         return array(
             'title' => $this->gateway->title,
             'description' => $this->gateway->description,
+            'supports' => $this->gateway->supports,
             'accessToken' => isset($acessToken['access_token']) ? $acessToken['access_token'] : '',
             'accessTokenExpiration' => isset($acessToken['expires_in']) ? $acessToken['expires_in'] : '',
             'url' => get_page_link(),

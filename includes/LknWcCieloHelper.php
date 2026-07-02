@@ -317,8 +317,8 @@ final class LknWcCieloHelper
         
         // Verificar se é pagamento recorrente
         $isRecurrent = 'Não';
-        if ($gatewayType === 'Credit' && class_exists('WC_Subscriptions_Order') && function_exists('WC_Subscriptions_Order::order_contains_subscription')) {
-            if (WC_Subscriptions_Order::order_contains_subscription($order_id)) {
+        if (($gatewayType === 'Credit' || $gatewayType === 'Debit' || $gatewayType === 'CreditCard') && function_exists('wcs_order_contains_subscription')) {
+            if (wcs_order_contains_subscription($order_id)) {
                 $isRecurrent = 'Sim';
             }
         }

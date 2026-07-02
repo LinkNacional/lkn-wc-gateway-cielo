@@ -441,7 +441,7 @@ Se você identificar vulnerabilidades de segurança:
 ### Suporte Técnico
 
 Para dúvidas sobre as correções:
-- **Issues GitHub:** https://github.com/LinkNacional/wc_cielo_payment_gateway/issues
+- **Issues GitHub:** https://github.com/LinkNacional/lkn-wc-gateway-cielo/issues
 - **Email:** contato@linknacional.com.br
 - **Documentação:** Ver MAPEAMENTO_TECNICO_ACOPLAMENTO.md
 

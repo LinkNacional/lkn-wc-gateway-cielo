@@ -1,183 +1,79 @@
 <?php
 /**
- * PHPUnit Bootstrap File
- * 
- * Inicializa o ambiente de testes usando Brain\Monkey para mockar WordPress/WooCommerce
- * 
- * @package Lkn\WCCieloPaymentGateway\Tests
+ * PHPUnit Bootstrap — WordPress + WooCommerce + Plugin
+ *
+ * Carrega o WordPress test suite, WooCommerce e o plugin Cielo.
+ * NÃO usa Brain\Monkey — funções WordPress são reais (banco local_tests).
+ *
+ * Requer: wp-tests-config.php na raiz do projeto com credenciais do banco.
  */
 
-// Require Composer autoloader
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+// ── 1. Configurar caminho para wp-tests-config.php ───────────────────
+//    wp-phpunit espera essa variável de ambiente
+putenv('WP_PHPUNIT__TESTS_CONFIG=' . dirname(__DIR__) . '/wp-tests-config.php');
 
-// Initialize Brain\Monkey for WordPress function mocking
-\Brain\Monkey\setUp();
+// ── 2. Carregar WordPress test suite ─────────────────────────────────
+//    Isto inicializa o WordPress completo (banco local_tests)
+$_tests_dir = dirname(__DIR__) . '/vendor/wp-phpunit/wp-phpunit/includes';
 
-// Define WordPress constants that are commonly used
-if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(__DIR__) . '/');
+if (! file_exists("$_tests_dir/bootstrap.php")) {
+    fwrite(STDERR, "Erro: WordPress test suite não encontrada em $_tests_dir\n");
+    fwrite(STDERR, "Execute: composer install\n");
+    exit(1);
 }
 
-if (!defined('WP_CONTENT_DIR')) {
-    define('WP_CONTENT_DIR', ABSPATH . 'wp-content/');
-}
+require_once "$_tests_dir/bootstrap.php";
 
-if (!defined('WP_PLUGIN_DIR')) {
-    define('WP_PLUGIN_DIR', WP_CONTENT_DIR . 'plugins/');
-}
+// ── 3. Carregar WooCommerce ──────────────────────────────────────────
+//    Instalado por wpackagist-plugin/woocommerce em wp-content/plugins/
+$wc_dir = dirname(__DIR__) . '/wp-content/plugins/woocommerce/woocommerce.php';
 
-if (!defined('WP_DEBUG')) {
-    define('WP_DEBUG', false);
-}
-
-// Define plugin constants
-if (!defined('LKN_WC_CIELO_VERSION')) {
-    define('LKN_WC_CIELO_VERSION', '1.29.1');
-}
-
-if (!defined('LKN_WC_CIELO_PLUGIN_DIR')) {
-    define('LKN_WC_CIELO_PLUGIN_DIR', dirname(__DIR__) . '/');
-}
-
-if (!defined('LKN_WC_CIELO_PLUGIN_URL')) {
-    define('LKN_WC_CIELO_PLUGIN_URL', 'http://example.org/wp-content/plugins/wc_cielo_payment_gateway/');
-}
-
-// Mock WordPress functions that don't exist in test environment
-if (!function_exists('admin_url')) {
-    function admin_url($path = '', $scheme = 'admin') {
-        return 'https://example.com/wp-admin/' . ltrim($path, '/');
+if (file_exists($wc_dir)) {
+    // Define constantes que o WC espera antes de carregar
+    if (! defined('WC_TAX_ROUNDING_MODE')) {
+        define('WC_TAX_ROUNDING_MODE', 'auto');
     }
-}
-
-// Mock WordPress functions that don't exist in test environment
-if (!function_exists('admin_url')) {
-    function admin_url($path = '', $scheme = 'admin') {
-        return 'https://example.com/wp-admin/' . ltrim($path, '/');
+    if (! defined('WC_USE_TRANSACTIONS')) {
+        define('WC_USE_TRANSACTIONS', false);
     }
-}
 
-if (!function_exists('is_plugin_active')) {
-    function is_plugin_active($plugin) {
-        // For tests, assume WooCommerce is always active
-        return strpos($plugin, 'woocommerce') !== false;
+    require_once $wc_dir;
+
+    // Ativar WooCommerce no site de teste (se ainda não estiver)
+    if (! is_plugin_active('woocommerce/woocommerce.php')) {
+        activate_plugin('woocommerce/woocommerce.php');
     }
+} else {
+    fwrite(STDERR, "Aviso: WooCommerce não encontrado em $wc_dir\n");
+    fwrite(STDERR, "Execute: composer require --dev wpackagist-plugin/woocommerce\n");
 }
 
-// Create mock classes for WooCommerce dependencies that don't exist in test environment
-if (!class_exists('WC_Payment_Gateway')) {
-    class WC_Payment_Gateway {
-        public $id = '';
-        public $icon = '';
-        public $has_fields = true;
-        public $supports = [];
-        public $method_title = '';
-        public $method_description = '';
-        public $form_fields = [];
-        public $title = ''; // Evita warning de propriedade dinâmica
-        public $description = ''; // Evita warning de propriedade dinâmica
-        public $settings = [];
-        
-        public function __construct() {}
-        
-        public function init_settings() {
-            // Initialize settings - mock implementation
-            return true;
-        }
-        
-        public function get_option($key, $default = '') {
-            return $default;
-        }
-        
-        public function add_notice_once($message, $type) {
-            return true;
-        }
-        
-        public function get_return_url($order = null) {
-            return 'http://example.com/checkout/return';
-        }
+// ── 4. Carregar o plugin Cielo ───────────────────────────────────────
+//    O plugin já está em wp-content/plugins/lkn-wc-gateway-cielo/
+//    WP_PLUGIN_DIR foi configurado em wp-tests-config.php
+$plugin_main_file = dirname(__DIR__) . '/lkn-wc-gateway-cielo.php';
+
+if (file_exists($plugin_main_file)) {
+    // O plugin define constantes e chama run_LknWCCieloPayment()
+    // que registra gateways, hooks, endpoints etc.
+    // is_plugin_active() espera o basename relativo a WP_PLUGIN_DIR
+    $plugin_basename = 'lkn-wc-gateway-cielo/lkn-wc-gateway-cielo.php';
+
+    // Ativar no banco de testes
+    $active_plugins = get_option('active_plugins', []);
+    if (! in_array($plugin_basename, $active_plugins, true)) {
+        $active_plugins[] = $plugin_basename;
+        update_option('active_plugins', array_unique($active_plugins));
     }
+
+    // Carregar o bootstrap do plugin (define constantes, autoloader, e executa)
+    require_once $plugin_main_file;
+} else {
+    fwrite(STDERR, "Erro: Plugin Cielo não encontrado em $plugin_main_file\n");
+    exit(1);
 }
 
-if (!class_exists('WC_Logger')) {
-    class WC_Logger {
-        public function log($level, $message, $context = []) {
-            return true;
-        }
-    }
+// ── 6. Load test helpers ─────────────────────────────────────────────
+if (file_exists(__DIR__ . '/TestHelpers.php')) {
+    require_once __DIR__ . '/TestHelpers.php';
 }
-
-if (!class_exists('WC_Order')) {
-    class WC_Order {
-        private $meta_data = [];
-        
-        public function get_id() {
-            return 123;
-        }
-        
-        public function get_total() {
-            return 100.00;
-        }
-        
-        public function get_currency() {
-            return 'BRL';
-        }
-        
-        public function get_transaction_id() {
-            return 'test-transaction-123';
-        }
-        
-        public function set_transaction_id($transaction_id) {
-            return true;
-        }
-        
-        public function add_order_note($note) {
-            return true;
-        }
-        
-        public function update_meta_data($key, $value, $unique = false) {
-            $this->meta_data[$key] = $value;
-            return true;
-        }
-        
-        public function get_meta($key, $single = true) {
-            return isset($this->meta_data[$key]) ? $this->meta_data[$key] : '';
-        }
-        
-        public function save() {
-            return true;
-        }
-        
-        public function get_payment_method() {
-            return 'lkn_cielo_credit';
-        }
-    }
-}
-
-if (!class_exists('WP_Error')) {
-    class WP_Error {
-        private $errors = [];
-        
-        public function __construct($code = '', $message = '', $data = '') {
-            if (!empty($code)) {
-                $this->errors[$code][] = $message;
-            }
-        }
-        
-        public function get_error_message() {
-            return 'Test error message';
-        }
-        
-        public function get_error_messages() {
-            return ['Test error message'];
-        }
-    }
-}
-
-// Load helper functions for tests
-require_once __DIR__ . '/TestHelpers.php';
-
-// Clean up after each test
-register_shutdown_function(function() {
-    \Brain\Monkey\tearDown();
-});

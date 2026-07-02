@@ -1,8 +1,13 @@
 {
   "redefinable-internals": [
+    "array_shift",
     "class_exists",
+    "file_exists",
+    "function_exists",
+    "is_dir",
     "number_format",
     "preg_replace",
-    "strlen"
+    "strlen",
+    "time"
   ]
 }

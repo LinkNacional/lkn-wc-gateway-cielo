@@ -985,7 +985,17 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                     // Atualiza os metadados do usuário
                     update_user_meta($user_id, 'card_array', $cardsArray);
                     update_user_meta($user_id, 'default_card', array_key_last($cardsArray));
+
+                    // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
+                    $order->update_meta_data('_lkn_used_card_brand', $provider);
+                    $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
                 }
+            }
+
+            // Fallback: salvar meta keys mesmo quando saveCard=false (usa dados do POST)
+            if (! $saveCard) {
+                $order->update_meta_data('_lkn_used_card_brand', $provider);
+                $order->update_meta_data('_lkn_used_card_last4', substr($cardNum, -4));
             }
 
             // Finalizar processo
