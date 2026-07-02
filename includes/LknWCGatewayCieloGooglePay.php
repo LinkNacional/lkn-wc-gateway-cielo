@@ -544,6 +544,12 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
             $order->add_meta_data('paymentId', $responseDecoded->Payment->PaymentId, true);
             $order->update_meta_data('lkn_nsu', $responseDecoded->Payment->ProofOfSale);
 
+            // Salvar bandeira e últimos 4 dígitos do cartão usado via Google Pay
+            if (isset($responseDecoded->Payment->CreditCard)) {
+                $order->update_meta_data('_lkn_used_card_brand', $responseDecoded->Payment->CreditCard->Brand);
+                $order->update_meta_data('_lkn_used_card_last4', $responseDecoded->Payment->CreditCard->CardNumber);
+            }
+
             //Atualiza order para processando
             $order->update_status('processing');
             // Executar ações de mudança de status

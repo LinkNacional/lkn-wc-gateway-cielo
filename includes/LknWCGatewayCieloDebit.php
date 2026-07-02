@@ -111,8 +111,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             return false;
         }
 
-        if (WC()->cart && WC()->cart->total <= 0) {
-            if (class_exists('WC_Subscriptions_Cart') && WC_Subscriptions_Cart::cart_contains_subscription()) { 
+        if (\WC()->cart && \WC()->cart->total <= 0) {
+            
+            if (class_exists('\WC_Subscriptions_Cart') && \WC_Subscriptions_Cart::cart_contains_subscription()) { 
                 return true; // Permite checkout de assinatura com trial gratuito 
             } 
             return false;
@@ -1576,6 +1577,18 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     // Atualiza os metadados do usuário
                     update_user_meta($user_id, 'card_array', $cardsArray);
                     update_user_meta($user_id, 'default_card', array_key_last($cardsArray));
+
+                    // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
+                    $order->update_meta_data('_lkn_used_card_brand', $provider);
+                    $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
+                }
+            }
+
+            // Fallback: salvar meta keys mesmo quando saveCard=false (usa dados do POST)
+            if (! $saveCard || ! isset($responseDecoded->Payment->CreditCard->CardToken)) {
+                if (isset($cardNum) && ! empty($cardNum)) {
+                    $order->update_meta_data('_lkn_used_card_brand', $provider);
+                    $order->update_meta_data('_lkn_used_card_last4', substr($cardNum, -4));
                 }
             }
         }else{
@@ -1596,7 +1609,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 $provider = $selectedCard['brand'];
                 $cardCvv = $selectedCard['securityCode'];
 
-    
+                // Salvar bandeira e últimos 4 dígitos no pedido (cartão salvo)
+                $order->update_meta_data('_lkn_used_card_brand', $selectedCard['brand']);
+                $order->update_meta_data('_lkn_used_card_last4', $selectedCard['cardDigits']);
+
                 // Gerar o corpo da requisição usando o token do cartão salvo
                 $args['headers'] = array(
                     'Content-Type' => 'application/json',

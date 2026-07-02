@@ -42,7 +42,8 @@ final class LknWcCieloPixBlocks extends AbstractPaymentMethodType
     {
         return array(
             'title' => $this->gateway->title,
-            'description' => $this->gateway->get_option('description', __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo'))
+            'description' => $this->gateway->get_option('description', __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo')),
+            'supports' => $this->gateway->supports,
         );
     }
 }
