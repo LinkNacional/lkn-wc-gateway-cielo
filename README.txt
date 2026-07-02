@@ -112,6 +112,10 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+= 1.34.0 =
+** 02/07/2026 **
+* Adjustment: compatibility with WooCommerce Subscription.
+
 = 1.33.6 =
 ** 25/06/2026 **
 * Adjustment: test version in the documentation.
