@@ -222,7 +222,7 @@ ONGOING:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 GENERAL SUPPORT:
-  GitHub: https://github.com/LinkNacional/wc_cielo_payment_gateway/issues
+  GitHub: https://github.com/LinkNacional/lkn-wc-gateway-cielo/issues
   Email:  contato@linknacional.com.br
 
 SECURITY ISSUES:

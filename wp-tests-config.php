@@ -28,7 +28,7 @@ define('WP_SITEURL', 'http://' . WP_TESTS_DOMAIN);
 define('WP_HOME', 'http://' . WP_TESTS_DOMAIN);
 
 // ── Caminhos customizados de conteúdo ────────────────────────────────
-// O projeto está em: wp-content/plugins/wc_cielo_payment_gateway/
+// O projeto está em: wp-content/plugins/lkn-wc-gateway-cielo/
 // WordPress core está em: wordpress/
 // Plugins estão no diretório pai do projeto (wp-content/plugins/)
 define('WP_CONTENT_DIR', dirname(__FILE__, 3));
