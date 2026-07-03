@@ -1559,12 +1559,13 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     'brand' => $provider,
                 );
 
+                $lastFourDigits = $responseDecoded->Payment->CreditCard->CardNumber;
+
                 if (0 != $user_id) {
                     $cardsArray = get_user_meta($user_id, 'card_array', true);
                     $cardsArray = is_array($cardsArray) ? $cardsArray : array();
                     $lastFourDigits = $responseDecoded->Payment->CreditCard->CardNumber;
                     $expirationDate = $responseDecoded->Payment->CreditCard->ExpirationDate;
-
                     // Adiciona o novo cartão à lista
                     $cardsArray[] = array(
                         'cardToken' => $cardPayment['cardToken'],
@@ -1577,20 +1578,13 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     // Atualiza os metadados do usuário
                     update_user_meta($user_id, 'card_array', $cardsArray);
                     update_user_meta($user_id, 'default_card', array_key_last($cardsArray));
-
-                    // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
-                    $order->update_meta_data('_lkn_used_card_brand', $provider);
-                    $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
                 }
+
+                // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
+                $order->update_meta_data('_lkn_used_card_brand', $provider);
+                $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
             }
 
-            // Fallback: salvar meta keys mesmo quando saveCard=false (usa dados do POST)
-            if (! $saveCard || ! isset($responseDecoded->Payment->CreditCard->CardToken)) {
-                if (isset($cardNum) && ! empty($cardNum)) {
-                    $order->update_meta_data('_lkn_used_card_brand', $provider);
-                    $order->update_meta_data('_lkn_used_card_last4', substr($cardNum, -4));
-                }
-            }
         }else{
             // Processar pagamento com cartão salvo
             $saveCardIndex = (int) $saveCardIndex;
