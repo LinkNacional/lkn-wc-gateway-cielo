@@ -1610,6 +1610,35 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 }
             }
 
+            // Salvar metadados do cartão/pagamento no pedido (independente de saveCard)
+            $lastFourDigits = substr($cardNum, -4);
+            $bin = substr($cardNum, 0, 6);
+            $order->update_meta_data('_lkn_used_card_brand', $provider);
+            $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
+            $order->update_meta_data('_lkn_card_bin', $bin);
+            $order->update_meta_data('_lkn_card_expiration', $cardExp);
+            $order->update_meta_data('_lkn_card_holder', $cardName);
+            $order->update_meta_data('_lkn_installments', $installments);
+            if (isset($responseDecoded->Payment->ProofOfSale)) {
+                $order->update_meta_data('_lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+            }
+            if (isset($responseDecoded->Payment->Tid)) {
+                $order->update_meta_data('_lkn_tid', $responseDecoded->Payment->Tid);
+            }
+            if (isset($responseDecoded->Payment->ReturnCode)) {
+                $order->update_meta_data('_lkn_return_code', $responseDecoded->Payment->ReturnCode);
+            }
+            if (isset($responseDecoded->Payment->ReturnMessage)) {
+                $order->update_meta_data('_lkn_return_message', $responseDecoded->Payment->ReturnMessage);
+            }
+            if (isset($responseDecoded->Payment->ReceivedDate)) {
+                $order->update_meta_data('_lkn_received_date', $responseDecoded->Payment->ReceivedDate);
+            }
+            if (isset($responseDecoded->Payment->Status)) {
+                $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
+            }
+            $order->update_meta_data('_lkn_card_type', $cardType);
+
             // Gerenciar salvamento de cartão (se aplicável)
             if ($saveCard &&  isset($responseDecoded->Payment->CreditCard->CardToken)) {
                 $user_id = $order->get_user_id();
@@ -1644,9 +1673,6 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     update_user_meta($user_id, 'default_card', array_key_last($cardsArray));
                 }
 
-                // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
-                $order->update_meta_data('_lkn_used_card_brand', $provider);
-                $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
             }
 
         }else{
@@ -1723,6 +1749,30 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         if (isset($responseDecoded->Code) && isset($responseDecoded->Message)) {
             throw new Exception(esc_attr($responseDecoded->Message));
+        }
+
+        // Salvar metadados da resposta para o pedido (ambos os caminhos: novo cartão e cartão salvo)
+        if (isset($responseDecoded->Payment->ProofOfSale)) {
+            $order->update_meta_data('_lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+        }
+        if (isset($responseDecoded->Payment->Tid)) {
+            $order->update_meta_data('_lkn_tid', $responseDecoded->Payment->Tid);
+        }
+        if (isset($responseDecoded->Payment->ReturnCode)) {
+            $order->update_meta_data('_lkn_return_code', $responseDecoded->Payment->ReturnCode);
+        }
+        if (isset($responseDecoded->Payment->ReturnMessage)) {
+            $order->update_meta_data('_lkn_return_message', $responseDecoded->Payment->ReturnMessage);
+        }
+        if (isset($responseDecoded->Payment->ReceivedDate)) {
+            $order->update_meta_data('_lkn_received_date', $responseDecoded->Payment->ReceivedDate);
+        }
+        if (isset($responseDecoded->Payment->Status)) {
+            $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
+        }
+        if ($saveCardIndex !== '') {
+            // Saved card path: cardType was never explicitly set yet
+            $order->update_meta_data('_lkn_card_type', 'Credit');
         }
 
         if ($this->get_option('debug') === 'yes') {

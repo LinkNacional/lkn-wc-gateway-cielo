@@ -955,6 +955,35 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                     $responseDecoded->Payment->ReturnCode
             );
 
+            // Salvar metadados do cartão/pagamento no pedido (independente de saveCard)
+            $lastFourDigits = substr($cardNum, -4);
+            $bin = substr($cardNum, 0, 6);
+            $order->update_meta_data('_lkn_used_card_brand', $provider);
+            $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
+            $order->update_meta_data('_lkn_card_bin', $bin);
+            $order->update_meta_data('_lkn_card_expiration', $cardExp);
+            $order->update_meta_data('_lkn_card_holder', $cardName);
+            $order->update_meta_data('_lkn_installments', $installments);
+            if (isset($responseDecoded->Payment->ProofOfSale)) {
+                $order->update_meta_data('_lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+            }
+            if (isset($responseDecoded->Payment->Tid)) {
+                $order->update_meta_data('_lkn_tid', $responseDecoded->Payment->Tid);
+            }
+            if (isset($responseDecoded->Payment->ReturnCode)) {
+                $order->update_meta_data('_lkn_return_code', $responseDecoded->Payment->ReturnCode);
+            }
+            if (isset($responseDecoded->Payment->ReturnMessage)) {
+                $order->update_meta_data('_lkn_return_message', $responseDecoded->Payment->ReturnMessage);
+            }
+            if (isset($responseDecoded->Payment->ReceivedDate)) {
+                $order->update_meta_data('_lkn_received_date', $responseDecoded->Payment->ReceivedDate);
+            }
+            if (isset($responseDecoded->Payment->Status)) {
+                $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
+            }
+            $order->update_meta_data('_lkn_card_type', $cardType);
+
             // Gerenciar salvamento de cartão (se aplicável)
             if ($saveCard) {
                 $user_id = $order->get_user_id();
@@ -989,9 +1018,6 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
 
                     
                 }
-                // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
-                $order->update_meta_data('_lkn_used_card_brand', $provider);
-                $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
             }
 
             // Finalizar processo
