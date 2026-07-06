@@ -425,14 +425,19 @@ if (! defined('ABSPATH')) {
         <select
             id="lkn_cc_type"
             name="lkn_cc_type"
-            class="input-select wc-credit-card-form-card-cvc">
-                <option
-                    value="Credit"><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?>
-                </option>
-                <option value="Debit">
-                    <?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?>
-                </option>
+            class="input-select wc-credit-card-form-card-cvc"<?php echo ($card_type_mode !== 'both') ? ' disabled style="color:#333 !important;opacity:1 !important;background-color:#f5f5f5 !important;cursor:default;"' : ''; ?>>
+                <?php if ($card_type_mode === 'only_debit') : ?>
+                <option value="Debit" selected><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php elseif ($card_type_mode === 'only_credit') : ?>
+                <option value="Credit" selected><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php else : ?>
+                <option value="Credit"><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <option value="Debit"><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php endif; ?>
         </select>
+        <?php if ($card_type_mode !== 'both') : ?>
+        <input type="hidden" name="lkn_cc_type" value="<?php echo ($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'; ?>">
+        <?php endif; ?>
     </div>
 
     <?php if ('yes' === $active_installment) { ?>

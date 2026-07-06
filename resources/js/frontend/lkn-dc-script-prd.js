@@ -94,6 +94,10 @@ function setupErrorDetection() {
 
     if (lknWcCieloCcDcNo && lknWcCieloPaymentCCTypeInput) {
       lknWcCieloCcDcNo.onchange = (e) => {
+        // Skip BIN auto-detection when card type is forced by admin config
+        if (typeof lknDCCardTypeMode !== 'undefined' && lknDCCardTypeMode.mode !== 'both') {
+          return
+        }
         const cardBin = e.target.value.replace(/\s+/g, '').substring(0, 6)
         if(!cardBin) {
           return

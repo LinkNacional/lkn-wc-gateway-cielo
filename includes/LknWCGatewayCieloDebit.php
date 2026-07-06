@@ -793,8 +793,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $env = $this->get_option('env');
         $installmentArgs = apply_filters('lkn_wc_cielo_js_3ds_args', array('installment_min' => '5'));
 
+        $card_type_mode_gateway = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+
         if (WC()->session) {
-            WC()->session->set('lkn_cielo_debit_card_type', 'Credit');
+            WC()->session->set('lkn_cielo_debit_card_type', ($card_type_mode_gateway === 'only_debit') ? 'Debit' : 'Credit');
         }
 
         // Recuperar parcela atual da sessão
@@ -812,6 +816,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         // Setup 3DS and other scripts
         wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js'));
         wp_localize_script('lkn-dc-script', 'lknDCScriptAllowCardIneligible', array('allow' => $this->get_option('allow_card_ineligible', 'no')));
+        wp_localize_script('lkn-dc-script', 'lknDCCardTypeMode', array('mode' => $card_type_mode_gateway));
         wp_localize_script('lkn-dc-script', 'lknCieloRestSettings', array(
             'rest_url'  => esc_url_raw(rest_url()),
             'nonce' => wp_create_nonce('wp_rest'),
@@ -833,11 +838,18 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             'interest_or_discount' => $this->get_option('interest_or_discount'),
             'installment_discount' => $this->get_option('installment_discount')
         ));
+        // Enqueue installment script
+        wp_enqueue_script('lkn-cc-dc-installment-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-cc-dc-installment.js', array('jquery'), $this->version, false);
+        wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3ds', $installmentArgs);
+        wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3dsConfig', array(
+            'interest_or_discount' => $this->get_option('interest_or_discount'),
+            'installment_discount' => $this->get_option('installment_discount')
+        ));
         wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3dsAjax', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('lkn_payment_fees_nonce'),
             'current_installment' => $current_installment,
-            'current_card_type' => WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit'
+            'current_card_type' => (LknWcCieloHelper::is_pro_license_active() && $this->get_option('card_type_mode', 'both') === 'only_debit') ? 'Debit' : (WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit')
         ));
         
         // Check checkout layout option
@@ -1035,6 +1047,11 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $email = $email;
         $billing_phone = $billing_phone;
 
+        // Card type mode: both / only_credit / only_debit (PRO only, defaults to both)
+        $card_type_mode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+        
         // --- Saved Cards (PRO feature) ---
         // card_array is only created by the PRO plugin; if it exists, show the saved cards list.
         $save_card_token = $this->get_option('save_card_token', 'disabled');
@@ -1132,6 +1149,16 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $this->add_notice_once(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'), 'error');
             return false;
         }
+
+        // Enforce card type mode (prevent HTML manipulation)
+        $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+        if ($cardTypeMode !== 'both') {
+            $forcedType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
+            $_POST['lkn_cc_type'] = $forcedType;
+        }
+
         if ('no' === $validateCompatMode && $saveCardIndex == '') {
             $dcnum = isset($_POST['lkn_dcno']) ? sanitize_text_field(wp_unslash($_POST['lkn_dcno'])) : '';
             $expDate = isset($_POST['lkn_dc_expdate']) ? sanitize_text_field(wp_unslash($_POST['lkn_dc_expdate'])) : '';
@@ -1196,6 +1223,15 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             }
 
             $cardType = isset($_POST['lkn_cc_type']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_type'])) : '';
+
+            // Enforce card type mode (prevent HTML manipulation)
+            $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
+                ? $this->get_option('card_type_mode', 'both')
+                : 'both';
+            if ($cardTypeMode !== 'both') {
+                $cardType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
+            }
+
             $installments = (int) (isset($_POST['lkn_cc_dc_installments']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_dc_installments'])) : 1);
             $saveCard = isset($_POST['lkn_save_debit_credit_card']) && ($_POST['lkn_save_debit_credit_card'] === '1' || $this->get_option('save_card_token') == 'required' ) ? true : false;
 
