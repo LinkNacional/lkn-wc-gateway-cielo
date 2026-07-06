@@ -1695,7 +1695,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
                 // Salvar bandeira e últimos 4 dígitos no pedido (cartão salvo)
                 $order->update_meta_data('_lkn_used_card_brand', $selectedCard['brand']);
-                $order->update_meta_data('_lkn_used_card_last4', $selectedCard['cardDigits']);
+                $order->update_meta_data('_lkn_used_card_last4', substr($selectedCard['cardDigits'], -4));
 
                 // Gerar o corpo da requisição usando o token do cartão salvo
                 $args['headers'] = array(
@@ -1771,8 +1771,37 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
         }
         if ($saveCardIndex !== '') {
-            // Saved card path: cardType was never explicitly set yet
+            // Saved card path: read everything directly from order + selected card.
+            // (new-card variables are out of scope or stale here.)
+            $tkCardName     = trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
+            $tkAmount       = floatval($order->get_total());
+            $tkCurrency     = $order->get_currency();
+            $tkInstallments = 1;
+            $tkMerchantId   = sanitize_text_field($this->get_option('merchant_id'));
+            $tkMerchantKey  = sanitize_text_field($this->get_option('merchant_key'));
+            $tkOrderRef     = $order_id . '-' . time();
+            $tkCardDigits   = $selectedCard['cardDigits'];
+            $tkExpiry       = $selectedCard['expirationDate'] ?? '';
+            $tkProvider     = $selectedCard['brand'];
+
             $order->update_meta_data('_lkn_card_type', 'Credit');
+            $order->update_meta_data('_lkn_card_holder', $tkCardName);
+            $order->update_meta_data('_lkn_used_card_brand', $tkProvider);
+            $order->update_meta_data('_lkn_used_card_last4', substr($tkCardDigits, -4));
+            if (!empty($tkExpiry)) {
+                $order->update_meta_data('_lkn_card_expiration', $tkExpiry);
+            }
+            $order->update_meta_data('_lkn_installments', $tkInstallments);
+            $order->save();
+
+            LknWcCieloHelper::saveTransactionMetadata(
+                $order, $responseDecoded,
+                $tkCardDigits, $tkExpiry, $tkCardName,
+                $tkInstallments, $tkAmount, $tkCurrency, $tkProvider,
+                $tkMerchantId, $tkMerchantKey, $tkOrderRef, $order_id,
+                true, $response, 'Credit', 'lkn_dc_cvc', $this,
+                '', '', '', '', ''
+            );
         }
 
         if ($this->get_option('debug') === 'yes') {

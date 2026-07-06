@@ -529,6 +529,14 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             $order->update_meta_data('_wc_cielo_qrcode_string', $response['response']['qrcodeString']);
             $order->update_meta_data('_wc_cielo_qrcode_payment_id', $response['response']['paymentId']);
 
+            // Salvar metadados de exibição (padronizado com Credit/Debit)
+            $order->update_meta_data('_lkn_used_card_brand', 'PIX');
+            $order->update_meta_data('_lkn_used_card_last4', '');
+            $order->update_meta_data('_lkn_tid', $response['response']['paymentId']);
+            $order->update_meta_data('_lkn_installments', 1);
+            $order->update_meta_data('_lkn_card_type', 'Pix');
+            if (isset($response['response']['status'])) $order->update_meta_data('_lkn_payment_status', $response['response']['status']);
+
             LknWcCieloHelper::saveTransactionMetadata($order, $response, $response['response']['qrcodeString'], 'N/A', $fullName, 1, $amount, $currency, 'PIX', $merchantId, $merchantSecret, $merchantOrderId, $order_id, 'N/A', null, 'Pix', 'N/A', $this, 'N/A', 'N/A', 'N/A', 'N/A', $response['response']['paymentId']);
             $order->save();
         } catch (Exception $err) {
