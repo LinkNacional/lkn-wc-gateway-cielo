@@ -1034,6 +1034,70 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $name = $name;
         $email = $email;
         $billing_phone = $billing_phone;
+
+        // --- Saved Cards (PRO feature) ---
+        // card_array is only created by the PRO plugin; if it exists, show the saved cards list.
+        $save_card_token = $this->get_option('save_card_token', 'disabled');
+        $user_id = get_current_user_id();
+        $cards_array = array();
+        $default_card = '';
+
+        if ($user_id) {
+            $raw_cards = get_user_meta($user_id, 'card_array', true);
+            $default_card = get_user_meta($user_id, 'default_card', true);
+
+            if (is_array($raw_cards) && ! empty($raw_cards)) {
+                foreach ($raw_cards as $key => $card) {
+                    if (! is_array($card)) continue;
+                    // Remove expired cards
+                    if (isset($card['expirationDate'])) {
+                        $exp = $card['expirationDate'];
+                        if (preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $exp, $matches)) {
+                            $expMonth = (int) $matches[1];
+                            $expYear = (int) $matches[2];
+                            $now = new \DateTime();
+                            $expDate = \DateTime::createFromFormat('Y-m', $expYear . '-' . str_pad($expMonth, 2, '0', STR_PAD_LEFT));
+                            $expDate->modify('last day of this month');
+                            if ($now > $expDate) {
+                                continue;
+                            }
+                        }
+                    }
+                    // Remove cardToken from frontend data
+                    unset($card['cardToken']);
+                    $cards_array[] = $card;
+                }
+            }
+        }
+
+        $show_saved_cards = ! empty($cards_array);
+
+        // Card brand icon URLs
+        $card_brand_icons = array(
+            'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
+            'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
+            'amex'       => plugin_dir_url(__FILE__) . '../resources/img/amex-icon.svg',
+            'elo'        => plugin_dir_url(__FILE__) . '../resources/img/elo-icon.svg',
+            'other_card' => plugin_dir_url(__FILE__) . '../resources/img/other-card.svg',
+        );
+
+        // Enqueue saved cards JS for shortcode
+        if ($show_saved_cards) {
+            wp_enqueue_script(
+                'lkn-cielo-saved-cards-shortcode',
+                plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-cielo-saved-cards-shortcode.js',
+                array('jquery'),
+                $this->version,
+                true
+            );
+            wp_localize_script('lkn-cielo-saved-cards-shortcode', 'lknCieloSavedCardsShortcode', array(
+                'cards' => $cards_array,
+                'default_card' => $default_card,
+                'card_brand_icons' => $card_brand_icons,
+                'gateway_id' => $this->id,
+                'save_card_token' => $save_card_token,
+            ));
+        }
         
         // Check checkout layout and load appropriate template
         if ($use_modern_layout) {
