@@ -15,7 +15,6 @@ if (! defined('ABSPATH')) {
 }
 
 ?>
-
 <fieldset
     id="wc-<?php echo esc_attr($gateway_id); ?>-cc-form"
     class="wc-credit-card-form wc-payment-form"
@@ -26,13 +25,46 @@ if (! defined('ABSPATH')) {
     </p>
     
     <div class="cielo-debit-fields-wrapper">
-        <?php if ('yes' === $show_card_animation) { ?>
-        <div class="lkn-cielo-animated-card-container">
-            <div
-                id="cielo-debit-card-animation"
-                class="card-wrapper card-animation"></div>
+
+        <!-- Saved Cards List (PRO feature - shortcode) -->
+        <?php if (isset($show_saved_cards) && $show_saved_cards && ! empty($cards_array)) : ?>
+        <div class="lkn-cielo-saved-cards-list lkn-cielo-saved-cards-flex" style="display: flex; flex-wrap: wrap; margin-bottom: 10px; gap: 10px; width: 100%; justify-content: center;">
+            <?php foreach ($cards_array as $idx => $card) : 
+                $brand = isset($card['brand']) ? $card['brand'] : '';
+                $brand_lower = strtolower($brand);
+                $icon_key = in_array($brand_lower, array('visa', 'mastercard', 'master', 'amex', 'elo')) ? $brand_lower : 'other_card';
+                if ($icon_key === 'master') $icon_key = 'mastercard';
+                $icon_url = isset($card_brand_icons[$icon_key]) ? $card_brand_icons[$icon_key] : $card_brand_icons['other_card'];
+                $card_digits = isset($card['cardDigits']) ? $card['cardDigits'] : '';
+                $last_four = preg_replace('/.*(\d{4})$/', '•••• $1', $card_digits);
+                $description = isset($card['description']) ? $card['description'] : '';
+                $exp_date = isset($card['expirationDate']) ? $card['expirationDate'] : '';
+                $is_default = (string) $idx === (string) $default_card;
+            ?>
+            <button type="button"
+                class="lkn-cielo-saved-card-btn<?php echo $is_default ? ' selected' : ''; ?>"
+                data-card-index="<?php echo esc_attr($idx); ?>"
+                data-card-brand="<?php echo esc_attr($brand); ?>"
+                data-card-digits="<?php echo esc_attr($card_digits); ?>"
+                data-card-description="<?php echo esc_attr($description); ?>"
+                data-card-expiration="<?php echo esc_attr($exp_date); ?>"
+                style="color: #2563eb; font-weight: 500; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; width: 225px; border: none; transition: all 0.2s; outline: <?php echo $is_default ? '2px solid #2563eb' : 'none'; ?>;">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>" style="height: 40px; margin-right: 8px;">
+                <span style="font-weight: 600;"><?php echo esc_html($brand); ?></span>
+                <span style="margin-left: 6px;"><?php echo esc_html($last_four); ?></span>
+            </button>
+            <?php endforeach; ?>
         </div>
-        <?php } ?>
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <button type="button"
+                class="lkn-cielo-saved-card-btn lkn-cielo-add-card-btn<?php echo empty($default_card) ? ' selected' : ''; ?>"
+                style="font-weight: 500; color: #2563eb; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; border: none; width: 225px; justify-content: center; outline: <?php echo empty($default_card) ? '2px solid #2563eb' : 'none'; ?>;">
+                <span style="font-size: 22px; margin-right: 8px;">＋</span> <?php echo esc_html__('Add Card', 'lkn-wc-gateway-cielo'); ?>
+            </button>
+        </div>
+        <input type="hidden" id="lkn_selected_saved_card_index" name="lkn_selected_saved_card_index" value="<?php echo esc_attr($default_card !== '' ? $default_card : ''); ?>">
+        <?php endif; ?>
+
         <div class="wc-payment-cielo-form-fields">
     <input
         type="hidden"
@@ -96,7 +128,7 @@ if (! defined('ABSPATH')) {
         type="hidden"
         name="lkn_payment_method"
         class="bpmpi_paymentmethod"
-        value="Debit" />
+        value="<?php echo esc_attr(($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'); ?>" />
     <input
         type="hidden"
         id="lkn_bpmpi_cardnumber"
@@ -308,6 +340,17 @@ if (! defined('ABSPATH')) {
 
     <?php do_action('woocommerce_credit_card_form_start', $gateway_id); ?>
 
+    <!-- Wrapper for new-card form fields (hidden when saved card selected) -->
+    <div id="lkn-debit-new-card-fields">
+
+    <?php if ('yes' === $show_card_animation) { ?>
+    <div class="lkn-cielo-animated-card-container">
+        <div
+            id="cielo-debit-card-animation"
+            class="card-wrapper card-animation"></div>
+    </div>
+    <?php } ?>
+
     <?php if ($this->get_option('show_cardholder_name', 'no') !== 'yes') : ?>
     <div class="form-row form-row-wide">
         <label
@@ -382,14 +425,19 @@ if (! defined('ABSPATH')) {
         <select
             id="lkn_cc_type"
             name="lkn_cc_type"
-            class="input-select wc-credit-card-form-card-cvc">
-                <option
-                    value="Credit"><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?>
-                </option>
-                <option value="Debit">
-                    <?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?>
-                </option>
+            class="input-select wc-credit-card-form-card-cvc"<?php echo ($card_type_mode !== 'both') ? ' disabled style="color:#bfbfbf !important;opacity:1 !important;background-color:#f5f5f5 !important;cursor:default;"' : ''; ?>>
+                <?php if ($card_type_mode === 'only_debit') : ?>
+                <option value="Debit" selected><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php elseif ($card_type_mode === 'only_credit') : ?>
+                <option value="Credit" selected><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php else : ?>
+                <option value="Credit"><?php esc_html_e('Credit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <option value="Debit"><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
+                <?php endif; ?>
         </select>
+        <?php if ($card_type_mode !== 'both') : ?>
+        <input type="hidden" name="lkn_cc_type" value="<?php echo ($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'; ?>">
+        <?php endif; ?>
     </div>
 
     <?php if ('yes' === $active_installment) { ?>
@@ -445,6 +493,7 @@ if (! defined('ABSPATH')) {
         </div>
     <?php } ?>
 
+    <?php if ($save_card_token === 'optional') : ?>
     <!-- Save Card Checkbox - Only visible when Credit card is selected -->
     <div
         id="lkn-save-debit-credit-card-row"
@@ -460,6 +509,9 @@ if (! defined('ABSPATH')) {
             <span style="text-transform: none;"><?php esc_html_e('Save card for safe and fast purchase', 'lkn-wc-gateway-cielo'); ?></span>
         </label>
     </div>
+    <?php endif; ?>
+
+    </div><!-- end #lkn-debit-new-card-fields -->
 
     <div class="clear"></div>
 

@@ -452,13 +452,13 @@ final class LknWcCieloHelper
         
         // Validar Recorrente baseado no tipo de pagamento
         $recurrentFormatted = 'N/A';
-        if ($gatewayType === 'Credit') {
+        if (in_array($gatewayType, array('Credit', 'Debit'), true)) {
             $recurrentFormatted = $isRecurrent;
         }
         
-        // Validar 3DS baseado no gateway - só existe para débito
+        // Validar 3DS baseado no gateway - existe para débito e crédito
         $threeDSFormatted = 'N/A';
-        if ($gatewayType === 'Debit') {
+        if (in_array($gatewayType, array('Debit', 'Credit'), true)) {
             // Verificar se houve erro relacionado a 3DS
             $is3DSError = false;
             if (isset($responseDecoded->Payment->ReturnCode)) {

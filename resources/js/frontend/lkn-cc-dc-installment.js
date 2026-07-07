@@ -150,7 +150,10 @@
       
       // Definir o valor correto do tipo de cartão da sessão PRIMEIRO
       if (typeof lknWCCielo3dsAjax !== 'undefined' && lknWCCielo3dsAjax.current_card_type) {
-        typeCard.val(lknWCCielo3dsAjax.current_card_type)
+        // Only apply if the option actually exists (e.g. skip 'Credit' when only 'Debit' is present)
+        if (typeCard.find('option[value="' + lknWCCielo3dsAjax.current_card_type + '"]').length) {
+          typeCard.val(lknWCCielo3dsAjax.current_card_type)
+        }
       }
       
       // Depois chamar showInstallments com o valor correto

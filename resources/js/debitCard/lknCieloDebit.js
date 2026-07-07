@@ -3,6 +3,7 @@ import Cards from 'react-credit-cards'
 import 'react-credit-cards/es/styles-compiled.css'
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 const lknDCsettingsCielo = window.wc.wcSettings.getSetting('lkn_cielo_debit_data', {})
+const lknDCCardTypeMode = lknDCsettingsCielo.cardTypeMode || 'both'
 const lknDCLabelCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.title)
 const lknDCDescriptionCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.description)
 const lknDCAccessTokenCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.accessToken)
@@ -27,7 +28,7 @@ const lknDCAuthMethod = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo
 const lknDCClient = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.client)
 
 // Definir variável global para comunicar com o script 3DS
-window.lknCurrentCardType = 'Credit'
+window.lknCurrentCardType = lknDCCardTypeMode === 'only_debit' ? 'Debit' : 'Credit'
 
 // Função para formatação de moeda baseada nas configurações do WooCommerce
 const formatCurrency = (amount) => {
@@ -194,13 +195,19 @@ const lknDCContentCielo = props => {
   const [isLoadingOptions, setIsLoadingOptions] = window.wp.element.useState(true)
   const [showInstallmentSelect, setShowInstallmentSelect] = window.wp.element.useState(false)
   const [cardBinState, setCardBinState] = window.wp.element.useState(0)
-  const [cardTypeOptions, setCardTypeOptions] = window.wp.element.useState([{
-    key: 'Credit',
-    label: lknDCTranslationsCielo.creditCard
-  }, {
-    key: 'Debit',
-    label: lknDCTranslationsCielo.debitCard
-  }])
+  const [cardTypeOptions, setCardTypeOptions] = window.wp.element.useState(
+    lknDCCardTypeMode === 'only_debit'
+    ? [{ key: 'Debit', label: lknDCTranslationsCielo.debitCard }]
+    : lknDCCardTypeMode === 'only_credit'
+    ? [{ key: 'Credit', label: lknDCTranslationsCielo.creditCard }]
+    : [{
+        key: 'Credit',
+        label: lknDCTranslationsCielo.creditCard
+      }, {
+        key: 'Debit',
+        label: lknDCTranslationsCielo.debitCard
+      }]
+  )
   const [debitObject, setdebitObject] = window.wp.element.useState({
     lkn_dc_cardholder_name: '',
     lkn_dcno: '',
@@ -208,10 +215,30 @@ const lknDCContentCielo = props => {
     lkn_dc_cvc: '',
     lkn_cc_dc_installments: '1',
     // Definir padrão como 1 parcela
-    lkn_cc_type: 'Credit',
+    lkn_cc_type: lknDCCardTypeMode === 'only_debit' ? 'Debit' : 'Credit',
     lkn_save_debit_credit_card: false
   })
+  const lknDCCardTypeSelectDisabled = lknDCCardTypeMode !== 'both'
   const [focus, setFocus] = window.wp.element.useState('')
+
+  // Force disabled on native <select> when SortSelect doesn't pass the prop through
+  window.wp.element.useEffect(() => {
+    if (lknDCCardTypeSelectDisabled) {
+      const selectEl = document.getElementById('lkn_cc_type');
+      if (selectEl) {
+        selectEl.disabled = true;
+        selectEl.style.color = '#888';
+        selectEl.style.pointerEvents = 'none';
+      }
+      // Also find the one rendered by SortSelect (different id)
+      const altSelect = document.querySelector('.lkn-cc-type-readonly select');
+      if (altSelect) {
+        altSelect.disabled = true;
+        altSelect.style.color = '#888';
+        altSelect.style.pointerEvents = 'none';
+      }
+    }
+  }, [lknDCCardTypeSelectDisabled, debitObject.lkn_cc_type])
 
   // Função para processar dados do carrinho (tanto da API normal quanto da batch)
   const processCartData = (cartData) => {
@@ -363,7 +390,7 @@ const lknDCContentCielo = props => {
       case 'lkn_dc_cvc':
         if (value.length > 8) return
       case 'lkn_dcno':
-        if (value.length > 7) {
+        if (value.length > 7 && lknDCCardTypeMode === 'both') {
           const cardBin = value.replace(' ', '').substring(0, 6)
           const restUrl = (typeof window.lknCieloDebitConfig !== 'undefined' && window.lknCieloDebitConfig.rest_url)
             ? window.lknCieloDebitConfig.rest_url
@@ -827,7 +854,9 @@ const lknDCContentCielo = props => {
   }), lknCieloDebitConfig.isProPluginValid && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
     id: 'lkn_cc_type',
     value: debitObject.lkn_cc_type,
-    className: 'lkn-credit-debit-card-type-select lkn-credit-debit-card-field',
+    disabled: lknDCCardTypeSelectDisabled,
+    className: 'lkn-credit-debit-card-type-select lkn-credit-debit-card-field' + (lknDCCardTypeSelectDisabled ? ' lkn-cc-type-readonly' : ''),
+    style: lknDCCardTypeSelectDisabled ? { color: '#888', pointerEvents: 'none' } : {},
     onChange: event => {
       updatedebitObject('lkn_cc_type', event.target.value)
       
@@ -907,7 +936,9 @@ const lknDCContentCielo = props => {
     id: 'lkn_cc_type',
     label: lknDCTranslationsCielo.cardType,
     value: debitObject.lkn_cc_type,
-    className: 'lkn-credit-debit-card-type-select lkn-credit-debit-card-field lkn-select-type',
+    disabled: lknDCCardTypeSelectDisabled,
+    className: 'lkn-credit-debit-card-type-select lkn-credit-debit-card-field lkn-select-type' + (lknDCCardTypeSelectDisabled ? ' lkn-cc-type-readonly' : ''),
+    style: lknDCCardTypeSelectDisabled ? { color: '#888', pointerEvents: 'none' } : {},
     onChange: event => {
       updatedebitObject('lkn_cc_type', event.target.value)
       

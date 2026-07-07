@@ -1,3 +1,8 @@
+# 1.35.0 - 07/07/2026
+* Novo: Sistema de pagamento por token de cartão no checkout do shortcode/clássico.
+* Novo: Metadados na página de pedido.
+* Ajuste: Remoção do checkbox de salvar cartão fora do bloco.
+
 # 1.34.0 - 02/07/2026
 * Ajuste: compatibilidade com o Woocommerce subscription.
 

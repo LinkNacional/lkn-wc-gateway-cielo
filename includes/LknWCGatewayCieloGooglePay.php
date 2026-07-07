@@ -540,15 +540,32 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         }
 
         if (isset($responseDecoded->Payment) && (1 == $responseDecoded->Payment->Status || 2 == $responseDecoded->Payment->Status)) {
-            // Adicionar metadados do pagamento
-            $order->add_meta_data('paymentId', $responseDecoded->Payment->PaymentId, true);
-            $order->update_meta_data('lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+            // Salvar metadados completos do pagamento (como Credit/Debit)
+            $payment = $responseDecoded->Payment;
+            $cc = isset($payment->CreditCard) ? $payment->CreditCard : null;
+            $cardNum = $cc ? $cc->CardNumber : '';
+            $brand = $cc ? $cc->Brand : '';
+            $expDate = $cc ? $cc->ExpirationDate : '';
+            $holder = $cc ? $cc->Holder : '';
 
-            // Salvar bandeira e últimos 4 dígitos do cartão usado via Google Pay
-            if (isset($responseDecoded->Payment->CreditCard)) {
-                $order->update_meta_data('_lkn_used_card_brand', $responseDecoded->Payment->CreditCard->Brand);
-                $order->update_meta_data('_lkn_used_card_last4', $responseDecoded->Payment->CreditCard->CardNumber);
-            }
+            $lastFourDigits = $cardNum ? substr($cardNum, -4) : '';
+            $bin = $cardNum ? substr($cardNum, 0, 6) : '';
+
+            $order->update_meta_data('_lkn_used_card_brand', $brand);
+            $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
+            $order->update_meta_data('_lkn_card_bin', $bin);
+            if (!empty($expDate)) $order->update_meta_data('_lkn_card_expiration', $expDate);
+            if (!empty($holder)) $order->update_meta_data('_lkn_card_holder', $holder);
+            $order->update_meta_data('_lkn_installments', 1);
+            $order->update_meta_data('_lkn_card_type', 'Credit');
+            if (isset($payment->ProofOfSale)) $order->update_meta_data('_lkn_nsu', $payment->ProofOfSale);
+            if (isset($payment->Tid)) $order->update_meta_data('_lkn_tid', $payment->Tid);
+            if (isset($payment->ReturnCode)) $order->update_meta_data('_lkn_return_code', $payment->ReturnCode);
+            if (isset($payment->ReturnMessage)) $order->update_meta_data('_lkn_return_message', $payment->ReturnMessage);
+            if (isset($payment->ReceivedDate)) $order->update_meta_data('_lkn_received_date', $payment->ReceivedDate);
+            if (isset($payment->Status)) $order->update_meta_data('_lkn_payment_status', $payment->Status);
+
+            $order->add_meta_data('paymentId', $payment->PaymentId, true);
 
             //Atualiza order para processando
             $order->update_status('processing');

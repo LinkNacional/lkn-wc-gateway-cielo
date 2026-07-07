@@ -793,8 +793,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $env = $this->get_option('env');
         $installmentArgs = apply_filters('lkn_wc_cielo_js_3ds_args', array('installment_min' => '5'));
 
+        $card_type_mode_gateway = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+
         if (WC()->session) {
-            WC()->session->set('lkn_cielo_debit_card_type', 'Credit');
+            WC()->session->set('lkn_cielo_debit_card_type', ($card_type_mode_gateway === 'only_debit') ? 'Debit' : 'Credit');
         }
 
         // Recuperar parcela atual da sessão
@@ -812,6 +816,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         // Setup 3DS and other scripts
         wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js'));
         wp_localize_script('lkn-dc-script', 'lknDCScriptAllowCardIneligible', array('allow' => $this->get_option('allow_card_ineligible', 'no')));
+        wp_localize_script('lkn-dc-script', 'lknDCCardTypeMode', array('mode' => $card_type_mode_gateway));
         wp_localize_script('lkn-dc-script', 'lknCieloRestSettings', array(
             'rest_url'  => esc_url_raw(rest_url()),
             'nonce' => wp_create_nonce('wp_rest'),
@@ -833,11 +838,18 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             'interest_or_discount' => $this->get_option('interest_or_discount'),
             'installment_discount' => $this->get_option('installment_discount')
         ));
+        // Enqueue installment script
+        wp_enqueue_script('lkn-cc-dc-installment-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-cc-dc-installment.js', array('jquery'), $this->version, false);
+        wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3ds', $installmentArgs);
+        wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3dsConfig', array(
+            'interest_or_discount' => $this->get_option('interest_or_discount'),
+            'installment_discount' => $this->get_option('installment_discount')
+        ));
         wp_localize_script('lkn-cc-dc-installment-script', 'lknWCCielo3dsAjax', array(
             'ajaxurl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('lkn_payment_fees_nonce'),
             'current_installment' => $current_installment,
-            'current_card_type' => WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit'
+            'current_card_type' => (LknWcCieloHelper::is_pro_license_active() && $this->get_option('card_type_mode', 'both') === 'only_debit') ? 'Debit' : (WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit')
         ));
         
         // Check checkout layout option
@@ -1034,6 +1046,75 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $name = $name;
         $email = $email;
         $billing_phone = $billing_phone;
+
+        // Card type mode: both / only_credit / only_debit (PRO only, defaults to both)
+        $card_type_mode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+        
+        // --- Saved Cards (PRO feature) ---
+        // card_array is only created by the PRO plugin; if it exists, show the saved cards list.
+        $save_card_token = $this->get_option('save_card_token', 'disabled');
+        $user_id = get_current_user_id();
+        $cards_array = array();
+        $default_card = '';
+
+        if ($user_id) {
+            $raw_cards = get_user_meta($user_id, 'card_array', true);
+            $default_card = get_user_meta($user_id, 'default_card', true);
+
+            if (is_array($raw_cards) && ! empty($raw_cards)) {
+                foreach ($raw_cards as $key => $card) {
+                    if (! is_array($card)) continue;
+                    // Remove expired cards
+                    if (isset($card['expirationDate'])) {
+                        $exp = $card['expirationDate'];
+                        if (preg_match('/^(0[1-9]|1[0-2])\/(\d{4})$/', $exp, $matches)) {
+                            $expMonth = (int) $matches[1];
+                            $expYear = (int) $matches[2];
+                            $now = new \DateTime();
+                            $expDate = \DateTime::createFromFormat('Y-m', $expYear . '-' . str_pad($expMonth, 2, '0', STR_PAD_LEFT));
+                            $expDate->modify('last day of this month');
+                            if ($now > $expDate) {
+                                continue;
+                            }
+                        }
+                    }
+                    // Remove cardToken from frontend data
+                    unset($card['cardToken']);
+                    $cards_array[] = $card;
+                }
+            }
+        }
+
+        $show_saved_cards = ! empty($cards_array);
+
+        // Card brand icon URLs
+        $card_brand_icons = array(
+            'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
+            'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
+            'amex'       => plugin_dir_url(__FILE__) . '../resources/img/amex-icon.svg',
+            'elo'        => plugin_dir_url(__FILE__) . '../resources/img/elo-icon.svg',
+            'other_card' => plugin_dir_url(__FILE__) . '../resources/img/other-card.svg',
+        );
+
+        // Enqueue saved cards JS for shortcode
+        if ($show_saved_cards) {
+            wp_enqueue_script(
+                'lkn-cielo-saved-cards-shortcode',
+                plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-cielo-saved-cards-shortcode.js',
+                array('jquery'),
+                $this->version,
+                true
+            );
+            wp_localize_script('lkn-cielo-saved-cards-shortcode', 'lknCieloSavedCardsShortcode', array(
+                'cards' => $cards_array,
+                'default_card' => $default_card,
+                'card_brand_icons' => $card_brand_icons,
+                'gateway_id' => $this->id,
+                'save_card_token' => $save_card_token,
+            ));
+        }
         
         // Check checkout layout and load appropriate template
         if ($use_modern_layout) {
@@ -1068,6 +1149,16 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $this->add_notice_once(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'), 'error');
             return false;
         }
+
+        // Enforce card type mode (prevent HTML manipulation)
+        $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+        if ($cardTypeMode !== 'both') {
+            $forcedType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
+            $_POST['lkn_cc_type'] = $forcedType;
+        }
+
         if ('no' === $validateCompatMode && $saveCardIndex == '') {
             $dcnum = isset($_POST['lkn_dcno']) ? sanitize_text_field(wp_unslash($_POST['lkn_dcno'])) : '';
             $expDate = isset($_POST['lkn_dc_expdate']) ? sanitize_text_field(wp_unslash($_POST['lkn_dc_expdate'])) : '';
@@ -1132,6 +1223,15 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             }
 
             $cardType = isset($_POST['lkn_cc_type']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_type'])) : '';
+
+            // Enforce card type mode (prevent HTML manipulation)
+            $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
+                ? $this->get_option('card_type_mode', 'both')
+                : 'both';
+            if ($cardTypeMode !== 'both') {
+                $cardType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
+            }
+
             $installments = (int) (isset($_POST['lkn_cc_dc_installments']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_dc_installments'])) : 1);
             $saveCard = isset($_POST['lkn_save_debit_credit_card']) && ($_POST['lkn_save_debit_credit_card'] === '1' || $this->get_option('save_card_token') == 'required' ) ? true : false;
 
@@ -1546,6 +1646,35 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 }
             }
 
+            // Salvar metadados do cartão/pagamento no pedido (independente de saveCard)
+            $lastFourDigits = substr($cardNum, -4);
+            $bin = substr($cardNum, 0, 6);
+            $order->update_meta_data('_lkn_used_card_brand', $provider);
+            $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
+            $order->update_meta_data('_lkn_card_bin', $bin);
+            $order->update_meta_data('_lkn_card_expiration', $cardExp);
+            $order->update_meta_data('_lkn_card_holder', $cardName);
+            $order->update_meta_data('_lkn_installments', $installments);
+            if (isset($responseDecoded->Payment->ProofOfSale)) {
+                $order->update_meta_data('_lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+            }
+            if (isset($responseDecoded->Payment->Tid)) {
+                $order->update_meta_data('_lkn_tid', $responseDecoded->Payment->Tid);
+            }
+            if (isset($responseDecoded->Payment->ReturnCode)) {
+                $order->update_meta_data('_lkn_return_code', $responseDecoded->Payment->ReturnCode);
+            }
+            if (isset($responseDecoded->Payment->ReturnMessage)) {
+                $order->update_meta_data('_lkn_return_message', $responseDecoded->Payment->ReturnMessage);
+            }
+            if (isset($responseDecoded->Payment->ReceivedDate)) {
+                $order->update_meta_data('_lkn_received_date', $responseDecoded->Payment->ReceivedDate);
+            }
+            if (isset($responseDecoded->Payment->Status)) {
+                $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
+            }
+            $order->update_meta_data('_lkn_card_type', $cardType);
+
             // Gerenciar salvamento de cartão (se aplicável)
             if ($saveCard &&  isset($responseDecoded->Payment->CreditCard->CardToken)) {
                 $user_id = $order->get_user_id();
@@ -1559,12 +1688,13 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     'brand' => $provider,
                 );
 
+                $lastFourDigits = $responseDecoded->Payment->CreditCard->CardNumber;
+
                 if (0 != $user_id) {
                     $cardsArray = get_user_meta($user_id, 'card_array', true);
                     $cardsArray = is_array($cardsArray) ? $cardsArray : array();
                     $lastFourDigits = $responseDecoded->Payment->CreditCard->CardNumber;
                     $expirationDate = $responseDecoded->Payment->CreditCard->ExpirationDate;
-
                     // Adiciona o novo cartão à lista
                     $cardsArray[] = array(
                         'cardToken' => $cardPayment['cardToken'],
@@ -1577,20 +1707,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     // Atualiza os metadados do usuário
                     update_user_meta($user_id, 'card_array', $cardsArray);
                     update_user_meta($user_id, 'default_card', array_key_last($cardsArray));
-
-                    // Salvar bandeira e últimos 4 dígitos no pedido (para exibição no PRO)
-                    $order->update_meta_data('_lkn_used_card_brand', $provider);
-                    $order->update_meta_data('_lkn_used_card_last4', $lastFourDigits);
                 }
+
             }
 
-            // Fallback: salvar meta keys mesmo quando saveCard=false (usa dados do POST)
-            if (! $saveCard || ! isset($responseDecoded->Payment->CreditCard->CardToken)) {
-                if (isset($cardNum) && ! empty($cardNum)) {
-                    $order->update_meta_data('_lkn_used_card_brand', $provider);
-                    $order->update_meta_data('_lkn_used_card_last4', substr($cardNum, -4));
-                }
-            }
         }else{
             // Processar pagamento com cartão salvo
             $saveCardIndex = (int) $saveCardIndex;
@@ -1607,11 +1727,21 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
     
                 $cardToken = $selectedCard['cardToken'];
                 $provider = $selectedCard['brand'];
-                $cardCvv = $selectedCard['securityCode'];
+                $cardCvv = $selectedCard['securityCode'] ?? '';
+
+                // Pegar nome do titular do pedido (não disponível no cartão salvo)
+                $cardName = trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
+
+                // Definir URL da API (não definida neste caminho)
+                $url = ($this->get_option('env') == 'production') ? 'https://api.cieloecommerce.cielo.com.br/' : 'https://apisandbox.cieloecommerce.cielo.com.br/';
+
+                // Variáveis usadas no código compartilhado pós-if/else
+                $actualCapture = true;
+                $cardNum = $selectedCard['cardDigits'];
 
                 // Salvar bandeira e últimos 4 dígitos no pedido (cartão salvo)
                 $order->update_meta_data('_lkn_used_card_brand', $selectedCard['brand']);
-                $order->update_meta_data('_lkn_used_card_last4', $selectedCard['cardDigits']);
+                $order->update_meta_data('_lkn_used_card_last4', substr($selectedCard['cardDigits'], -4));
 
                 // Gerar o corpo da requisição usando o token do cartão salvo
                 $args['headers'] = array(
@@ -1665,6 +1795,59 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         if (isset($responseDecoded->Code) && isset($responseDecoded->Message)) {
             throw new Exception(esc_attr($responseDecoded->Message));
+        }
+
+        // Salvar metadados da resposta para o pedido (ambos os caminhos: novo cartão e cartão salvo)
+        if (isset($responseDecoded->Payment->ProofOfSale)) {
+            $order->update_meta_data('_lkn_nsu', $responseDecoded->Payment->ProofOfSale);
+        }
+        if (isset($responseDecoded->Payment->Tid)) {
+            $order->update_meta_data('_lkn_tid', $responseDecoded->Payment->Tid);
+        }
+        if (isset($responseDecoded->Payment->ReturnCode)) {
+            $order->update_meta_data('_lkn_return_code', $responseDecoded->Payment->ReturnCode);
+        }
+        if (isset($responseDecoded->Payment->ReturnMessage)) {
+            $order->update_meta_data('_lkn_return_message', $responseDecoded->Payment->ReturnMessage);
+        }
+        if (isset($responseDecoded->Payment->ReceivedDate)) {
+            $order->update_meta_data('_lkn_received_date', $responseDecoded->Payment->ReceivedDate);
+        }
+        if (isset($responseDecoded->Payment->Status)) {
+            $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
+        }
+        if ($saveCardIndex !== '') {
+            // Saved card path: read everything directly from order + selected card.
+            // (new-card variables are out of scope or stale here.)
+            $tkCardName     = trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
+            $tkAmount       = floatval($order->get_total());
+            $tkCurrency     = $order->get_currency();
+            $tkInstallments = 1;
+            $tkMerchantId   = sanitize_text_field($this->get_option('merchant_id'));
+            $tkMerchantKey  = sanitize_text_field($this->get_option('merchant_key'));
+            $tkOrderRef     = $order_id . '-' . time();
+            $tkCardDigits   = $selectedCard['cardDigits'];
+            $tkExpiry       = $selectedCard['expirationDate'] ?? '';
+            $tkProvider     = $selectedCard['brand'];
+
+            $order->update_meta_data('_lkn_card_type', 'Credit');
+            $order->update_meta_data('_lkn_card_holder', $tkCardName);
+            $order->update_meta_data('_lkn_used_card_brand', $tkProvider);
+            $order->update_meta_data('_lkn_used_card_last4', substr($tkCardDigits, -4));
+            if (!empty($tkExpiry)) {
+                $order->update_meta_data('_lkn_card_expiration', $tkExpiry);
+            }
+            $order->update_meta_data('_lkn_installments', $tkInstallments);
+            $order->save();
+
+            LknWcCieloHelper::saveTransactionMetadata(
+                $order, $responseDecoded,
+                $tkCardDigits, $tkExpiry, $tkCardName,
+                $tkInstallments, $tkAmount, $tkCurrency, $tkProvider,
+                $tkMerchantId, $tkMerchantKey, $tkOrderRef, $order_id,
+                true, $response, 'Credit', 'lkn_dc_cvc', $this,
+                '', '', '', '', ''
+            );
         }
 
         if ($this->get_option('debug') === 'yes') {
