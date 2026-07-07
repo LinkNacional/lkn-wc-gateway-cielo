@@ -112,6 +112,13 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+
+= 1.35.0 =
+** 07/07/2026 **
+* New: Card token payment system in shortcode/classic checkout.
+* New: Metadata on order page.
+* Tweak: Removed the save card checkbox outside of block.
+
 = 1.34.0 =
 ** 02/07/2026 **
 * Adjustment: compatibility with WooCommerce Subscription.
