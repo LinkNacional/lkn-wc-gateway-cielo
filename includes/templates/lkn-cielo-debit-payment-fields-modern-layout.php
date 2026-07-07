@@ -232,7 +232,7 @@ if (!defined('ABSPATH')) {
                     <?php esc_html_e('Card Type', 'lkn-wc-gateway-cielo'); ?>
                     <span class="required">*</span>
                 </label>
-                <select id="lkn_cc_type" name="lkn_cc_type" class="field-select"<?php echo ($card_type_mode !== 'both') ? ' disabled style="color:#333 !important;opacity:1 !important;background-color:#f5f5f5 !important;cursor:default;"' : ''; ?>>
+                <select id="lkn_cc_type" name="lkn_cc_type" class="field-select"<?php echo ($card_type_mode !== 'both') ? ' disabled style="color:#bfbfbf !important;opacity:1 !important;background-color:#f5f5f5 !important;cursor:default;"' : ''; ?>>
                     <?php if ($card_type_mode === 'only_debit') : ?>
                     <option value="Debit" selected><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
                     <?php elseif ($card_type_mode === 'only_credit') : ?>
