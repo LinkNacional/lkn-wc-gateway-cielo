@@ -128,7 +128,7 @@ if (! defined('ABSPATH')) {
         type="hidden"
         name="lkn_payment_method"
         class="bpmpi_paymentmethod"
-        value="Debit" />
+        value="<?php echo esc_attr(($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'); ?>" />
     <input
         type="hidden"
         id="lkn_bpmpi_cardnumber"

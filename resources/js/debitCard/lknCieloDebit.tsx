@@ -535,7 +535,7 @@ const lknDCContentCielo = (props) => {
         <input type="hidden" name="lkn_currency" className="bpmpi_currency" value="BRL" />
         <input type="hidden" size="50" id="lkn_cielo_3ds_value" name="lkn_amount" className="bpmpi_totalamount" value={lknDCTotalCartCielo} />
         <input type="hidden" size="2" name="lkn_installments" className="bpmpi_installments" value="1" />
-        <input type="hidden" name="lkn_payment_method" className="bpmpi_paymentmethod" value="Debit" />
+        <input type="hidden" name="lkn_payment_method" className="bpmpi_paymentmethod" value={debitObject.lkn_cc_type} />
         <input type="hidden" id="lkn_bpmpi_cardnumber" className="bpmpi_cardnumber" />
         <input type="hidden" id="lkn_bpmpi_expmonth" maxLength="2" name="lkn_card_expiry_month" className="bpmpi_cardexpirationmonth" />
         <input type="hidden" id="lkn_bpmpi_expyear" maxLength="4" name="lkn_card_expiry_year" className="bpmpi_cardexpirationyear" />

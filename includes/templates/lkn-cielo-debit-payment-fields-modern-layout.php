@@ -134,7 +134,7 @@ if (!defined('ABSPATH')) {
         <input type="hidden" name="lkn_currency" class="bpmpi_currency" value="BRL" />
         <input type="hidden" size="50" id="lkn_cielo_3ds_value" name="lkn_amount" class="bpmpi_totalamount" value="<?php echo esc_attr($total_cart_3ds); ?>" />
         <input type="hidden" size="2" name="lkn_installments" class="bpmpi_installments" value="1" />
-        <input type="hidden" name="lkn_payment_method" class="bpmpi_paymentmethod" value="Debit" />
+        <input type="hidden" name="lkn_payment_method" class="bpmpi_paymentmethod" value="<?php echo esc_attr(($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'); ?>" />
         <input type="hidden" id="lkn_bpmpi_cardnumber" class="bpmpi_cardnumber" />
         <input type="hidden" id="lkn_bpmpi_expmonth" maxlength="2" name="lkn_card_expiry_month" class="bpmpi_cardexpirationmonth" />
         <input type="hidden" id="lkn_bpmpi_expyear" maxlength="4" name="lkn_card_expiry_year" class="bpmpi_cardexpirationyear" />

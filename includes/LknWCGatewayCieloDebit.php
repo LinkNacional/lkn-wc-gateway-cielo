@@ -1727,7 +1727,17 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
     
                 $cardToken = $selectedCard['cardToken'];
                 $provider = $selectedCard['brand'];
-                $cardCvv = $selectedCard['securityCode'];
+                $cardCvv = $selectedCard['securityCode'] ?? '';
+
+                // Pegar nome do titular do pedido (não disponível no cartão salvo)
+                $cardName = trim($order->get_billing_first_name() . ' ' . $order->get_billing_last_name());
+
+                // Definir URL da API (não definida neste caminho)
+                $url = ($this->get_option('env') == 'production') ? 'https://api.cieloecommerce.cielo.com.br/' : 'https://apisandbox.cieloecommerce.cielo.com.br/';
+
+                // Variáveis usadas no código compartilhado pós-if/else
+                $actualCapture = true;
+                $cardNum = $selectedCard['cardDigits'];
 
                 // Salvar bandeira e últimos 4 dígitos no pedido (cartão salvo)
                 $order->update_meta_data('_lkn_used_card_brand', $selectedCard['brand']);
