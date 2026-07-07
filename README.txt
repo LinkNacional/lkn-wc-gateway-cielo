@@ -48,7 +48,8 @@ With the [CIELO PRO version](https://www.linknacional.com.br/wordpress/woocommer
 **Recommended Plugins**
 * [Link Invoice Payment for WooCommerce](https://wordpress.org/plugins/invoice-payment-for-woocommerce/) - Integrate custom payment methods and offer invoice-based payments, discounts, subscriptions in your WooCommerce store.
 * [Shipping Calculator for Brazil](https://wordpress.org/plugins/woo-better-shipping-calculator-for-brazil/) - Provide accurate freight calculation and Brazilian Fields directly in your WooCommerce checkout.
-* [Fraud and Scam Detection](https://wordpress.org/plugins/fraud-and-scam-detection-for-woocommerce/) - Protect your online store by adding a verification layer to the WooCommerce checkout.
+* [Fraud and Scam Detection](https://wordpress.org/plugins/fraud-and-scam-detection-for-woocommerce/) - Protect your online store by adding a verification layer to your WooCommerce checkout and block by emails, IPs, telephones numbers.
+* [Checkout Brazilian Fields](https://wordpress.org/plugins/woo-better-shipping-calculator-for-brazil/) - Adds essential Brazilian checkout fields to WooCommerce, such as CPF, CNPJ, and others, ensuring better compatibility for issuing fiscal receipts.
 
 **Dependencies**
 Payment Gateway for Cielo API on WooCommerce plugin is dependent on WooCommerce plugin, please make sure WooCommerce is installed and properly configured before starting Payment Gateway for Cielo API on WooCommerce installation.
