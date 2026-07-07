@@ -219,6 +219,7 @@ final class LknWCGatewayCieloEndpoint
             );
         }
 
+        /* translators: %d: number of order logs cleared */
         wp_send_json_success(array(
             'message' => sprintf(__('%d order logs cleared successfully.', 'lkn-wc-gateway-cielo'), $count),
             'count' => $count
