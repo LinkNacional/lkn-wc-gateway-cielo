@@ -1100,7 +1100,7 @@ const lknDCContentCielo = props => {
     type: 'hidden',
     name: 'lkn_auth_enabled_notifyonly',
     className: 'bpmpi_auth_notifyonly',
-    value: 'true'
+    value: 'false'
   }), /* #__PURE__ */React.createElement('input', {
     type: 'hidden',
     name: 'lkn_auth_suppresschallenge',

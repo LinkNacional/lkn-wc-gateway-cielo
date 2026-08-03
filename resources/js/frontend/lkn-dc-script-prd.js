@@ -5,9 +5,13 @@
 // Flag global para controlar se 3DS já foi completado
 let lkn3DSCompleted = false;
 
+// Provider detectado via BIN — usado para pular MPI se bandeira não tem 3DS
+let lknDetectedCardProvider = '';
+
 // Função para resetar o status 3DS
 function resetLkn3DSStatus() {
   lkn3DSCompleted = false;
+  lknDetectedCardProvider = '';
   
   // Reconfigurar o botão para tipo button (caso tenha sido alterado)
   const btnSubmit = document.getElementById('place_order');
@@ -122,6 +126,11 @@ function setupErrorDetection() {
             'X-WP-Nonce': nonce
           },
           success: function (response) {
+            // Guardar provider detectado para pré-filtro 3DS
+            if (response.Provider) {
+              lknDetectedCardProvider = response.Provider;
+            }
+
             const options = document.querySelectorAll('#lkn_cc_type option')
             const currentSelection = document.querySelector('#lkn_cc_type').value
 
@@ -281,8 +290,11 @@ function bpmpi_config () {
     onUnenrolled: function (e) {
       // Card is not eligible for authentication (unauthenticable)
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
-      // ECI 04/07 = Data Only = NÃO autenticada. Requer allow_card_ineligible.
-      if(lknDCScriptAllowCardIneligible.allow == 'yes'){
+      // UNAVAILABLE: stand-in CAVV válido (issuer indisponível) — submeter direto
+      // NOT_ENROLLED: cartão sem 3DS — verificar allow_card_ineligible
+      if (e.Cavv) {
+        submitForm(e)
+      } else if(lknDCScriptAllowCardIneligible.allow == 'yes'){
         submitForm(e)
       }else{
         alert(wp.i18n.__('Card Ineligible for Authentication', 'lkn-wc-gateway-cielo'))
@@ -308,14 +320,9 @@ function bpmpi_config () {
       }
     },
     onUnsupportedBrand: function (e) {
-      // Provider not supported for authentication
+      // Provider not supported for authentication — definitive error, always submit
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
-      //aqui
-      if(lknDCScriptAllowCardIneligible.allow == 'yes'){
-        submitForm(e)
-      }else{
-        alert(wp.i18n.__('Provider not supported by Cielo 3DS authentication', 'lkn-wc-gateway-cielo'))
-      }
+      submitForm(e)
     },
 
     Environment: 'PRD', // SDB or PRD
@@ -424,6 +431,26 @@ function lknDCProccessButton () {
     setIfExists('lkn_bpmpi_billto_email', getDomValueWithFallback(['billing-email', 'shipping-email']))
     setIfExists('lkn_bpmpi_billto_contactname', getDomValueWithFallback(['billing-first_name']))
     // Se o email do DOM não foi encontrado, manter o valor já existente no campo hidden
+
+    // Pré-filtro por BIN: pular MPI se bandeira não suporta 3DS
+    var supported3DSBrands = ['Visa', 'Mastercard', 'Elo', 'Amex', 'American Express'];
+    if (lknDetectedCardProvider && supported3DSBrands.indexOf(lknDetectedCardProvider) === -1) {
+      console.log('[CIELO 3DS] Provider ' + lknDetectedCardProvider + ' not 3DS-capable, skipping MPI');
+      lkn3DSCompleted = true;
+      // Limpar campos 3DS para indicar que não houve autenticação
+      document.getElementById('lkn_cavv').value = '';
+      document.getElementById('lkn_eci').value = '';
+      document.getElementById('lkn_ref_id').value = '';
+      document.getElementById('lkn_version').value = '';
+      document.getElementById('lkn_xid').value = '';
+      var btnSkip = document.getElementById('place_order');
+      if (btnSkip) {
+        btnSkip.removeEventListener('click', lknDCProccessButton, true);
+        btnSkip.setAttribute('type', 'submit');
+        btnSkip.click();
+      }
+      return;
+    }
 
     bpmpi_authenticate()
   } catch (error) {
