@@ -164,14 +164,28 @@ final class LknWCGatewayCieloEndpoint
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
+        // Resposta com wrapper cardQuery (formato antigo da API)
         if (isset($data['cardQuery'])) {
+            if (isset($data['cardQuery']['Provider'])) {
+                $data['cardQuery']['Provider'] = ucfirst(strtolower($data['cardQuery']['Provider']));
+            }
+            $data['cardQuery']['Source'] = 'online';
             return new WP_REST_Response($data['cardQuery'], 200);
         }
 
-        // Fallback offline: API da Cielo retornou erro (ex: Bandeira não suportada)
-        // Usa regex local para detectar Provider e CardType
+        // Resposta direta bem-sucedida: {Status, Provider, CardType, ...}
+        if (isset($data['Status']) && '00' === $data['Status']) {
+            if (isset($data['Provider'])) {
+                $data['Provider'] = ucfirst(strtolower($data['Provider']));
+            }
+            $data['Source'] = 'online';
+            return new WP_REST_Response($data, 200);
+        }
+
+        // API online retornou erro → fallback offline por regex de BIN
         $offlineResult = $this->detectCardByBinOffline($cardBin);
         if ($offlineResult) {
+            $offlineResult['Source'] = 'offline';
             return new WP_REST_Response($offlineResult, 200);
         }
 
@@ -315,18 +329,19 @@ final class LknWCGatewayCieloEndpoint
         $number = str_replace(' ', '', trim($cardBin));
 
         // Mapeamento: [regex, Provider, CardType]
+        // CardType sempre "Multiplo" porque sem a API online não dá pra distinguir
         $binMap = [
-            ['/^4/',                         'Visa',       'Crédito'],
-            ['/^5[1-5]/',                    'Mastercard', 'Crédito'],
-            ['/^2(?:2(?:2[1-9]|[3-9]\d)|[3-6]\d\d|7(?:[01]\d|20))/', 'Mastercard', 'Crédito'],
-            ['/^3[47]/',                     'Amex',       'Crédito'],
-            ['/^(431274|438935|451416|457393|4576|504175|627780|636297|636368|636369)/', 'Elo', 'Crédito'],
-            ['/^(506|509|650)/',             'Elo',        'Crédito'],
-            ['/^(606282|3841)/',             'Hipercard',  'Crédito'],
-            ['/^3(?:0[0-5]|[68])/',          'Diners',     'Crédito'],
-            ['/^6(?:011|5)/',                'Discover',   'Crédito'],
-            ['/^(?:2131|1800|35)/',          'Jcb',        'Crédito'],
-            ['/^50/',                        'Aura',       'Crédito'],
+            ['/^4/',                         'Visa',       'Multiplo'],
+            ['/^5[1-5]/',                    'Mastercard', 'Multiplo'],
+            ['/^2(?:2(?:2[1-9]|[3-9]\d)|[3-6]\d\d|7(?:[01]\d|20))/', 'Mastercard', 'Multiplo'],
+            ['/^3[47]/',                     'Amex',       'Multiplo'],
+            ['/^(431274|438935|451416|457393|4576|504175|627780|636297|636368|636369)/', 'Elo', 'Multiplo'],
+            ['/^(506|509|650)/',             'Elo',        'Multiplo'],
+            ['/^(606282|3841)/',             'Hipercard',  'Multiplo'],
+            ['/^3(?:0[0-5]|[68])/',          'Diners',     'Multiplo'],
+            ['/^6(?:011|5)/',                'Discover',   'Multiplo'],
+            ['/^(?:2131|1800|35)/',          'Jcb',        'Multiplo'],
+            ['/^50/',                        'Aura',       'Multiplo'],
         ];
 
         foreach ($binMap as $entry) {
