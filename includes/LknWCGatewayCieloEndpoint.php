@@ -168,6 +168,13 @@ final class LknWCGatewayCieloEndpoint
             return new WP_REST_Response($data['cardQuery'], 200);
         }
 
+        // Fallback offline: API da Cielo retornou erro (ex: Bandeira não suportada)
+        // Usa regex local para detectar Provider e CardType
+        $offlineResult = $this->detectCardByBinOffline($cardBin);
+        if ($offlineResult) {
+            return new WP_REST_Response($offlineResult, 200);
+        }
+
         return new WP_REST_Response($data, 200);
     }
 
@@ -293,5 +300,44 @@ final class LknWCGatewayCieloEndpoint
             'status' => false,
             'message' => __('Card brand not found', 'lkn-wc-gateway-cielo'),
         ], 200);
+    }
+
+    /**
+     * Detecção offline de bandeira por BIN — fallback quando a API Cielo falha.
+     * Retorna array com Provider e CardType no mesmo formato do cardQuery da Cielo,
+     * ou false se não identificar.
+     *
+     * @param string $cardBin 6 primeiros dígitos do cartão
+     * @return array|false
+     */
+    private function detectCardByBinOffline($cardBin)
+    {
+        $number = str_replace(' ', '', trim($cardBin));
+
+        // Mapeamento: [regex, Provider, CardType]
+        $binMap = [
+            ['/^4/',                         'Visa',       'Crédito'],
+            ['/^5[1-5]/',                    'Mastercard', 'Crédito'],
+            ['/^2(?:2(?:2[1-9]|[3-9]\d)|[3-6]\d\d|7(?:[01]\d|20))/', 'Mastercard', 'Crédito'],
+            ['/^3[47]/',                     'Amex',       'Crédito'],
+            ['/^(431274|438935|451416|457393|4576|504175|627780|636297|636368|636369)/', 'Elo', 'Crédito'],
+            ['/^(506|509|650)/',             'Elo',        'Crédito'],
+            ['/^(606282|3841)/',             'Hipercard',  'Crédito'],
+            ['/^3(?:0[0-5]|[68])/',          'Diners',     'Crédito'],
+            ['/^6(?:011|5)/',                'Discover',   'Crédito'],
+            ['/^(?:2131|1800|35)/',          'Jcb',        'Crédito'],
+            ['/^50/',                        'Aura',       'Crédito'],
+        ];
+
+        foreach ($binMap as $entry) {
+            if (preg_match($entry[0], $number)) {
+                return [
+                    'Provider' => $entry[1],
+                    'CardType' => $entry[2],
+                ];
+            }
+        }
+
+        return false;
     }
 }

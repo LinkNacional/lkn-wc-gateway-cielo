@@ -814,7 +814,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
         
         // Setup 3DS and other scripts
-        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js'));
+        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js?ver=' . $this->version));
         wp_localize_script('lkn-dc-script', 'lknDCScriptAllowCardIneligible', array('allow' => $this->get_option('allow_card_ineligible', 'no')));
         wp_localize_script('lkn-dc-script', 'lknDCCardTypeMode', array('mode' => $card_type_mode_gateway));
         wp_localize_script('lkn-dc-script', 'lknCieloRestSettings', array(

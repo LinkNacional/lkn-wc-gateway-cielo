@@ -527,7 +527,7 @@ const lknDCContentCielo = (props) => {
 
       <div>
         <input type="hidden" name="lkn_auth_enabled" className="bpmpi_auth" value="true" />
-        <input type="hidden" name="lkn_auth_enabled_notifyonly" className="bpmpi_auth_notifyonly" value="true" />
+        <input type="hidden" name="lkn_auth_enabled_notifyonly" className="bpmpi_auth_notifyonly" value="false" />
         <input type="hidden" name="lkn_auth_suppresschallenge" className="bpmpi_auth_suppresschallenge" value="false" />
         <input type="hidden" name="lkn_access_token" className="bpmpi_accesstoken" value={lknDCAccessTokenCielo} />
         <input type="hidden" name="lkn_expires_in" id="expires_in" value={lknDCAccessTokenExpiration} />

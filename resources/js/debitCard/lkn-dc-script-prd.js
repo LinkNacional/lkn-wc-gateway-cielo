@@ -113,24 +113,18 @@ function bpmpi_config () {
       alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
     },
     onUnsupportedBrand: function (e) {
+      // Provider not supported for authentication — definitive error, always submit
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
-
-      const allowCardIneligible = window.lknDCScriptAllowCardIneligible && window.lknDCScriptAllowCardIneligible.allow === 'yes'
-      if (allowCardIneligible) {
-        // Continuar sem 3DS
-        const Form3dsButton = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]?.closest('form')
-        if (Form3dsButton) {
-          Form3dsButton.setAttribute('data-payment-cavv', '')
-          Form3dsButton.setAttribute('data-payment-eci', '')
-          Form3dsButton.setAttribute('data-payment-ref_id', '')
-          Form3dsButton.setAttribute('data-payment-version', '')
-          Form3dsButton.setAttribute('data-payment-xid', '')
-          const Button3ds = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]
-          const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
-          Button3ds.dispatchEvent(event)
-        }
-      } else {
-        alert(wp.i18n.__('Provider not supported by Cielo 3DS authentication', 'lkn-wc-gateway-cielo'))
+      const Form3dsButton = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]?.closest('form')
+      if (Form3dsButton) {
+        Form3dsButton.setAttribute('data-payment-cavv', '')
+        Form3dsButton.setAttribute('data-payment-eci', '')
+        Form3dsButton.setAttribute('data-payment-ref_id', '')
+        Form3dsButton.setAttribute('data-payment-version', '')
+        Form3dsButton.setAttribute('data-payment-xid', '')
+        const Button3ds = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
+        Button3ds.dispatchEvent(event)
       }
     },
 
