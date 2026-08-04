@@ -584,6 +584,10 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                 wp_localize_script('lkn-cielo-credit-brand-detector', 'lknCieloCreditBrandConfig', array(
                     'show_card_brand_icons' => $show_card_brand_icons
                 ));
+                wp_localize_script('lkn-cielo-credit-brand-detector', 'lknCieloRestSettings', array(
+                    'rest_url'  => esc_url_raw(rest_url()),
+                    'nonce' => wp_create_nonce('wp_rest'),
+                ));
             }
             
             // Check if modern layout CSS is already enqueued to avoid duplicates

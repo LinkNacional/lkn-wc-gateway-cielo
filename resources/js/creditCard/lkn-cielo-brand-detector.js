@@ -26,68 +26,49 @@
     let isInitialized = false;
     let cardNumberInput = null;
     let brandIcons = null;
-    
-    // Card brand detection patterns (converted from PHP regex)
-    const cardPatterns = [
-        {
-            name: 'visa',
-            regex: /^4[0-9]{2,15}$/
-        },
-        {
-            name: 'elo',
-            regex: /^(431274|438935|451416|457393|4576|457631|457632|504175|627780|636297|636368|636369|(6503[1-3])|(6500(3[5-9]|4[0-9]|5[0-1]))|(6504(0[5-9]|1[0-9]|2[0-9]|3[0-9]))|(650(48[5-9]|49[0-9]|50[0-9]|51[1-9]|52[0-9]|53[0-7]))|(6505(4[0-9]|5[0-9]|6[0-9]|7[0-9]|8[0-9]|9[0-8]))|(6507(0[0-9]|1[0-8]))|(6507(2[0-7]))|(650(90[1-9]|91[0-9]|920))|(6516(5[2-9]|6[0-9]|7[0-9]))|(6550(0[0-9]|1[1-9]))|(6550(2[1-9]|3[0-9]|4[0-9]|5[0-8]))|(506(699|77[0-8]|7[1-6][0-9))|(509([0-9][0-9][0-9])))/
-        },
-        {
-            name: 'hipercard',
-            regex: /^(606282|3841)\d{0,13}$/
-        },
-        {
-            name: 'diners',
-            regex: /^3(?:0[0-5]|[68][0-9])[0-9]{0,11}$/
-        },
-        {
-            name: 'discover',
-            regex: /^6(?:011|5[0-9]{2})[0-9]{0,12}$/
-        },
-        {
-            name: 'jcb',
-            regex: /^(?:2131|1800|35\d{2})\d{0,11}$/
-        },
-        {
-            name: 'aura',
-            regex: /^50[0-9]{2,17}$/
-        },
-        {
-            name: 'amex',
-            regex: /^3[47][0-9]{2,13}$/
-        },
-        {
-            name: 'mastercard',
-            regex: /^5[1-5]\d{0,14}$|^2(?:2(?:2[1-9]|[3-9]\d)|[3-6]\d\d|7(?:[01]\d|20))\d{0,12}$/
-        }
-    ];
+    let debounceTimer = null;
+    let lastDetectedBrand = null;
     
     /**
-     * Detect card brand based on card number
-     * @param {string} number - Card number (cleaned)
-     * @returns {string|null} - Brand name or null if not found
+     * Fetch card brand from the REST endpoint (online + offline fallback).
+     * @param {string} number - Card number
+     * @returns {Promise<object|null>}
      */
-    function detectCardBrand(number) {
+    function fetchCardBrand(number) {
         const cleanNumber = number.replace(/\s+/g, '');
         
-        // Need at least 6 digits to detect
         if (cleanNumber.length < 6) {
-            return null;
+            return Promise.resolve(null);
         }
         
-        // Test against each pattern
-        for (const pattern of cardPatterns) {
-            if (pattern.regex.test(cleanNumber)) {
-                return pattern.name;
+        // Detect REST URL + nonce
+        var restUrl = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.rest_url)
+            ? lknCieloRestSettings.rest_url
+            : (window.location.origin + '/wp-json/');
+        var nonce = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.nonce)
+            ? lknCieloRestSettings.nonce
+            : '';
+        
+        return fetch(restUrl + 'lknWCGatewayCielo/getCardBrand?number=' + encodeURIComponent(cleanNumber) + '&gateway=credit', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-WP-Nonce': nonce
             }
-        }
-        
-        return null;
+        })
+        .then(function(response) {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.status && data.brand) {
+                return data.brand;
+            }
+            return null;
+        })
+        .catch(function() {
+            return null;
+        });
     }
     
     /**
@@ -139,12 +120,18 @@
         if (typeof lknCieloCreditBrandConfig !== 'undefined' && lknCieloCreditBrandConfig.show_card_brand_icons === 'yes') {
             // Apply gray filter when user starts typing (1+ digits)
             if (cleanNumber.length >= 1 && cleanNumber.length < 6) {
-                // Gray out all brands when typing but not enough digits to detect
                 applyGrayFilterToAll();
-            } else {
-                // Detect brand only when 6+ digits
-                const detectedBrand = detectCardBrand(cardNumber);
-                updateBrandIcons(detectedBrand);
+                return;
+            }
+            
+            // Debounce the REST call (only when 6+ digits)
+            if (cleanNumber.length >= 6) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    fetchCardBrand(cleanNumber).then(function(detectedBrand) {
+                        updateBrandIcons(detectedBrand);
+                    });
+                }, 500);
             }
         }
         

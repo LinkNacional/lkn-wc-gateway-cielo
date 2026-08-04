@@ -1,3 +1,6 @@
+# 1.35.1 - 04/08/2026
+* Ajuste: correção no sistema de 3DS.
+  
 # 1.35.0 - 07/07/2026
 * Novo: Sistema de pagamento por token de cartão no checkout do shortcode/clássico.
 * Novo: Metadados na página de pedido.

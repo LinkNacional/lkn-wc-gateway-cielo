@@ -117,6 +117,10 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 
 == Changelog ==
 
+= 1.35.1 =
+** 04/08/2026 **
+* Fix: 3DS system correction.
+
 = 1.35.0 =
 ** 07/07/2026 **
 * New: Card token payment system in shortcode/classic checkout.
