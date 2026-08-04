@@ -872,6 +872,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloDebitBrandConfig', array(
                     'show_card_brand_icons' => $show_card_brand_icons
                 ));
+                wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloRestSettings', array(
+                    'rest_url'  => esc_url_raw(rest_url()),
+                    'nonce' => wp_create_nonce('wp_rest'),
+                ));
             }
         }
         

@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
                               let isBrandMatched = false
 
                               debounceTimeout = setTimeout(() => {
-                                fetch(`/wp-json/lknWCGatewayCielo/getCardBrand?number=${value}`, {
+                                fetch(`/wp-json/lknWCGatewayCielo/getCardBrand?number=${value}&gateway=credit`, {
                                     method: 'GET',
                                     headers: {
                                         'Accept': 'application/json',

@@ -144,7 +144,7 @@ const lknDCContentCielo = (props) => {
           var restUrl = (typeof window.lknCieloDebitConfig !== 'undefined' && window.lknCieloDebitConfig.rest_url)
             ? window.lknCieloDebitConfig.rest_url
             : (window.location.origin + '/wp-json/');
-          var url = restUrl + 'lknWCGatewayCielo/checkCard?cardbin=' + cardBin;
+          var url = restUrl + 'lknWCGatewayCielo/getCardBrand?number=' + encodeURIComponent(cardBin) + '&gateway=debit';
 
           if (cardBin !== cardBinState) {
             setCardBinState(cardBin);  // Mova o setCardBinState para antes da requisição
@@ -163,7 +163,7 @@ const lknDCContentCielo = (props) => {
                 return response.json();
               })
               .then(data => {
-                if ('Crédito' == data.CardType) {
+                if ('Credito' == data.cardType) {
                   setCardTypeOptions([
                     { key: 'Credit', label: lknDCTranslationsCielo.creditCard },
                   ]);
@@ -171,7 +171,7 @@ const lknDCContentCielo = (props) => {
                     ...prevState,
                     lkn_cc_type: 'Credit'
                   }));
-                } else if ('Débito' == data.CardType) {
+                } else if ('Debito' == data.cardType) {
                   setCardTypeOptions([
                     { key: 'Debit', label: lknDCTranslationsCielo.debitCard }
                   ]);

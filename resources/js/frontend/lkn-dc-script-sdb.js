@@ -115,7 +115,7 @@ function setupErrorDetection() {
         var nonce = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.nonce)
           ? lknCieloRestSettings.nonce
           : (typeof wpApiSettings !== 'undefined' && wpApiSettings.nonce ? wpApiSettings.nonce : '')
-        const url = restRoot + 'lknWCGatewayCielo/checkCard?cardbin=' + cardBin
+        const url = restRoot + 'lknWCGatewayCielo/getCardBrand?number=' + encodeURIComponent(cardBin) + '&gateway=debit'
         $.ajax({
           url,
           type: 'GET',
@@ -125,8 +125,8 @@ function setupErrorDetection() {
           },
           success: function (response) {
             // Guardar provider detectado para pré-filtro 3DS
-            if (response.Provider) {
-              lknDetectedCardProvider = response.Provider;
+            if (response.brand) {
+              lknDetectedCardProvider = response.brand.charAt(0).toUpperCase() + response.brand.slice(1);
             }
 
             const options = document.querySelectorAll('#lkn_cc_type option')
@@ -140,7 +140,7 @@ function setupErrorDetection() {
             let shouldChangeSelection = false
 
             options.forEach(function (option) {
-              if (response.CardType === 'Crédito' && option.value !== 'Credit') {
+              if (response.cardType === 'Credito' && option.value !== 'Credit') {
                 option.disabled = true
                 if (currentSelection === option.value) {
                   shouldChangeSelection = true
@@ -148,7 +148,7 @@ function setupErrorDetection() {
                 if (lknWcCieloCcDcInstallment) {
                   lknWcCieloCcDcInstallment.parentElement.style.display = ''
                 }
-              } else if (response.CardType === 'Débito' && option.value !== 'Debit') {
+              } else if (response.cardType === 'Debito' && option.value !== 'Debit') {
                 option.disabled = true
                 if (currentSelection === option.value) {
                   shouldChangeSelection = true
@@ -156,14 +156,14 @@ function setupErrorDetection() {
                 if (lknWcCieloCcDcInstallment) {
                   lknWcCieloCcDcInstallment.parentElement.style.display = 'none'
                 }
-              } else if (response.CardType === 'Crédito' && option.value === 'Credit') {
+              } else if (response.cardType === 'Credito' && option.value === 'Credit') {
                 if (lknWcCieloCcDcInstallment) {
                   lknWcCieloCcDcInstallment.parentElement.style.display = ''
                 }
                 if (shouldChangeSelection) {
                   option.selected = true
                 }
-              } else if (response.CardType === 'Débito' && option.value === 'Debit') {
+              } else if (response.cardType === 'Debito' && option.value === 'Debit') {
                 if (shouldChangeSelection) {
                   option.selected = true
                 }

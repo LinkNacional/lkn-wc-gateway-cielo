@@ -265,6 +265,27 @@ final class LknWCGatewayCieloEndpoint
     public function getOfflineBinCard($request)
     {
         $number = str_replace(' ', '', trim($request->get_param('number')));
+        $gateway = $request->get_param('gateway'); // 'debit' or 'credit'
+
+        // Se brand_validation estiver ativo e gateway informado, tenta online primeiro
+        if (in_array($gateway, array('debit', 'credit'), true)) {
+            $optionKey = 'woocommerce_lkn_cielo_' . $gateway . '_settings';
+            $option = get_option($optionKey, array());
+
+            if (isset($option['brand_validation']) && 'yes' === $option['brand_validation']) {
+                $onlineBrand = $this->tryOnlineBin($number, $option);
+
+                if ($onlineBrand) {
+                    return new WP_REST_Response(array(
+                        'status'   => true,
+                        'brand'    => $onlineBrand['provider'],
+                        'cardType' => $onlineBrand['cardType'],
+                        'source'   => 'online',
+                    ), 200);
+                }
+                // Fallthrough para offline em caso de falha
+            }
+        }
 
         $bin = [
             // visa
@@ -305,6 +326,8 @@ final class LknWCGatewayCieloEndpoint
                 return new WP_REST_Response([
                     'status' => true,
                     'brand' => $brands[$index],
+                    'cardType' => 'Multiplo',
+                    'source' => 'offline',
                 ], 200);
             }
         }
@@ -354,5 +377,126 @@ final class LknWCGatewayCieloEndpoint
         }
 
         return false;
+    }
+
+    /**
+     * Tenta consulta online do BIN na API Cielo.
+     * Retorna array com provider e cardType, ou false se falhar.
+     *
+     * @param string $cardBin 6 primeiros dígitos do cartão
+     * @param array  $option  Configurações do gateway (debit ou credit)
+     * @return array{provider: string, cardType: string}|false
+     */
+    private function tryOnlineBin($cardBin, $option)
+    {
+        $bin = substr(str_replace(' ', '', $cardBin), 0, 6);
+
+        if (strlen($bin) < 6) {
+            return false;
+        }
+
+        $url = ('production' === $option['env'])
+            ? 'https://apiquery.cieloecommerce.cielo.com.br/1/cardBin/'
+            : 'https://apiquerysandbox.cieloecommerce.cielo.com.br/1/cardBin/';
+        $url .= $bin;
+
+        $headers = array(
+            'Accept'      => 'application/json',
+            'MerchantId'  => $option['merchant_id'],
+            'MerchantKey' => $option['merchant_key'],
+        );
+
+        $response = wp_remote_get($url, array(
+            'headers' => $headers,
+            'timeout' => 30,
+        ));
+
+        if (is_wp_error($response)) {
+            if (isset($option['debug']) && 'yes' === $option['debug']) {
+                $log = new WC_Logger();
+                $log->log('error', '[CIELO BIN] cardBin=' . $bin . ' | wp_error=' . $response->get_error_message(), array('source' => 'woocommerce-cielo-debit-bin'));
+            }
+            return false;
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (isset($option['debug']) && 'yes' === $option['debug']) {
+            $log = new WC_Logger();
+            $log->log('info', '[CIELO BIN] cardBin=' . $bin . ' | response=' . $body, array('source' => 'woocommerce-cielo-debit-bin'));
+        }
+
+        // Resposta com wrapper cardQuery (formato antigo)
+        if (isset($data['cardQuery']['Provider'])) {
+            return array(
+                'provider' => $this->mapProviderToBrand($data['cardQuery']['Provider']),
+                'cardType' => $this->mapCardType(isset($data['cardQuery']['CardType']) ? $data['cardQuery']['CardType'] : 'Multiplo'),
+            );
+        }
+
+        // Resposta direta: {Status, Provider, CardType, ...}
+        if (isset($data['Status']) && '00' === $data['Status'] && isset($data['Provider'])) {
+            return array(
+                'provider' => $this->mapProviderToBrand($data['Provider']),
+                'cardType' => $this->mapCardType(isset($data['CardType']) ? $data['CardType'] : 'Multiplo'),
+            );
+        }
+
+        // Qualquer outra resposta é considerada falha
+        return false;
+    }
+
+    /**
+     * Mapeia o nome do Provider retornado pela API Cielo para o nome
+     * lowercase usado internamente pelo plugin.
+     *
+     * @param string $provider Nome do provider (ex: "VISA", "MASTERCARD")
+     * @return string Nome da bandeira (ex: "visa", "mastercard")
+     */
+    private function mapProviderToBrand($provider)
+    {
+        $map = array(
+            'VISA'             => 'visa',
+            'MASTERCARD'       => 'mastercard',
+            'AMERICAN EXPRESS' => 'amex',
+            'ELO'              => 'elo',
+            'HIPERCARD'        => 'hipercard',
+            'DINERS CLUB'      => 'diners',
+            'DINERS'           => 'diners',
+            'DISCOVER'         => 'discover',
+            'JCB'              => 'jcb',
+            'AURA'             => 'aura',
+        );
+
+        $provider = strtoupper(trim($provider));
+
+        return isset($map[$provider]) ? $map[$provider] : strtolower($provider);
+    }
+
+    /**
+     * Normaliza o CardType vindo da API Cielo para um formato consistente.
+     * A API pode retornar "Crédito", "Débito", "Multiplo" (com ou sem acento).
+     * Normalizamos para: Credito, Debito, Multiplo (sem acento, primeira maiúscula).
+     *
+     * @param string $cardType Valor bruto do CardType da API
+     * @return string "Credito", "Debito" ou "Multiplo"
+     */
+    private function mapCardType($cardType)
+    {
+        // Remove acentos
+        $normalized = preg_replace(
+            array('/[áàãâä]/u', '/[éèêë]/u', '/[íìîï]/u', '/[óòõôö]/u', '/[úùûü]/u', '/[ç]/u'),
+            array('a',          'e',          'i',          'o',          'u',          'c'),
+            mb_strtolower(trim($cardType))
+        );
+
+        $map = array(
+            'credito'  => 'Credito',
+            'debito'   => 'Debito',
+            'multiplo' => 'Multiplo',
+        );
+
+        return isset($map[$normalized]) ? $map[$normalized] : 'Multiplo';
     }
 }
