@@ -117,6 +117,11 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 
 == Changelog ==
 
+= 1.36.0 =
+** 07/08/2026 **
+* Fix: Adjusted the card type warning when saving metadata in the credit-only payment gateway.
+* New: Option to show or hide the checkout button in the debit/credit payment gateway.
+
 = 1.35.1 =
 ** 04/08/2026 **
 * Fix: 3DS system correction.
