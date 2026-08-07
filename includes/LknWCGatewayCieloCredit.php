@@ -986,7 +986,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             if (isset($responseDecoded->Payment->Status)) {
                 $order->update_meta_data('_lkn_payment_status', $responseDecoded->Payment->Status);
             }
-            $order->update_meta_data('_lkn_card_type', $cardType);
+            $order->update_meta_data('_lkn_card_type', 'Credit');
 
             // Gerenciar salvamento de cartão (se aplicável)
             if ($saveCard) {
