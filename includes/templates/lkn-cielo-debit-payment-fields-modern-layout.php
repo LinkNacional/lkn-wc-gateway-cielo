@@ -338,6 +338,7 @@ if (!defined('ABSPATH')) {
         </div><!-- end #lkn-debit-new-card-fields -->
 
         <!-- Submit Button -->
+        <?php if ($this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
         <div class="payment-submit-section">
             <button type="button" id="cielo-debit-submit-btn" class="cielo-submit-button debit-submit">
                 <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
@@ -346,6 +347,7 @@ if (!defined('ABSPATH')) {
                 <?php echo esc_html($description); ?>
             </p>
         </div>
+        <?php endif; ?>
         
         <div class="clear"></div>
 

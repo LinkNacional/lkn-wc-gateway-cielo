@@ -280,6 +280,7 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             'authentication_method' => is_user_logged_in() ? '02' : '01',
             'showCard' => $this->gateway->get_option('show_card_animation'),
             'showSaveCardToken' => $this->gateway->get_option('save_card_token'),
+            'showFinishOrderButton' => $this->gateway->get_option('show_finish_order_button', 'yes'),
             'cardTypeMode' => LknWcCieloHelper::is_pro_license_active()
                 ? $this->gateway->get_option('card_type_mode', 'both')
                 : 'both',

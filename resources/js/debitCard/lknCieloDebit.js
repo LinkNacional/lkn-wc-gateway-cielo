@@ -26,6 +26,7 @@ const lknDCClientIp = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.c
 const lknDCUserGuest = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.user_guest)
 const lknDCAuthMethod = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.authentication_method)
 const lknDCClient = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.client)
+const lknDCShowFinishOrderButton = lknDCsettingsCielo.showFinishOrderButton || 'yes'
 
 // Definir variável global para comunicar com o script 3DS
 window.lknCurrentCardType = lknDCCardTypeMode === 'only_debit' ? 'Debit' : 'Credit'
@@ -1062,7 +1063,7 @@ const lknDCContentCielo = props => {
     }
   })
     
-), /* #__PURE__ */React.createElement('div', {
+), lknDCShowFinishOrderButton !== 'no' ? /* #__PURE__ */React.createElement(React.Fragment, null, /* #__PURE__ */React.createElement('div', {
     style: {
       marginBottom: '25px',
       width: '100%'
@@ -1080,7 +1081,7 @@ const lknDCContentCielo = props => {
       margin: '2px',
       width: '100%'
     }
-  }), /* #__PURE__ */React.createElement('div', {
+  })) : null, /* #__PURE__ */React.createElement('div', {
     className: 'lkn-cielo-credit-debit-description',
     style: {
       width: '100%'
