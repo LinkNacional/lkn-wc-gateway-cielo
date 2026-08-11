@@ -1,6 +1,7 @@
-# 1.36.0 - 07/08/2026
+# 1.36.0 - 11/08/2026
 * Correção: Ajuste no warning referente ao tipo de cartão ao salvar metadados no gateway de pagamento exclusivo de crédito.
 * Novo: Opção para exibir ou ocultar o botão de finalizar pedido no gateway de pagamento de débito/crédito.
+* Correção: Ajuste na validação de carregamento do gateway de pagamento de débito no order-pay.
   
 # 1.35.1 - 04/08/2026
 * Ajuste: correção no sistema de 3DS.
