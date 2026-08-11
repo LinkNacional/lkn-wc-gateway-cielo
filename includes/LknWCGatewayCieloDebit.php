@@ -112,7 +112,11 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
 
         if (\WC()->cart && \WC()->cart->total <= 0) {
-            
+            // Allow on order-pay page (cart may be empty, order total is separate)
+            if (is_checkout_pay_page()) {
+                return true;
+            }
+
             if (class_exists('\WC_Subscriptions_Cart') && \WC_Subscriptions_Cart::cart_contains_subscription()) { 
                 return true; // Permite checkout de assinatura com trial gratuito 
             } 
