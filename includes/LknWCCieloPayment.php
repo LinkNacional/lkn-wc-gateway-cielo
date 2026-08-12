@@ -739,7 +739,7 @@ final class LknWCCieloPayment
     public function lkn_admin_notice(): void
     {
         // Verificar se usuario já dispensou a notificação
-        $notice_dismissed = get_option('lkn_fraud_notice_dismissed', 'no');
+        $notice_dismissed = get_option('lkn_cielo_fraud_notice_dismissed', 'no');
 
         if ($notice_dismissed === 'no' && (!file_exists(WP_PLUGIN_DIR . '/fraud-scam-detection-woocommerce/fraud-scam-detection-woocommerce.php') && !file_exists(WP_PLUGIN_DIR . '/fraud-and-scam-detection-for-woocommerce/fraud-scam-detection-woocommerce.php')) && (!is_plugin_active('integration-rede-for-woocommerce/integration-rede-for-woocommerce.php') && !is_plugin_active('woo-rede/integration-rede-for-woocommerce.php'))) {
             // Enfileirar script para dismiss da notificação
