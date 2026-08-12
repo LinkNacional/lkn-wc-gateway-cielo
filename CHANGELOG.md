@@ -1,3 +1,6 @@
+# 1.36.1 - 12/08/2026
+* Correção: Ajuste no sistema de geração de juros/parcelas.
+  
 # 1.36.0 - 11/08/2026
 * Correção: Ajuste no warning referente ao tipo de cartão ao salvar metadados no gateway de pagamento exclusivo de crédito.
 * Novo: Opção para exibir ou ocultar o botão de finalizar pedido no gateway de pagamento de débito/crédito.
