@@ -719,7 +719,7 @@ const lknDCContentCielo = props => {
         formData.append('action', 'lkn_update_payment_fees')
         formData.append('payment_method', 'lkn_cielo_debit')
         formData.append('installment', debitObject.lkn_cc_dc_installments)
-        formData.append('card_type', 'Credit') // Sempre força Credit na inicialização
+        formData.append('card_type', debitObject.lkn_cc_type) // Respeita card_type_mode (only_debit -> 'Debit')
         formData.append('nonce', window.lknCieloDebitConfig.fees_nonce)
 
         try {
