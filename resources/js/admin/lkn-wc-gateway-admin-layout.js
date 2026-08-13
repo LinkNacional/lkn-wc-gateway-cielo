@@ -836,8 +836,76 @@
     })
 
     $('#lknWcCieloCreditBlocksSettingsLayoutDiv').append(message).css('display', 'table')
+
+    // Aviso sobre juros na parcela 1x (aplicado após a geração do layout)
+    lknWcCieloAddOnexInterestWarning()
+
     document.dispatchEvent(new Event('lknWcCieloFinishedAdminLayout'))
   })
+
+  function lknWcCieloAddOnexInterestWarning() {
+    // Campo de juros da 1ª parcela (não o de desconto)
+    const onexInput = document.querySelector('input[id$="_1x"]')
+    if (!onexInput) return
+
+    const bodyDiv = onexInput.closest('.lkn-body-cart')
+    const fieldset = onexInput.closest('fieldset')
+    const headerDiv = fieldset ? fieldset.querySelector('.lkn-header-cart') : null
+    if (!bodyDiv || !headerDiv) return
+
+    // Evita aplicar duas vezes
+    if (fieldset.querySelector('.lkn-cielo-onex-warning')) return
+
+    // Ícone de info + balão customizado (hover no desktop, toque/clique no mobile)
+    const icon = document.createElement('span')
+    icon.className = 'lkn-cielo-info-icon lkn-cielo-onex-warning'
+    icon.setAttribute('tabindex', '0')
+    icon.setAttribute('role', 'button')
+    icon.setAttribute('aria-label', 'Informações sobre juros na primeira parcela')
+    icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'
+
+    const tooltip = document.createElement('span')
+    tooltip.className = 'lkn-cielo-info-tooltip'
+    tooltip.setAttribute('role', 'tooltip')
+    tooltip.textContent = 'No Brasil, adicionar juros ou cobrar um valor maior no pagamento à vista (em 1 parcela) no cartão de crédito vai contra a lei e é considerado uma prática abusiva pelo Código de Defesa do Consumidor e órgãos de proteção (como os Procons).'
+    icon.appendChild(tooltip)
+
+    icon.addEventListener('mouseenter', function () { icon.classList.add('is-open') })
+    icon.addEventListener('mouseleave', function () { icon.classList.remove('is-open') })
+    icon.addEventListener('click', function (e) {
+      e.stopPropagation()
+      icon.classList.toggle('is-open')
+    })
+    icon.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        icon.classList.toggle('is-open')
+      }
+    })
+
+    document.addEventListener('click', function (e) {
+      if (!icon.contains(e.target)) icon.classList.remove('is-open')
+    })
+
+    // Insere o ícone ao lado do título do card
+    const titleEl = headerDiv.querySelector('div')
+    if (titleEl) {
+      titleEl.appendChild(icon)
+    } else {
+      headerDiv.appendChild(icon)
+    }
+
+    // Recomendação junto à descrição do campo
+    const descP = bodyDiv.querySelector('p.description')
+    const recommendation = document.createElement('p')
+    recommendation.className = 'description lkn-cielo-onex-recommendation lkn-cielo-onex-warning'
+    recommendation.textContent = 'Recomendação: Para pagamento à vista é sugerido que aplique sem juros.'
+    if (descP) {
+      descP.insertAdjacentElement('afterend', recommendation)
+    } else {
+      bodyDiv.appendChild(recommendation)
+    }
+  }
 
   function lknWcCieloValidateMerchantInputs() {
     const urlParams = new URLSearchParams(window.location.search)
