@@ -1,3 +1,6 @@
+# 1.36.2 - 13/08/2026
+* Adicionado: Alerta para pagamento à vista com juros.
+  
 # 1.36.1 - 12/08/2026
 * Correção: Ajuste no sistema de geração de juros/parcelas.
   

@@ -117,6 +117,10 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 
 == Changelog ==
 
+= 1.36.2 =
+** 13/08/2026 **
+* Added: Alert for upfront payment with interest.
+
 = 1.36.1 =
 ** 12/08/2026 **
 * Fix: Adjustment to the interest/installment generation system.
