@@ -257,6 +257,13 @@ final class LknWCCieloPayment
         // Definir parcela na sessão
         WC()->session->set($payment_method . '_installment', $installment);
 
+        // Garante que o método de pagamento escolhido fique na sessão para o cálculo de fees.
+        // Necessário no checkout em Blocks (Store API), que não grava 'chosen_payment_method'
+        // durante a navegação — só na finalização do pedido. Como $payment_method já foi
+        // validado acima para ser apenas 'lkn_cielo_credit' ou 'lkn_cielo_debit', a fee
+        // continua restrita aos gateways Cielo.
+        WC()->session->set('chosen_payment_method', $payment_method);
+
         // Verificar e definir tipo de cartão se fornecido
         $response_data = array(
             'message' => 'Installment set successfully',
@@ -377,7 +384,7 @@ final class LknWCCieloPayment
                     switch ($interest_or_discount) {
                         case 'discount':
                             if (isset($settings['installment_discount']) && $settings['installment_discount'] === 'yes') {
-                                $installment = WC()->session->get($chosen_payment_method . '_installment');
+                                $installment = WC()->session->get($chosen_payment_method . '_installment', '1');
                                 if (isset($installment) && $installment > 0) {
                                     $installment_rate_key = $installment . 'x_discount';
                                     $installment_rate = isset($settings[$installment_rate_key]) ? $settings[$installment_rate_key] : 0;
@@ -417,7 +424,7 @@ final class LknWCCieloPayment
                             break;
                         case 'interest':
                             if (isset($settings['installment_interest']) && $settings['installment_interest'] === 'yes') {
-                                $installment = WC()->session->get($chosen_payment_method . '_installment');
+                                $installment = WC()->session->get($chosen_payment_method . '_installment', '1');
                                 if (isset($installment) && $installment > 0) {
                                     $installment_rate_key = $installment . 'x';
                                     $installment_rate = isset($settings[$installment_rate_key]) ? $settings[$installment_rate_key] : 0;
@@ -494,8 +501,8 @@ final class LknWCCieloPayment
             }
         }
 
-        // Obter a parcela selecionada da sessão
-        $installment = WC()->session->get($chosen_payment_method . '_installment');
+        // Obter a parcela selecionada da sessão (default 1x quando ainda não definida)
+        $installment = WC()->session->get($chosen_payment_method . '_installment', '1');
 
         if (!$installment || $installment <= 0) {
             return;
@@ -732,7 +739,7 @@ final class LknWCCieloPayment
     public function lkn_admin_notice(): void
     {
         // Verificar se usuario já dispensou a notificação
-        $notice_dismissed = get_option('lkn_fraud_notice_dismissed', 'no');
+        $notice_dismissed = get_option('lkn_cielo_fraud_notice_dismissed', 'no');
 
         if ($notice_dismissed === 'no' && (!file_exists(WP_PLUGIN_DIR . '/fraud-scam-detection-woocommerce/fraud-scam-detection-woocommerce.php') && !file_exists(WP_PLUGIN_DIR . '/fraud-and-scam-detection-for-woocommerce/fraud-scam-detection-woocommerce.php')) && (!is_plugin_active('integration-rede-for-woocommerce/integration-rede-for-woocommerce.php') && !is_plugin_active('woo-rede/integration-rede-for-woocommerce.php'))) {
             // Enfileirar script para dismiss da notificação

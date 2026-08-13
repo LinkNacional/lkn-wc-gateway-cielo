@@ -137,8 +137,12 @@ final class LknWcCieloCreditBlocks extends AbstractPaymentMethodType
         if (function_exists('WC') && WC()->session) {
             WC()->session->set('lkn_cielo_credit_installment', '1');
             WC()->session->set('lkn_cielo_debit_installment', '1');
-            // Força sempre Credit na inicialização para ambos gateways
-            WC()->session->set('lkn_cielo_debit_card_type', 'Credit');
+            // Não forçar 'Credit' cegamente: respeita o card_type_mode do gateway
+            // de débito para não aplicar taxa como crédito quando está em 'only_debit'.
+            $debit_settings = get_option('woocommerce_lkn_cielo_debit_settings', array());
+            $debit_card_type_mode = isset($debit_settings['card_type_mode']) ? $debit_settings['card_type_mode'] : 'both';
+            $debit_default_card_type = 'only_debit' === $debit_card_type_mode ? 'Debit' : 'Credit';
+            WC()->session->set('lkn_cielo_debit_card_type', $debit_default_card_type);
         }
 
         if (has_block('woocommerce/checkout') && !wp_script_is('lkn-installment-label', 'enqueued') && !wp_script_is('lkn-installment-label', 'done')) {

@@ -30,6 +30,11 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
 
         $is_pro_plugin_valid = $pro_plugin_active && $pro_license_active && $pro_plugin_version_valid;
 
+        // Tipo de cartão padrão conforme o card_type_mode do gateway (PRO).
+        // Em 'only_debit' a sessão NÃO deve iniciar como 'Credit', senão o
+        // cálculo de juros/desconto roda como se fosse crédito.
+        $default_card_type = 'only_debit' === $this->gateway->get_option('card_type_mode', 'both') ? 'Debit' : 'Credit';
+
         // Gate exclusivo para carregar os scripts de UI do layout moderno
         $checkout_layout = isset($this->settings['checkout_layout']) ? $this->settings['checkout_layout'] : 'no';
         $use_modern_layout = $is_pro_plugin_valid && $checkout_layout === 'yes';
@@ -43,7 +48,7 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
         $installmentArgs = apply_filters('lkn_wc_cielo_js_3ds_args', array('installment_min' => '5'));
 
         if (WC()->session) {
-            WC()->session->set('lkn_cielo_debit_card_type', 'Credit');
+            WC()->session->set('lkn_cielo_debit_card_type', $default_card_type);
         }
 
         // Recuperar parcela atual da sessão
@@ -194,8 +199,8 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             if (function_exists('WC') && WC()->session) {
                 WC()->session->set('lkn_cielo_credit_installment', '1');
                 WC()->session->set('lkn_cielo_debit_installment', '1');
-                // Força sempre Credit na inicialização para ambos gateways
-                WC()->session->set('lkn_cielo_debit_card_type', 'Credit');
+                // Respeita o card_type_mode: em 'only_debit' inicializa como 'Debit'
+                WC()->session->set('lkn_cielo_debit_card_type', $default_card_type);
             }
         }
 
