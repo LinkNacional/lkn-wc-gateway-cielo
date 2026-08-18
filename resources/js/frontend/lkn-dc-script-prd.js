@@ -490,3 +490,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 })
+
+// Botão custom "Confirm Payment" no layout padrão (shortcode)
+if (typeof jQuery !== 'undefined') {
+  jQuery(document.body).on('click', '#cielo-debit-submit-btn', function (e) {
+    e.preventDefault()
+    const placeOrder = document.getElementById('place_order')
+    if (placeOrder && !placeOrder.disabled) {
+      placeOrder.click()
+    }
+  })
+}
