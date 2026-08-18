@@ -1,3 +1,6 @@
+# 1.36.3 - 18/08/2026
+* Correção: Ajuste na geração do token de autenticação 3DS.
+
 # 1.36.2 - 13/08/2026
 * Adicionado: Alerta para pagamento à vista com juros.
   

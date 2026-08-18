@@ -1,6 +1,6 @@
 ---
 name: prepare-release
-description: Prepara release do lkn-wc-gateway-cielo: atualiza README.txt, CHANGELOG.md, cabeçalho PHP, constante LKN_WC_CIELO_VERSION e DEPLOY_TAG dos workflows baseado no git log
+description: Prepara release do lkn-wc-gateway-cielo: atualiza README.txt, CHANGELOG.md, cabeçalho PHP, constante LKN_WC_CIELO_VERSION, DEPLOY_TAG dos workflows e a versão no AGENTS.md baseado no git log
 ---
 
 # prepare-release
@@ -35,7 +35,7 @@ Só se não for possível ler o diff, use os comentários dos commits como pista
 
 ### 3. Atualizar TODOS os arquivos com versão
 
-A versão aparece em **6 locais** espalhados por **6 arquivos**. Atualize todos:
+A versão aparece em **7 locais** espalhados por **7 arquivos**. Atualize todos:
 
 #### 3a. `README.txt` (ATENÇÃO: maiúsculo, NÃO é `readme.txt`)
 - `Stable tag:` → nova versão
@@ -74,6 +74,9 @@ A versão aparece em **6 locais** espalhados por **6 arquivos**. Atualize todos:
 #### 3f. `.github/workflows/wordpressRelease.yml`
 - `DEPLOY_TAG: "NOVA_VERSION"`
 
+#### 3g. `AGENTS.md`
+- Atualizar a linha de rodapé `*Última atualização: análise da vX.Y.Z — ...*` para a nova versão (substituir só o número, preservando o restante da linha).
+
 ### 4. Validação final
 Rodar grep com a versão **antiga** para confirmar que não restou nenhuma ocorrência fora do esperado:
 ```
@@ -81,7 +84,7 @@ grep -r "VERSAO_ANTIGA" --include="*.php" --include="*.md" --include="*.txt" --i
 ```
 O esperado: `README.txt` e `CHANGELOG.md` ainda contêm a versão antiga **apenas** nas entradas antigas do Changelog (isso é correto). Qualquer outro arquivo retornando a versão antiga é **erro** e deve ser corrigido.
 
-Depois, grep com a versão **nova** para confirmar que aparece em todos os **6 locais**:
+Depois, grep com a versão **nova** para confirmar que aparece em todos os **7 locais**:
 ```
 grep -rn "NOVA_VERSAO" --include="*.php" --include="*.md" --include="*.txt" --include="*.yml" .
 ```
@@ -99,3 +102,4 @@ grep -rn "NOVA_VERSAO" --include="*.php" --include="*.md" --include="*.txt" --in
 - **Requires at least / Requires PHP**: devem existir **tanto** no cabeçalho PHP (`lkn-wc-gateway-cielo.php`) quanto no `README.txt`, com valores idênticos (WP mínimo `5.8`, PHP mínimo `8.2`).
 - **Datas de release**: fuso `America/Sao_Paulo`. Tanto `README.txt` quanto `CHANGELOG.md` usam `dd/mm/aaaa`.
 - **Assets do WP.org**: ficam em `resources/assets/wordpressAssets` (referenciado no `wordpressRelease.yml` como `ASSETS_DIR`).
+- **`AGENTS.md`**: a versão aparece apenas na linha de rodapé `*Última atualização: análise da vX.Y.Z — ...*` no final do arquivo. Atualize o número nessa linha a cada release (é o único ponto de versão no AGENTS.md).
