@@ -252,6 +252,14 @@ final class LknWCGatewayCieloEndpoint
         $LknWCGatewayCieloDebitClass = new LknWCGatewayCieloDebit();
         $acessToken = $LknWCGatewayCieloDebitClass->generate_debit_auth_token();
 
+        if (empty($acessToken) || ! is_array($acessToken) || empty($acessToken['access_token'])) {
+            return new WP_Error(
+                'token_generation_failed',
+                __('Auth token generation failed.', 'lkn-wc-gateway-cielo'),
+                array('status' => 502)
+            );
+        }
+
         return new WP_REST_Response($acessToken, 200);
     }
 
