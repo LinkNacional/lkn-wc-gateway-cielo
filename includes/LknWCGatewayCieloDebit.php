@@ -418,7 +418,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'label'       => __('Show "Finish order" button at checkout', 'lkn-wc-gateway-cielo'),
                 'description' => __('Displays a custom finish-order button at checkout (Blocks and modern layout). Uncheck to use only the native WooCommerce button.', 'lkn-wc-gateway-cielo'),
                 'desc_tip'    => __('Disable if your theme already provides a suitable checkout button.', 'lkn-wc-gateway-cielo'),
-                'default'     => 'yes',
+                'default'     => 'no',
                 'custom_attributes' => array(
                     'data-title-description' => __('Controls the display of the custom finish-order button at checkout.', 'lkn-wc-gateway-cielo'),
                 ),
