@@ -446,4 +446,4 @@ composer test:unit   # Apenas testes unitários
 
 ---
 
-*Última atualização: análise da v1.36.3 — 2026. Este documento reflete os padrões observados no código e as correções de anti-padrões identificados.*
+*Última atualização: análise da v1.37.0 — 2026. Este documento reflete os padrões observados no código e as correções de anti-padrões identificados.*
