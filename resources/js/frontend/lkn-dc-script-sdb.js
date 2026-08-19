@@ -522,20 +522,12 @@ document.addEventListener('click', function (event) {
   }
   lknCustomSubmitLockedUntil = Date.now() + 15000
 
-  // Desabilita e aplica efeito cinza.
+  // Desabilita o botão; o efeito cinza é aplicado via CSS (#cielo-debit-submit-btn:disabled).
   btn.disabled = true
-  btn.style.backgroundColor = '#6c757d'
-  btn.style.borderColor = '#6c757d'
-  btn.style.cursor = 'not-allowed'
-  btn.style.opacity = '0.65'
 
   // Reabilita o botão após o período de trava.
   setTimeout(function () {
     btn.disabled = false
-    btn.style.backgroundColor = ''
-    btn.style.borderColor = ''
-    btn.style.cursor = ''
-    btn.style.opacity = ''
   }, 15000)
 
   var placeOrder = document.getElementById('place_order')

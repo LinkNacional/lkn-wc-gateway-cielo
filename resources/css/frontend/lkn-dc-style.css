@@ -34,3 +34,15 @@
     text-align: center;
     margin-bottom: 20px;
 }
+
+.lkn-debit-submit-section {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+#cielo-debit-submit-btn:disabled {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    cursor: not-allowed;
+    opacity: 0.65;
+}

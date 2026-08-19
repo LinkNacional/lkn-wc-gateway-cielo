@@ -515,7 +515,7 @@ if (! defined('ABSPATH')) {
 
     <!-- Submit Button -->
     <?php if ($this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
-    <div class="lkn-debit-submit-section" style="text-align: center; margin-bottom: 16px;">
+    <div class="lkn-debit-submit-section">
         <button type="button" id="cielo-debit-submit-btn" class="button alt wc-forward">
             <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
         </button>
