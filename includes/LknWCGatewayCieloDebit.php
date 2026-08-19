@@ -418,7 +418,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'label'       => __('Show "Finish order" button at checkout', 'lkn-wc-gateway-cielo'),
                 'description' => __('Displays a custom finish-order button at checkout (Blocks and modern layout). Uncheck to use only the native WooCommerce button.', 'lkn-wc-gateway-cielo'),
                 'desc_tip'    => __('Disable if your theme already provides a suitable checkout button.', 'lkn-wc-gateway-cielo'),
-                'default'     => 'yes',
+                'default'     => 'no',
                 'custom_attributes' => array(
                     'data-title-description' => __('Controls the display of the custom finish-order button at checkout.', 'lkn-wc-gateway-cielo'),
                 ),
@@ -829,7 +829,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
         
         // Setup 3DS and other scripts
-        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js?ver=' . $this->version));
+        $mpiScript = ('production' === $env) ? 'BP.Mpi.3ds20-prd.min.js' : 'BP.Mpi.3ds20-sdb.min.js';
+        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/' . $mpiScript . '?ver=' . $this->version));
         wp_localize_script('lkn-dc-script', 'lknDCScriptAllowCardIneligible', array('allow' => $this->get_option('allow_card_ineligible', 'no')));
         wp_localize_script('lkn-dc-script', 'lknDCCardTypeMode', array('mode' => $card_type_mode_gateway));
         wp_localize_script('lkn-dc-script', 'lknCieloRestSettings', array(

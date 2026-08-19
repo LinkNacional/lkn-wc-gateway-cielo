@@ -498,3 +498,44 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 })
+
+// Botão custom "Confirm Payment" no layout padrão (shortcode)
+// Delegação em `document` (sem jQuery): o listener fica no document, que é
+// persistente, então sobrevive à recriação do formulário pelo updated_checkout.
+var lknCustomSubmitLockedUntil = 0
+
+document.addEventListener('click', function (event) {
+  var target = event.target
+  var btn = (target && typeof target.closest === 'function')
+    ? target.closest('#cielo-debit-submit-btn')
+    : null
+
+  if (!btn) {
+    return
+  }
+
+  event.preventDefault()
+
+  // Trava global por 15s: evita múltiplos cliques mesmo se o botão for recriado.
+  if (Date.now() < lknCustomSubmitLockedUntil) {
+    return
+  }
+  lknCustomSubmitLockedUntil = Date.now() + 15000
+
+  // Desabilita o botão; o efeito cinza é aplicado via CSS (#cielo-debit-submit-btn:disabled).
+  btn.disabled = true
+
+  // Reabilita o botão após o período de trava.
+  setTimeout(function () {
+    btn.disabled = false
+  }, 15000)
+
+  var placeOrder = document.getElementById('place_order')
+
+  // Reaproveita o mesmo fluxo do botão nativo #place_order (3DS -> submit).
+  if (typeof lknDCProccessButton === 'function') {
+    lknDCProccessButton()
+  } else if (placeOrder) {
+    placeOrder.click()
+  }
+})

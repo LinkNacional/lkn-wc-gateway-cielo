@@ -64,7 +64,8 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
         }
         
         // Setup 3DS and other scripts
-        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js?ver=' . LKN_WC_CIELO_VERSION));
+        $mpiScript = ('production' === $env) ? 'BP.Mpi.3ds20-prd.min.js' : 'BP.Mpi.3ds20-sdb.min.js';
+        wp_localize_script('lkn-dc-script', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/' . $mpiScript . '?ver=' . LKN_WC_CIELO_VERSION));
         wp_localize_script('lkn-dc-script', 'lknDCScriptAllowCardIneligible', array('allow' => $this->gateway->get_option('allow_card_ineligible', 'no')));
         wp_localize_script('lkn-dc-script', 'lknCieloRestSettings', array(
             'rest_url'  => esc_url_raw(rest_url()),
@@ -161,8 +162,18 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             'default_card' => $defaultCard
         ));
 
+        // Ícones das bandeiras usados nos botões de cartões salvos (React).
+        // Deve estar sempre disponível para o bloco, independente do layout.
+        wp_localize_script('lkn_cielo_debit-blocks-integration', 'lknCieloDebitCardIcons', array(
+            'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
+            'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
+            'amex'       => plugin_dir_url(__FILE__) . '../resources/img/amex-icon.svg',
+            'elo'        => plugin_dir_url(__FILE__) . '../resources/img/elo-icon.svg',
+            'other_card' => plugin_dir_url(__FILE__) . '../resources/img/other-card.svg'
+        ));
+
         // Adicionar os mesmos localize scripts da versão clássica
-        wp_localize_script('lkn_cielo_debit-blocks-integration', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js?ver=' . LKN_WC_CIELO_VERSION));
+        wp_localize_script('lkn_cielo_debit-blocks-integration', 'lknDCDirScript3DSCieloShortCode', array('url' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/' . $mpiScript . '?ver=' . LKN_WC_CIELO_VERSION));
         wp_localize_script('lkn_cielo_debit-blocks-integration', 'lknDCScriptAllowCardIneligible', array('allow' => $this->gateway->get_option('allow_card_ineligible', 'no')));
 
         if (function_exists('wp_set_script_translations')) {
@@ -235,8 +246,10 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
     {
         if ($this->gateway->get_option('env') == 'sandbox') {
             $dirScriptConfig3DS = LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/lkn-dc-script-sdb.js';
+            $dirScript3DS = LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20-sdb.min.js';
         } else {
             $dirScriptConfig3DS = LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/lkn-dc-script-prd.js';
+            $dirScript3DS = LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20-prd.min.js';
         }
 
         $installmentMinAmount = apply_filters('lkn_wc_cielo_set_installment_min_amount', '5,00', $this->gateway);
@@ -272,7 +285,7 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             'activeInstallment' => $this->gateway->get_option('installment_payment'),
             'activeDiscount' => $this->gateway->get_option('installment_discount', 'no'),
             'interestOrDiscount' => $this->gateway->get_option('interest_or_discount', 'no'),
-            'dirScript3DS' => LKN_WC_GATEWAY_CIELO_URL . 'resources/js/debitCard/BP.Mpi.3ds20.min.js',
+            'dirScript3DS' => $dirScript3DS,
             'dirScriptConfig3DS' => $dirScriptConfig3DS,
             'totalCart' => $this->gateway->lknGetCartTotal(),
             'nonceCieloDebit' => wp_create_nonce('nonce_lkn_cielo_debit'),

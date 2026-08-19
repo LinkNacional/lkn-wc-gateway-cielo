@@ -1,3 +1,6 @@
+# 1.37.0 - 18/08/2026
+* Ajuste: Separação do script MPI 3DS por ambiente (produção/sandbox).
+
 # 1.36.3 - 18/08/2026
 * Correção: Ajuste na geração do token de autenticação 3DS.
 
