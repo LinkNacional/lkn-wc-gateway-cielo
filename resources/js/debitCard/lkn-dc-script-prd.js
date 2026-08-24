@@ -1,6 +1,26 @@
 /* eslint-disable no-undef */
 // Implements script internationalization
 
+// O bundle do bloco (lknCieloDebitCompiled.js) NÃO esconde o botão nativo
+// "Place order" do WooCommerce blocks. Esse botão envia o checkout direto,
+// sem executar o 3DS (ECI/CAVV/XID vazios). Interceptamos o clique REAL do
+// usuário nesse botão e executamos o fluxo 3DS antes de deixar o envio seguir.
+document.addEventListener('click', function (e) {
+  var native = e.target && e.target.closest && e.target.closest('.wc-block-components-checkout-place-order-button')
+  if (!native) {
+    return
+  }
+
+  // Cliques sintéticos (disparados pelo próprio fluxo 3DS via dispatchEvent)
+  // têm isTrusted === false e devem passar direto. Só interceptamos o clique
+  // real do usuário no botão nativo.
+  if (e.isTrusted === true && typeof lknDCProccessButton === 'function') {
+    e.preventDefault()
+    e.stopPropagation()
+    lknDCProccessButton()
+  }
+}, true)
+
 function bpmpi_config () {
   return {
     onReady: function () {
@@ -158,13 +178,29 @@ function setIfExists (id, value) {
 // Função para processar cartão de débito (com 3DS)
 function lknProcessDebitCard () {
   try {
-    var cardNumber = document.getElementById('lkn_dcno').value.replace(/\D/g, '')
+    var dcNoEl = document.getElementById('lkn_dcno')
+    var cardNumber = dcNoEl ? dcNoEl.value.replace(/\D/g, '') : ''
 
-    // Se não há campo de cartão visível, não precisa de 3DS — submete direto
-    if (!document.getElementById('lkn_dcno') || !cardNumber || !document.getElementById('lkn_dcno').offsetParent) {
+    // No fluxo de blocos (Gutenberg) esta função só é executada depois que o
+    // React valida os campos do cartão. Removida a checagem de offsetParent /
+    // visibilidade, que fazia o pedido ser enviado sem 3DS (ECI/CAVV/XID
+    // vazios) e resultava em "Autenticação Cielo 3DS 2.2 inválida".
+    if (!dcNoEl || !cardNumber) {
       var btn = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]
       if (btn) btn.click()
       return;
+    }
+
+    // Garante que o tipo enviado ao 3DS (bpmpi_paymentmethod) corresponda ao
+    // tipo de cartão selecionado. O bundle compilado fixa o valor em "Debit".
+    var cardTypeSelect = document.getElementById('lkn_cc_type') ||
+      document.querySelector('.lkn-credit-debit-card-type-select select') ||
+      document.querySelector('.lkn-select-type select')
+    var paymentMethodEl = document.querySelector('.bpmpi_paymentmethod')
+    var cardType = (cardTypeSelect && cardTypeSelect.value) ||
+      (paymentMethodEl && paymentMethodEl.value) || 'Debit'
+    if (paymentMethodEl) {
+      paymentMethodEl.value = cardType
     }
 
     var cardHolder = document.getElementById('lkn_dc_cardholder_name')

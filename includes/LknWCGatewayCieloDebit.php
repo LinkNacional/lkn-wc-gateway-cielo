@@ -1601,20 +1601,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
                         throw new Exception(esc_attr($message));
                     }
-                    if (empty($xid) && $this->get_option('allow_card_ineligible', 'no') == 'no') {
-                        $message = __('Invalid Cielo 3DS 2.2 authentication.', 'lkn-wc-gateway-cielo');
-
-                        // Salvar metadados da transação com dados customizados para erro de autenticação 3DS
-                        $customErrorResponse = LknWcCieloHelper::createCustomErrorResponse(
-                            401,
-                            'BP900',
-                            'Operation failure'
-                        );
-                        LknWcCieloHelper::saveTransactionMetadata($order, $customErrorResponse, $cardNum, $cardExpShort, $cardName, $installments, $amount, $currency, $provider, $merchantId, $merchantSecret, $merchantOrderId, $order_id, $capture, null, $cardType, 'lkn_dc_cvc', $this, $xid, $cavv, $eci, $version, $refId);
-                        $order->save();
-
-                        throw new Exception(esc_attr($message));
-                    }
+                    // No 3DS 2.2 o XID não é retornado (campo legado do 3DS 1.0).
+                    // A autenticação é válida quando CAVV e ECI estão presentes.
+                    // Exigir XID aqui fazia TODA autenticação 2.2 ser recusada.
 
                     $args['headers'] = array(
                         'Content-Type' => 'application/json',
