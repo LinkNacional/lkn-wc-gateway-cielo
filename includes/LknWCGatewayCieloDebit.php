@@ -593,6 +593,23 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
     {
         try {
             $env = $this->get_option('env');
+
+            // Reutiliza um access token 3DS ainda válido da sessão. Gera um novo
+            // apenas quando não existe ou está expirado. Isso evita chamar
+            // /v2/auth/token/ a cada re-render do checkout (updated_checkout), o
+            // que causava rate-limit / troca de ReferenceId e resultava em 401
+            // intermitente no /v2/3ds/init.
+            $sessionKey = 'lkn_cielo_3ds_access_token_' . $env;
+            if (WC()->session) {
+                $cached = WC()->session->get($sessionKey, null);
+                if (is_array($cached) && ! empty($cached['access_token']) && ! empty($cached['expires_at']) && $cached['expires_at'] > time()) {
+                    return array(
+                        'access_token' => $cached['access_token'],
+                        'expires_in' => max(1, (int) ($cached['expires_at'] - time())),
+                    );
+                }
+            }
+
             $clientId = $this->get_option('client_id');
             $clientSecret = $this->get_option('client_secret');
             $url = ('sandbox' === $env) ? 'https://mpisandbox.braspag.com.br/v2/auth/token/' : 'https://mpi.braspag.com.br/v2/auth/token/';
@@ -630,9 +647,20 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $responseDecoded = json_decode($response['body']);
 
             if (isset($responseDecoded->access_token)) {
+                $expiresIn = isset($responseDecoded->expires_in) ? (int) $responseDecoded->expires_in : 1200;
+                // Margem de segurança de 60s para não usar token prestes a expirar.
+                $expiresIn = max(1, $expiresIn - 60);
+
+                if (WC()->session) {
+                    WC()->session->set($sessionKey, array(
+                        'access_token' => $responseDecoded->access_token,
+                        'expires_at'   => time() + $expiresIn,
+                    ));
+                }
+
                 return array(
                     'access_token' => $responseDecoded->access_token,
-                    'expires_in' => $responseDecoded->expires_in,
+                    'expires_in' => $expiresIn,
                 );
             }
         } catch (Exception $e) {
@@ -663,9 +691,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $product = $cart_item['data'];
             $total += $product->get_price() * $cart_item['quantity'];
         }
-        return number_format($total, 2, '', '');
-
-        return 0;
+        // Valor em centavos sem zero à esquerda (ex.: R$ 0,10 -> "10").
+        return (string) (int) round($total * 100);
     }
 
     /**
@@ -915,8 +942,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
         $activeInstallment = $this->get_option('installment_payment');
         $total_cart = number_format($this->get_subtotal_plus_shipping(), 2, '.', '');
-        // Para 3DS 2.2, o valor deve estar em centavos (sem vírgula decimal)
-        $total_cart_3ds = number_format($this->get_subtotal_plus_shipping(), 2, '', '');
+        // Para 3DS 2.2, o valor deve estar em centavos, sem zero à esquerda.
+        $total_cart_3ds = (string) (int) round($this->get_subtotal_plus_shipping() * 100);
         $fees_total = number_format($this->get_fees_total(), 2, '.', '');
         $taxes_total = number_format($this->get_taxes_total(), 2, '.', '');
         $discounts_total = number_format($this->get_discounts_total(), 2, '.', '');
@@ -925,6 +952,22 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             : array('access_token' => '', 'expires_in' => 0);
         $url = get_page_link();
         $nonce = wp_create_nonce('nonce_lkn_cielo_debit');
+
+        // Order number do 3DS precisa ser ESTÁVEL entre o /v2/3ds/init e o
+        // /v2/3ds/enroll. Antes era gerado com uniqid() direto no template, o que
+        // mudava a cada re-render (updated_checkout) e fazia o enroll falhar com
+        // 400 "Invalid enrollment request" por não bater com o token do init.
+        $order_number_3ds = '';
+        if (WC()->session) {
+            $order_number_3ds = (string) WC()->session->get('lkn_cielo_3ds_order_number', '');
+        }
+        if ('' === $order_number_3ds) {
+            $order_number_3ds = uniqid();
+            if (WC()->session) {
+                WC()->session->set('lkn_cielo_3ds_order_number', $order_number_3ds);
+            }
+        }
+
         $placeholder = $this->get_option('placeholder', 'no');
         $placeholderEnabled = false;
         $noLoginCheckout = isset($_GET['pay_for_order']) ? sanitize_text_field(wp_unslash($_GET['pay_for_order'])) : 'false';
@@ -975,8 +1018,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 $order_id = wc_get_order_id_by_order_key($key);
                 $order = wc_get_order($order_id);
                 $total_cart = number_format($order->get_total(), 2, '.', '');
-                // Para 3DS 2.2, o valor deve estar em centavos (sem vírgula decimal)
-                $total_cart_3ds = number_format($order->get_total(), 2, '', '');
+                // Para 3DS 2.2, o valor deve estar em centavos, sem zero à esquerda.
+                $total_cart_3ds = (string) (int) round($order->get_total() * 100);
             }
         }
 
@@ -1051,6 +1094,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $discounts_total = $discounts_total;
         $total_cart = $total_cart;
         $total_cart_3ds = $total_cart_3ds;
+        $order_number_3ds = $order_number_3ds;
         $installments = $installments;
         $nonce = $nonce;
         $url = $url;
@@ -1601,20 +1645,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
                         throw new Exception(esc_attr($message));
                     }
-                    if (empty($xid) && $this->get_option('allow_card_ineligible', 'no') == 'no') {
-                        $message = __('Invalid Cielo 3DS 2.2 authentication.', 'lkn-wc-gateway-cielo');
-
-                        // Salvar metadados da transação com dados customizados para erro de autenticação 3DS
-                        $customErrorResponse = LknWcCieloHelper::createCustomErrorResponse(
-                            401,
-                            'BP900',
-                            'Operation failure'
-                        );
-                        LknWcCieloHelper::saveTransactionMetadata($order, $customErrorResponse, $cardNum, $cardExpShort, $cardName, $installments, $amount, $currency, $provider, $merchantId, $merchantSecret, $merchantOrderId, $order_id, $capture, null, $cardType, 'lkn_dc_cvc', $this, $xid, $cavv, $eci, $version, $refId);
-                        $order->save();
-
-                        throw new Exception(esc_attr($message));
-                    }
+                    // No 3DS 2.2 o XID não é retornado (campo legado do 3DS 1.0).
+                    // A autenticação é válida quando CAVV e ECI estão presentes.
+                    // Exigir XID aqui fazia TODA autenticação 2.2 ser recusada.
 
                     $args['headers'] = array(
                         'Content-Type' => 'application/json',

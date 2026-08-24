@@ -36,6 +36,9 @@
 }
 
 .lkn-debit-submit-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     margin-bottom: 16px;
 }
