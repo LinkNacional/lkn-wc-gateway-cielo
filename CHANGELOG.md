@@ -1,3 +1,9 @@
+# 1.37.1 - 24/08/2026
+* Correção: Ajuste no sistema 3DS no checkout por shortcode/clássico e em blocos (Gutenberg).
+* Correção: Ajuste na exibição das bandeiras dos cartões no checkout em blocos (Gutenberg).
+* Ajuste: Correções no botão de finalizar pagamento (opção padrão e centralização).
+* Ajuste: Remoção de CSS inline.
+
 # 1.37.0 - 18/08/2026
 * Ajuste: Separação do script MPI 3DS por ambiente (produção/sandbox).
 
