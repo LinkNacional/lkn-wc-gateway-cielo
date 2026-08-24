@@ -5,11 +5,14 @@ let lkn3DSCompleted = false;
 
 // Provider detectado via BIN — usado para pular MPI se bandeira não tem 3DS
 let lknDetectedCardProvider = '';
+// Tipo do cartão detectado via BIN: 'Debit' | 'Credit' (vazio = indeterminado)
+let lknDetectedCardType = '';
 
 // Função para resetar o status 3DS
 function resetLkn3DSStatus() {
   lkn3DSCompleted = false;
   lknDetectedCardProvider = '';
+  lknDetectedCardType = '';
   
   // Reconfigurar o botão para tipo button (caso tenha sido alterado)
   const btnSubmit = document.getElementById('place_order');
@@ -127,6 +130,13 @@ function setupErrorDetection() {
             // Guardar provider detectado para pré-filtro 3DS
             if (response.brand) {
               lknDetectedCardProvider = response.brand.charAt(0).toUpperCase() + response.brand.slice(1);
+            }
+
+            // Guardar o tipo real do cartão (Debit/Credit) para o paymentmethod do 3DS
+            if (response.cardType === 'Debito') {
+              lknDetectedCardType = 'Debit'
+            } else if (response.cardType === 'Credito') {
+              lknDetectedCardType = 'Credit'
             }
 
             const options = document.querySelectorAll('#lkn_cc_type option')
@@ -414,31 +424,10 @@ function lknDCProccessButton() {
       javaEnabledEl.value = (typeof navigator.javaEnabled === 'function' && navigator.javaEnabled()) ? 'true' : 'false'
     }
 
-    // Preencher campos billto com fallback DOM: billing → shipping → custom
-    // Phone com 3 camadas: billing-phone → shipping-phone → custom-phone
-    function getDomValueWithFallback(ids) {
-      for (var i = 0; i < ids.length; i++) {
-        var el = document.getElementById(ids[i])
-        if (el && el.value && el.value.trim() !== '') {
-          return el.value.trim()
-        }
-      }
-      return ''
-    }
-    function setIfExists(id, value) {
-      var el = document.getElementById(id)
-      if (el) el.value = value
-    }
-    setIfExists('lkn_bpmpi_billto_phonenumber', getDomValueWithFallback(['billing-phone', 'shipping-phone', 'custom-phone']))
-    setIfExists('lkn_bpmpi_billto_street1', getDomValueWithFallback(['billing-address_1', 'shipping-address_1']))
-    setIfExists('lkn_bpmpi_billto_street2', getDomValueWithFallback(['billing-address_2', 'shipping-address_2']))
-    setIfExists('lkn_bpmpi_billto_city', getDomValueWithFallback(['billing-city', 'shipping-city']))
-    setIfExists('lkn_bpmpi_billto_state', getDomValueWithFallback(['billing-state', 'shipping-state']))
-    setIfExists('lkn_bpmpi_billto_zipcode', getDomValueWithFallback(['billing-postcode', 'shipping-postcode']))
-    setIfExists('lkn_bpmpi_billto_country', getDomValueWithFallback(['billing-country', 'shipping-country']))
-    setIfExists('lkn_bpmpi_billto_email', getDomValueWithFallback(['billing-email', 'shipping-email']))
-    setIfExists('lkn_bpmpi_billto_contactname', getDomValueWithFallback(['billing-first_name']))
-    // Se o email do DOM não foi encontrado, manter o valor já existente no campo hidden
+    // Não preencher billing via DOM (fallback JS). Os campos bpmpi_billto_*
+    // permanecem como o template PHP renderizou: preenchidos a partir do
+    // user_meta para usuário logado com perfil completo; vazios para convidado.
+    // Comportamento idêntico ao fluxo Gutenberg.
 
     // Pré-filtro por BIN: pular MPI se bandeira não suporta 3DS
     var supported3DSBrands = ['Visa', 'Mastercard', 'Elo', 'Amex', 'American Express'];
@@ -458,6 +447,28 @@ function lknDCProccessButton() {
         btnSkip.click();
       }
       return;
+    }
+
+    // O gateway aceita crédito E débito. O bpmpi_paymentmethod deve refletir o
+    // tipo REAL da operação: usa o tipo detectado via BIN quando a API
+    // consegue distinguir (Debito/Credito); caso contrário (cartão "Multiplo"),
+    // respeita o que o cliente selecionou no select lkn_cc_type.
+    var cardTypeSelect = document.getElementById('lkn_cc_type')
+    var paymentMethodEl = document.querySelector('.bpmpi_paymentmethod')
+    var cardType = (lknDetectedCardType === 'Credit' || lknDetectedCardType === 'Debit')
+      ? lknDetectedCardType
+      : ((cardTypeSelect && cardTypeSelect.value) || (paymentMethodEl && paymentMethodEl.value) || 'Credit')
+    if (paymentMethodEl) {
+      paymentMethodEl.value = cardType
+    }
+
+    // Reaplica o orderNumber congelado no load, garantindo que o enroll use o
+    // MESMO valor que o /v2/3ds/init usou (evita 400 por divergência).
+    if (window.__lknOrderNumber3ds) {
+      const orderNumberEl = document.querySelector('.bpmpi_ordernumber')
+      if (orderNumberEl) {
+        orderNumberEl.value = window.__lknOrderNumber3ds
+      }
     }
 
     bpmpi_authenticate()
@@ -488,14 +499,70 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function lknWcGatewayCieloLoadScript() {
     const scriptUrlBpmpi = lknDCDirScript3DSCieloShortCode.url
-    const existingScriptBpmpi = document.querySelector(`script[src="${scriptUrlBpmpi}"]`)
 
-    if (!existingScriptBpmpi) {
-      const scriptBpmpi = document.createElement('script')
-      scriptBpmpi.src = scriptUrlBpmpi
-      scriptBpmpi.async = true
-      document.body.appendChild(scriptBpmpi)
+    if (window.__lknBpmpiLoadStarted) {
+      return
     }
+    window.__lknBpmpiLoadStarted = true
+
+    // Congela o orderNumber que o /v2/3ds/init vai usar. O campo pode ser
+    // re-renderizado pelo updated_checkout (cache de página), fazendo o enroll
+    // enviar um orderNumber diferente do init e resultando em 400.
+    const orderNumberEl = document.querySelector('.bpmpi_ordernumber')
+    if (orderNumberEl && orderNumberEl.value) {
+      window.__lknOrderNumber3ds = orderNumberEl.value
+    }
+
+    const appendBpmpi = function () {
+      if (!document.querySelector(`script[src="${scriptUrlBpmpi}"]`)) {
+        const scriptBpmpi = document.createElement('script')
+        scriptBpmpi.src = scriptUrlBpmpi
+        scriptBpmpi.async = true
+        document.body.appendChild(scriptBpmpi)
+      }
+    }
+
+    // O access token embutido no HTML pode estar expirado (cache de página),
+    // o que faz o /v2/3ds/init devolver 401. Busca um token fresco via REST
+    // antes de carregar o BP.Mpi (igual ao fluxo Gutenberg).
+    const restRoot = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.rest_url)
+      ? lknCieloRestSettings.rest_url
+      : null
+    const nonce = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.nonce)
+      ? lknCieloRestSettings.nonce
+      : ''
+
+    if (!restRoot) {
+      appendBpmpi()
+      return
+    }
+
+    fetch(restRoot + 'lknWCGatewayCielo/getAcessToken', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'X-WP-Nonce': nonce
+      }
+    })
+      .then(function (res) { return res.json() })
+      .then(function (data) {
+        if (data && data.access_token) {
+          const tokenEl = document.getElementsByClassName('bpmpi_accesstoken')[0]
+          if (tokenEl) {
+            tokenEl.value = data.access_token
+          }
+          if (data.expires_in) {
+            const expEl = document.getElementById('expires_in')
+            if (expEl) {
+              expEl.value = data.expires_in
+            }
+          }
+        }
+        appendBpmpi()
+      })
+      .catch(function () {
+        appendBpmpi()
+      })
   }
 })
 

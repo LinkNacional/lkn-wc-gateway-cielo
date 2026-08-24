@@ -130,7 +130,7 @@ if (!defined('ABSPATH')) {
         <input type="hidden" name="lkn_auth_suppresschallenge" class="bpmpi_auth_suppresschallenge" value="false" />
         <input type="hidden" name="lkn_access_token" class="bpmpi_accesstoken" value="<?php echo esc_attr($access_token['access_token']); ?>" />
         <input type="hidden" name="lkn_expires_in" id="expires_in" value="<?php echo esc_attr($access_token['expires_in']); ?>" />
-        <input type="hidden" size="50" name="lkn_order_number" class="bpmpi_ordernumber" value="<?php echo esc_attr(uniqid()); ?>" />
+        <input type="hidden" size="50" name="lkn_order_number" class="bpmpi_ordernumber" value="<?php echo esc_attr(isset($order_number_3ds) && '' !== $order_number_3ds ? $order_number_3ds : uniqid()); ?>" />
         <input type="hidden" name="lkn_currency" class="bpmpi_currency" value="BRL" />
         <input type="hidden" size="50" id="lkn_cielo_3ds_value" name="lkn_amount" class="bpmpi_totalamount" value="<?php echo esc_attr($total_cart_3ds); ?>" />
         <input type="hidden" size="2" name="lkn_installments" class="bpmpi_installments" value="1" />
@@ -154,7 +154,7 @@ if (!defined('ABSPATH')) {
         <input type="hidden" size="8" id="lkn_bpmpi_billto_zipcode" name="lkn_card_billto_zipcode" class="bpmpi_billto_zipcode" value="<?php echo esc_attr($billing_postcode); ?>" />
         <input type="hidden" size="2" id="lkn_bpmpi_billto_country" name="lkn_card_billto_country" class="bpmpi_billto_country" value="<?php echo esc_attr($billing_country); ?>" />
         <input type="hidden" id="lkn_bpmpi_shipto_sameasbillto" name="lkn_card_shipto_sameasbillto" class="bpmpi_shipto_sameasbillto" value="true" />
-        <input type="hidden" id="lkn_bpmpi_useraccount_guest" name="lkn_card_useraccount_guest" class="bpmpi_useraccount_guest" value="<?php echo esc_attr($user_guest); ?>" />
+        <input type="hidden" id="lkn_bpmpi_useraccount_guest" name="lkn_card_useraccount_guest" class="bpmpi_useraccount_guest" value="<?php echo ($user_guest ? 'true' : 'false'); ?>" />
         <input type="hidden" id="lkn_bpmpi_useraccount_authenticationmethod" name="lkn_card_useraccount_authenticationmethod" class="bpmpi_useraccount_authenticationmethod" value="<?php echo esc_attr($authentication_method); ?>" />
         <input type="hidden" size="45" id="lkn_bpmpi_device_ipaddress" name="lkn_card_device_ipaddress" class="bpmpi_device_ipaddress" value="<?php echo esc_attr($client_ip); ?>" />
         <input type="hidden" size="7" id="lkn_bpmpi_device_channel" name="lkn_card_device_channel" class="bpmpi_device_channel" value="Browser" />

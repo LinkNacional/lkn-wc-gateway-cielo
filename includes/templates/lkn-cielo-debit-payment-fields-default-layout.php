@@ -105,7 +105,7 @@ if (! defined('ABSPATH')) {
         size="50"
         name="lkn_order_number"
         class="bpmpi_ordernumber"
-        value="<?php echo esc_attr(uniqid()); ?>" />
+        value="<?php echo esc_attr(isset($order_number_3ds) && '' !== $order_number_3ds ? $order_number_3ds : uniqid()); ?>" />
     <input
         type="hidden"
         name="lkn_currency"
@@ -253,7 +253,7 @@ if (! defined('ABSPATH')) {
         id="lkn_bpmpi_useraccount_guest"
         name="lkn_card_useraccount_guest"
         class="bpmpi_useraccount_guest"
-        value="<?php echo esc_attr($user_guest); ?>" />
+        value="<?php echo ($user_guest ? 'true' : 'false'); ?>" />
     <input
         type="hidden"
         id="lkn_bpmpi_useraccount_authenticationmethod"
