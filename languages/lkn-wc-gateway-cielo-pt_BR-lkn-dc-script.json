@@ -19,6 +19,9 @@
             "Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly": [
                 "Erro no processo de autenticação 3DS 2.2 verifique se suas credenciais estão corretas"
             ],
+            "Failed to communicate with the 3DS authentication service. This may be caused by an origin block (CORS) or an unregistered domain, try again or contact the store": [
+                "Falha na comunicação com o serviço de autenticação 3DS. Isso pode ser causado por um bloqueio de origem (CORS) ou domínio não cadastrado, tente novamente ou entre em contato com a loja"
+            ],
             "Provider not supported by Cielo 3DS authentication": [
                 "Bandeira não suportada pela autenticação 3DS da Cielo"
             ],

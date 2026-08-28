@@ -129,8 +129,13 @@ function bpmpi_config () {
     onError: function (e) {
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
 
-      // Error on proccess in authentication
-      alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
+      // MPI900 = falha de rede/HTTP (ex.: 403/CORS no /v2/3ds/enroll), não é
+      // erro de credencial. Mensagem distinta para não induzir o lojista.
+      if (e && e.ReturnCode === 'MPI900') {
+        alert(wp.i18n.__('Failed to communicate with the 3DS authentication service. This may be caused by an origin block (CORS) or an unregistered domain, try again or contact the store', 'lkn-wc-gateway-cielo'))
+      } else {
+        alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
+      }
     },
     onUnsupportedBrand: function (e) {
       // Provider not supported for authentication — definitive error, always submit
