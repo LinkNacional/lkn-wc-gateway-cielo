@@ -1,3 +1,7 @@
+# 1.37.2 - 08/09/2026
+* Correção: Tratamento do erro MPI900 (falha de rede/HTTP) no fluxo de autenticação 3DS.
+* Ajuste: Melhorias no sistema de autenticação 3DS.
+
 # 1.37.1 - 24/08/2026
 * Correção: Ajuste no sistema 3DS no checkout por shortcode/clássico e em blocos (Gutenberg).
 * Correção: Ajuste na exibição das bandeiras dos cartões no checkout em blocos (Gutenberg).
