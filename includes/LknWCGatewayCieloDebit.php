@@ -720,12 +720,33 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
     }
 
     /**
-     * Total 3DS em centavos (subtotal + frete), sem zero à esquerda.
-     * Mantém o valor do checkout em blocos igual ao do clássico.
+     * Total 3DS em centavos, sem zero à esquerda.
+     * Em checkout normal usa o total do carrinho (que já inclui juros/descontos
+     * adicionados como fee pelo plugin), para que o amount enviado ao 3DS reflita
+     * o valor final que será autorizado — não apenas subtotal + frete.
      */
     public function get_3ds_total_amount()
     {
-        return (string) (int) round($this->get_subtotal_plus_shipping() * 100);
+        // pay_for_order: usa o total do pedido específico.
+        if (isset($_GET['pay_for_order'])) {
+            $key = isset($_GET['key']) ? sanitize_text_field(wp_unslash($_GET['key'])) : '';
+            $order_id = wc_get_order_id_by_order_key($key);
+            $order = wc_get_order($order_id);
+
+            if ($order) {
+                return (string) (int) round((float) $order->get_total() * 100);
+            }
+        }
+
+        if (WC()->cart) {
+            // get_total() sem argumento retorna HTML (wc_price). Usamos o array
+            // cru de totais para evitar qualquer filtro de formatação de preço.
+            $cart_totals = WC()->cart->get_totals();
+            $cart_total_raw = isset($cart_totals['total']) ? $cart_totals['total'] : 0;
+            return (string) (int) round((float) $cart_total_raw * 100);
+        }
+
+        return (string) (int) round((float) $this->get_subtotal_plus_shipping() * 100);
     }
 
     /**
