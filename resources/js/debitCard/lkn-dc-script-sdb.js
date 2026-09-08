@@ -129,12 +129,24 @@ function bpmpi_config () {
     onError: function (e) {
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
 
-      // MPI900 = falha de rede/HTTP (ex.: 403/CORS no /v2/3ds/enroll), não é
-      // erro de credencial. Mensagem distinta para não induzir o lojista.
+      // MPI900 = falha de rede/HTTP (ex.: 400/403/CORS no /v2/3ds/enroll).
+      // Mensagem curta com o status HTTP para diagnóstico.
       if (e && e.ReturnCode === 'MPI900') {
-        alert(wp.i18n.__('Failed to communicate with the 3DS authentication service. This may be caused by an origin block (CORS) or an unregistered domain, try again or contact the store', 'lkn-wc-gateway-cielo'))
+        var httpStatus = ''
+        if (e.ReturnMessage) {
+          var statusMatch = String(e.ReturnMessage).match(/\((\d{3})\)/)
+          if (statusMatch) {
+            httpStatus = statusMatch[1]
+          }
+        }
+        var mpiMessage = wp.i18n.__('3DS authentication error', 'lkn-wc-gateway-cielo')
+        if (httpStatus) {
+          mpiMessage += ' (HTTP ' + httpStatus + ')'
+        }
+        mpiMessage += '. ' + wp.i18n.__('Try again or contact the store.', 'lkn-wc-gateway-cielo')
+        alert(mpiMessage)
       } else {
-        alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
+        alert(wp.i18n.__('3DS authentication error. Check your credentials.', 'lkn-wc-gateway-cielo'))
       }
     },
     onUnsupportedBrand: function (e) {
