@@ -21,9 +21,18 @@ document.addEventListener('click', function (e) {
   }
 }, true)
 
+window.__lknBpmpiReady = false
+window.__lknBpmpiLoading = false
+window.__lknPendingAuthenticate = false
+
 function bpmpi_config () {
   return {
     onReady: function () {
+      window.__lknBpmpiReady = true
+      if (window.__lknPendingAuthenticate) {
+        window.__lknPendingAuthenticate = false
+        bpmpi_authenticate()
+      }
     },
     onSuccess: function (e) {
       // Card is eligible for authentication, and the bearer successfully authenticated
@@ -272,9 +281,116 @@ function lknProcessDebitCard () {
     setIfExists('lkn_bpmpi_expmonth', expDate[0].replace(/\D/g, ''))
     setIfExists('lkn_bpmpi_expyear', expDate[1].replace(/\D/g, ''))
 
-    bpmpi_authenticate()
+    // O bundle React (lknCieloDebitCompiled.js) já preenche bpmpi_installments
+    // com a parcela correta. O bpmpi_totalamount ainda vem com o valor da
+    // renderização inicial (sem juros). Lemos o total final do store do
+    // WooCommerce Blocks (fonte React), aguardando o refetch terminar.
+    lknReadBlockTotalAndProceed(10)
   } catch (error) {
     console.log(error)
     alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
   }
+}
+
+// Carrega o BP.Mpi (init) sob demanda, no clique de finalizar, para que o
+// amount enviado ao MPI reflita o total final (com juros/desconto).
+function lknLoadBpmpiScript () {
+  if (window.__lknBpmpiLoading) {
+    return
+  }
+  window.__lknBpmpiLoading = true
+
+  var scriptUrlBpmpi = window.__lknBpmpiUrl
+  if (!scriptUrlBpmpi) {
+    window.__lknPendingAuthenticate = false
+    bpmpi_authenticate()
+    return
+  }
+
+  if (!document.querySelector('script[src="' + scriptUrlBpmpi + '"]')) {
+    var scriptBpmpi = document.createElement('script')
+    scriptBpmpi.src = scriptUrlBpmpi
+    scriptBpmpi.async = true
+    document.body.appendChild(scriptBpmpi)
+  }
+}
+
+function lknProceedToAuthenticate () {
+  window.__lknPendingAuthenticate = true
+  if (window.__lknBpmpiReady) {
+    bpmpi_authenticate()
+  } else {
+    lknLoadBpmpiScript()
+  }
+}
+
+// Lê o total final (com juros/desconto) direto do store do WooCommerce Blocks
+// (React) — a fonte real que renderiza o "Total". Durante o refetch (loading)
+// o selector ainda não terminou de resolver; aguardamos e tentamos de novo.
+function lknReadBlockTotalAndProceed (retriesLeft) {
+  var totalAmountEl = document.querySelector('.bpmpi_totalamount')
+  if (!totalAmountEl) {
+    lknProceedToAuthenticate()
+    return
+  }
+
+  var cents = lknGetCartTotalCentsFromStore()
+  if (cents > 0) {
+    totalAmountEl.value = String(cents)
+    lknProceedToAuthenticate()
+    return
+  }
+
+  if (retriesLeft > 0) {
+    setTimeout(function () {
+      lknReadBlockTotalAndProceed(retriesLeft - 1)
+    }, 150)
+    return
+  }
+
+  // Esgotou as tentativas: usa o valor atual do hidden (fallback seguro).
+  lknProceedToAuthenticate()
+}
+
+// Retorna o total do carrinho em centavos vindo do store wc/store/cart, ou 0
+// se indisponível / ainda resolvendo.
+function lknGetCartTotalCentsFromStore () {
+  var select = window.wp && window.wp.data && window.wp.data.select
+  if (typeof select !== 'function') {
+    return 0
+  }
+
+  var store = null
+  try {
+    store = select('wc/store/cart')
+  } catch (e) {
+    return 0
+  }
+
+  if (!store) {
+    return 0
+  }
+
+  // Se o selector ainda está resolvendo (ex.: refetch após troca de parcela),
+  // retorna 0 para o retry aguardar.
+  if (typeof store.hasFinishedResolution === 'function' && typeof store.getCartData === 'function') {
+    if (!store.hasFinishedResolution('getCartData', [])) {
+      return 0
+    }
+  }
+
+  var totals = null
+  try {
+    totals = (typeof store.getCartTotals === 'function')
+      ? store.getCartTotals()
+      : (store.getCartData ? store.getCartData().totals : null)
+  } catch (e) {
+    return 0
+  }
+
+  if (totals && totals.total_price) {
+    return parseInt(totals.total_price, 10) || 0
+  }
+
+  return 0
 }

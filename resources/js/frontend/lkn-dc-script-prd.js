@@ -10,6 +10,13 @@ let lknDetectedCardProvider = '';
 // Tipo do cartão detectado via BIN: 'Debit' | 'Credit' (vazio = indeterminado)
 let lknDetectedCardType = '';
 
+// Estado de carregamento do BP.Mpi (3DS). O init (bpmpi_load) é adiado para o
+// clique de finalizar, para que amount e installments enviados ao MPI reflitam
+// o total final (com juros/desconto) e a parcela selecionada.
+window.__lknBpmpiReady = false;
+window.__lknBpmpiLoading = false;
+window.__lknPendingAuthenticate = false;
+
 // Função para resetar o status 3DS
 function resetLkn3DSStatus() {
   lkn3DSCompleted = false;
@@ -279,6 +286,11 @@ function submitForm (e) {
 function bpmpi_config () {
   return {
     onReady: function () {
+      window.__lknBpmpiReady = true
+      if (window.__lknPendingAuthenticate) {
+        window.__lknPendingAuthenticate = false
+        bpmpi_authenticate()
+      }
     },
     onSuccess: function (e) {
       // Card is eligible for authentication, and the bearer successfully authenticated
@@ -356,6 +368,97 @@ function bpmpi_config () {
     Environment: 'PRD', // SDB or PRD
     Debug: false // true or false
   }
+}
+
+function lknFinalize3DS () {
+  // Parcela selecionada (crédito). Débito permanece '1'.
+  const installmentSelect = document.getElementById('lkn_cc_dc_installments')
+  const installmentEl = document.querySelector('.bpmpi_installments')
+  if (installmentEl) {
+    const installmentValue = (installmentSelect && installmentSelect.value) ? installmentSelect.value : '1'
+    installmentEl.value = installmentValue
+  }
+
+  window.__lknPendingAuthenticate = true
+
+  if (window.__lknBpmpiReady) {
+    bpmpi_authenticate()
+  } else {
+    lknLoadBpmpiScript()
+  }
+}
+
+// Carrega o BP.Mpi (init) sob demanda, buscando um token fresco antes.
+function lknLoadBpmpiScript () {
+  if (window.__lknBpmpiLoading) {
+    return
+  }
+  window.__lknBpmpiLoading = true
+
+  const scriptUrlBpmpi = (typeof lknDCDirScript3DSCieloShortCode !== 'undefined' && lknDCDirScript3DSCieloShortCode.url)
+    ? lknDCDirScript3DSCieloShortCode.url
+    : null
+
+  if (!scriptUrlBpmpi) {
+    window.__lknPendingAuthenticate = false
+    bpmpi_authenticate()
+    return
+  }
+
+  // Congela o orderNumber que o /v2/3ds/init vai usar.
+  const orderNumberEl = document.querySelector('.bpmpi_ordernumber')
+  if (orderNumberEl && orderNumberEl.value) {
+    window.__lknOrderNumber3ds = orderNumberEl.value
+  }
+
+  const appendBpmpi = function () {
+    if (!document.querySelector('script[src="' + scriptUrlBpmpi + '"]')) {
+      const scriptBpmpi = document.createElement('script')
+      scriptBpmpi.src = scriptUrlBpmpi
+      scriptBpmpi.async = true
+      document.body.appendChild(scriptBpmpi)
+    }
+  }
+
+  // Token fresco via REST (evita 401 por cache de página).
+  const restRoot = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.rest_url)
+    ? lknCieloRestSettings.rest_url
+    : null
+  const nonce = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.nonce)
+    ? lknCieloRestSettings.nonce
+    : ''
+
+  if (!restRoot) {
+    appendBpmpi()
+    return
+  }
+
+  fetch(restRoot + 'lknWCGatewayCielo/getAcessToken', {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'X-WP-Nonce': nonce
+    }
+  })
+    .then(function (res) { return res.json() })
+    .then(function (data) {
+      if (data && data.access_token) {
+        const tokenEl = document.getElementsByClassName('bpmpi_accesstoken')[0]
+        if (tokenEl) {
+          tokenEl.value = data.access_token
+        }
+        if (data.expires_in) {
+          const expEl = document.getElementById('expires_in')
+          if (expEl) {
+            expEl.value = data.expires_in
+          }
+        }
+      }
+      appendBpmpi()
+    })
+    .catch(function () {
+      appendBpmpi()
+    })
 }
 
 function lknDCProccessButton () {
@@ -481,100 +584,16 @@ function lknDCProccessButton () {
       }
     }
 
-    bpmpi_authenticate()
+    lknFinalize3DS()
   } catch (error) {
     resetLkn3DSStatus();
     alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
   }
 }
 
-// Carrega js do 3DS
-document.addEventListener('DOMContentLoaded', function () {
-  const radioInputCieloDebitId = 'payment_method_lkn_cielo_debit';
-
-  // Configura o MutationObserver para monitorar alterações no DOM
-  const observer = new MutationObserver((mutationsList) => {
-    // Verifica se o input de pagamento desejado está selecionado
-    const radioInputCieloDebit = document.getElementById(radioInputCieloDebitId);
-    if (radioInputCieloDebit && radioInputCieloDebit.checked) {
-      lknWcGatewayCieloLoadScript()
-    }
-  })
-
-  // Configura o observer para observar mudanças no body
-  observer.observe(document.body, {
-    childList: true, // Monitoramento de adição/remoção de elementos
-    subtree: true,   // Monitoramento em todo o DOM, não apenas no nível imediato
-  });
-
-  function lknWcGatewayCieloLoadScript () {
-    const scriptUrlBpmpi = lknDCDirScript3DSCieloShortCode.url
-
-    if (window.__lknBpmpiLoadStarted) {
-      return
-    }
-    window.__lknBpmpiLoadStarted = true
-
-    // Congela o orderNumber que o /v2/3ds/init vai usar. O campo pode ser
-    // re-renderizado pelo updated_checkout (cache de página), fazendo o enroll
-    // enviar um orderNumber diferente do init e resultando em 400.
-    const orderNumberEl = document.querySelector('.bpmpi_ordernumber')
-    if (orderNumberEl && orderNumberEl.value) {
-      window.__lknOrderNumber3ds = orderNumberEl.value
-    }
-
-    const appendBpmpi = function () {
-      if (!document.querySelector(`script[src="${scriptUrlBpmpi}"]`)) {
-        const scriptBpmpi = document.createElement('script')
-        scriptBpmpi.src = scriptUrlBpmpi
-        scriptBpmpi.async = true
-        document.body.appendChild(scriptBpmpi)
-      }
-    }
-
-    // O access token embutido no HTML pode estar expirado (cache de página),
-    // o que faz o /v2/3ds/init devolver 401. Busca um token fresco via REST
-    // antes de carregar o BP.Mpi (igual ao fluxo Gutenberg).
-    const restRoot = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.rest_url)
-      ? lknCieloRestSettings.rest_url
-      : null
-    const nonce = (typeof lknCieloRestSettings !== 'undefined' && lknCieloRestSettings.nonce)
-      ? lknCieloRestSettings.nonce
-      : ''
-
-    if (!restRoot) {
-      appendBpmpi()
-      return
-    }
-
-    fetch(restRoot + 'lknWCGatewayCielo/getAcessToken', {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-        'X-WP-Nonce': nonce
-      }
-    })
-      .then(function (res) { return res.json() })
-      .then(function (data) {
-        if (data && data.access_token) {
-          const tokenEl = document.getElementsByClassName('bpmpi_accesstoken')[0]
-          if (tokenEl) {
-            tokenEl.value = data.access_token
-          }
-          if (data.expires_in) {
-            const expEl = document.getElementById('expires_in')
-            if (expEl) {
-              expEl.value = data.expires_in
-            }
-          }
-        }
-        appendBpmpi()
-      })
-      .catch(function () {
-        appendBpmpi()
-      })
-  }
-})
+// O carregamento do BP.Mpi (init 3DS) agora é feito sob demanda no clique de
+// finalizar (lknFinalize3DS -> lknLoadBpmpiScript), para que o amount enviado
+// ao MPI reflita o total final (com juros/desconto) e a parcela selecionada.
 
 // Botão custom "Confirm Payment" no layout padrão (shortcode)
 // Delegação em `document` (sem jQuery): o listener fica no document, que é

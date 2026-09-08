@@ -53,37 +53,21 @@ const formatCurrency = (amount) => {
 }
 
 const lknDCInitCieloPaymentForm = () => {
+  // Expose a URL do BP.Mpi para o script de config (lkn-dc-script-*.js), que
+  // agora carrega o MPI sob demanda no clique de finalizar (para que o amount
+  // enviado reflita o total final com juros/desconto).
+  window.__lknBpmpiUrl = lknDCDirScript3DSCielo
 
-  // Load Cielo 3DS Config Script FIRST
+  // Load Cielo 3DS Config Script (define bpmpi_config + lknDCProccessButton).
+  // O BP.Mpi NÃO é mais carregado aqui — é carregado no clique via lknLoadBpmpiScript.
   const scriptUrl = lknDCDirScriptConfig3DSCielo
   const existingScript = document.querySelector(`script[src="${scriptUrl}"]`)
-  
+
   if (!existingScript) {
     const script = document.createElement('script')
     script.src = scriptUrl
     script.async = false // Load synchronously to ensure bpmpi_config is defined
-    script.onload = () => {
-      // Only load BP.Mpi after config script is loaded
-      const scriptUrlBpmpi = lknDCDirScript3DSCielo
-      const existingScriptBpmpi = document.querySelector(`script[src="${scriptUrlBpmpi}"]`)
-      if (!existingScriptBpmpi) {
-        const scriptBpmpi = document.createElement('script')
-        scriptBpmpi.src = scriptUrlBpmpi
-        scriptBpmpi.async = true
-        document.body.appendChild(scriptBpmpi)
-      }
-    }
     document.body.appendChild(script)
-  } else {
-    // Config script already exists, load BP.Mpi
-    const scriptUrlBpmpi = lknDCDirScript3DSCielo
-    const existingScriptBpmpi = document.querySelector(`script[src="${scriptUrlBpmpi}"]`)
-    if (!existingScriptBpmpi) {
-      const scriptBpmpi = document.createElement('script')
-      scriptBpmpi.src = scriptUrlBpmpi
-      scriptBpmpi.async = true
-      document.body.appendChild(scriptBpmpi)
-    }
   }
 }
 const lknDCContentCielo = props => {
@@ -221,6 +205,7 @@ const lknDCContentCielo = props => {
   })
   const lknDCCardTypeSelectDisabled = lknDCCardTypeMode !== 'both'
   const [focus, setFocus] = window.wp.element.useState('')
+  const [finalAmount, setFinalAmount] = window.wp.element.useState(lknDCTotalCartCielo)
 
   // Force disabled on native <select> when SortSelect doesn't pass the prop through
   window.wp.element.useEffect(() => {
@@ -599,6 +584,7 @@ const lknDCContentCielo = props => {
     const installmentMin = parseFloat(lknDCInstallmentMinAmount)
     const totalAmount = baseAmount + safeAdditionalValues.externalFees - safeAdditionalValues.discount + safeAdditionalValues.tax
     const newOptions = [] // Array local para construir as opções
+    let selectedTotalValue = null
 
     // Verifica se 'lknDCActiveInstallmentCielo' é 'yes', o valor base é maior que 10 e installmentMin não é maior que o total
     if (lknDCActiveInstallmentCielo === 'yes' && baseAmount > 10 && installmentMin <= totalAmount) {
@@ -651,6 +637,10 @@ const lknDCContentCielo = props => {
           nextInstallmentAmount = totalValue / index
         }
 
+        if (index === parseInt((document.getElementById('lkn_cc_dc_installments') || {}).value || '1', 10)) {
+          selectedTotalValue = totalValue
+        }
+
         // Verifica se atende o valor mínimo
         if (nextInstallmentAmount < installmentMin) {
           break
@@ -694,6 +684,7 @@ const lknDCContentCielo = props => {
     } else {
       // À vista: usa o valor base + valores adicionais
       const totalAmountValue = baseAmount + safeAdditionalValues.externalFees - safeAdditionalValues.discount + safeAdditionalValues.tax
+      selectedTotalValue = totalAmountValue
       const totalAmount = totalAmountValue.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -702,6 +693,12 @@ const lknDCContentCielo = props => {
         key: '1',
         label: `${lknDCTranslationsCielo.installmentText.replace('%1$d', '1').replace('%2$s', `R$ ${totalAmount}`)} ${lknDCTranslationsCielo.cashPayment}`
       })
+    }
+
+    // Atualiza o amount 3DS com o total final (com juros/desconto) da parcela
+    // selecionada, em centavos.
+    if (selectedTotalValue !== null) {
+      setFinalAmount(String(Math.round(selectedTotalValue * 100)))
     }
 
     // Define todas as opções de uma vez
@@ -1134,13 +1131,13 @@ const lknDCContentCielo = props => {
     id: 'lkn_cielo_3ds_value',
     name: 'lkn_amount',
     className: 'bpmpi_totalamount',
-    value: lknDCTotalCartCielo
+    value: finalAmount
   }), /* #__PURE__ */React.createElement('input', {
     type: 'hidden',
     size: '2',
     name: 'lkn_installments',
     className: 'bpmpi_installments',
-    value: '1'
+    value: debitObject.lkn_cc_dc_installments
   }), /* #__PURE__ */React.createElement('input', {
     type: 'hidden',
     name: 'lkn_payment_method',
