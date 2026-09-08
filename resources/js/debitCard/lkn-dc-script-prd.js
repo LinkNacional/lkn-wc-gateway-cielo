@@ -129,8 +129,25 @@ function bpmpi_config () {
     onError: function (e) {
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
 
-      // Error on proccess in authentication
-      alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
+      // MPI900 = falha de rede/HTTP (ex.: 400/403/CORS no /v2/3ds/enroll).
+      // Mensagem curta com o status HTTP para diagnóstico.
+      if (e && e.ReturnCode === 'MPI900') {
+        var httpStatus = ''
+        if (e.ReturnMessage) {
+          var statusMatch = String(e.ReturnMessage).match(/\((\d{3})\)/)
+          if (statusMatch) {
+            httpStatus = statusMatch[1]
+          }
+        }
+        var mpiMessage = wp.i18n.__('3DS authentication error', 'lkn-wc-gateway-cielo')
+        if (httpStatus) {
+          mpiMessage += ' (HTTP ' + httpStatus + ')'
+        }
+        mpiMessage += '. ' + wp.i18n.__('Try again or contact the store.', 'lkn-wc-gateway-cielo')
+        alert(mpiMessage)
+      } else {
+        alert(wp.i18n.__('3DS authentication error. Check your credentials.', 'lkn-wc-gateway-cielo'))
+      }
     },
     onUnsupportedBrand: function (e) {
       // Provider not supported for authentication — definitive error, always submit

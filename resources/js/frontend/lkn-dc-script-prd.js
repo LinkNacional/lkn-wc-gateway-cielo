@@ -326,7 +326,25 @@ function bpmpi_config () {
 
       const lknDebitCCForm = document.getElementById('wc-lkn_cielo_debit-cc-form')
       if (lknDebitCCForm) {
-        alert(wp.i18n.__('Error in the 3DS 2.2 authentication process check that your credentials are filled in correctly', 'lkn-wc-gateway-cielo'))
+        // MPI900 = falha de rede/HTTP (ex.: 403/CORS no /v2/3ds/enroll), não é
+        // erro de credencial. Mensagem curta com o status HTTP para diagnóstico.
+        if (e && e.ReturnCode === 'MPI900') {
+          var httpStatus = ''
+          if (e.ReturnMessage) {
+            var statusMatch = String(e.ReturnMessage).match(/\((\d{3})\)/)
+            if (statusMatch) {
+              httpStatus = statusMatch[1]
+            }
+          }
+          var mpiMessage = wp.i18n.__('3DS authentication error', 'lkn-wc-gateway-cielo')
+          if (httpStatus) {
+            mpiMessage += ' (HTTP ' + httpStatus + ')'
+          }
+          mpiMessage += '. ' + wp.i18n.__('Try again or contact the store.', 'lkn-wc-gateway-cielo')
+          alert(mpiMessage)
+        } else {
+          alert(wp.i18n.__('3DS authentication error. Check your credentials.', 'lkn-wc-gateway-cielo'))
+        }
       }
     },
     onUnsupportedBrand: function (e) {

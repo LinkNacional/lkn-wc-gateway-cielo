@@ -696,6 +696,39 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
     }
 
     /**
+     * Retorna o order number 3DS estável entre o /v2/3ds/init e o /v2/3ds/enroll.
+     * Reutiliza o mesmo valor da sessão no checkout clássico e em blocos (Gutenberg),
+     * evitando o erro 400 "Invalid enrollment request" por divergência entre init e enroll.
+     */
+    public function get_3ds_order_number()
+    {
+        $order_number_3ds = '';
+
+        if (WC()->session) {
+            $order_number_3ds = (string) WC()->session->get('lkn_cielo_3ds_order_number', '');
+        }
+
+        if ('' === $order_number_3ds) {
+            $order_number_3ds = uniqid();
+
+            if (WC()->session) {
+                WC()->session->set('lkn_cielo_3ds_order_number', $order_number_3ds);
+            }
+        }
+
+        return $order_number_3ds;
+    }
+
+    /**
+     * Total 3DS em centavos (subtotal + frete), sem zero à esquerda.
+     * Mantém o valor do checkout em blocos igual ao do clássico.
+     */
+    public function get_3ds_total_amount()
+    {
+        return (string) (int) round($this->get_subtotal_plus_shipping() * 100);
+    }
+
+    /**
      * Get cart subtotal plus shipping total.
      */
     private function get_subtotal_plus_shipping()
@@ -943,7 +976,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $activeInstallment = $this->get_option('installment_payment');
         $total_cart = number_format($this->get_subtotal_plus_shipping(), 2, '.', '');
         // Para 3DS 2.2, o valor deve estar em centavos, sem zero à esquerda.
-        $total_cart_3ds = (string) (int) round($this->get_subtotal_plus_shipping() * 100);
+        $total_cart_3ds = $this->get_3ds_total_amount();
         $fees_total = number_format($this->get_fees_total(), 2, '.', '');
         $taxes_total = number_format($this->get_taxes_total(), 2, '.', '');
         $discounts_total = number_format($this->get_discounts_total(), 2, '.', '');
@@ -957,16 +990,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         // /v2/3ds/enroll. Antes era gerado com uniqid() direto no template, o que
         // mudava a cada re-render (updated_checkout) e fazia o enroll falhar com
         // 400 "Invalid enrollment request" por não bater com o token do init.
-        $order_number_3ds = '';
-        if (WC()->session) {
-            $order_number_3ds = (string) WC()->session->get('lkn_cielo_3ds_order_number', '');
-        }
-        if ('' === $order_number_3ds) {
-            $order_number_3ds = uniqid();
-            if (WC()->session) {
-                WC()->session->set('lkn_cielo_3ds_order_number', $order_number_3ds);
-            }
-        }
+        $order_number_3ds = $this->get_3ds_order_number();
 
         $placeholder = $this->get_option('placeholder', 'no');
         $placeholderEnabled = false;
