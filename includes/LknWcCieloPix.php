@@ -567,7 +567,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             LknWcCieloHelper::saveTransactionMetadata($order, $customErrorResponse, 'N/A', 'N/A', $fullName, 1, $amount, $currency, 'PIX', $merchantId, $merchantSecret, $merchantOrderId, $order_id, 'N/A', null, 'Pix', 'N/A', $this, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A');
             $order->save();
 
-            throw new Exception(esc_attr(__('PIX Payment Failed', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('PIX Payment Failed', 'lkn-wc-gateway-cielo'));
         }
     }
 
