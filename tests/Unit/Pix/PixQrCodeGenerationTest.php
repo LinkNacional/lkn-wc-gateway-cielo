@@ -264,6 +264,6 @@ class PixQrCodeGenerationTest extends TestCase
         // Assert - Should return invalid credentials error
         $this->assertIsArray($result);
         $this->assertFalse($result['sucess']);
-        $this->assertEquals('Invalid credential(s).', $result['response']);
+        $this->assertEquals('Affiliation not found', $result['response']);
     }
 }

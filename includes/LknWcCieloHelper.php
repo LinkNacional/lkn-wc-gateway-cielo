@@ -181,6 +181,52 @@ final class LknWcCieloHelper
     }
 
     /**
+     * Build a user-facing error message from a decoded Cielo response.
+     *
+     * The return code is translated through the shared catalog
+     * (`LknCieloErrorCodes::translate`), so declined cards surface the official
+     * Cielo/ABECS reason as a translatable string (source strings live in the
+     * catalog, translatable via .po/.mo). The message returned by Cielo is used
+     * only as a fallback when the code is not mapped. Codes with multiple
+     * meanings (e.g. 57, which differs per brand) collapse to a single canonical
+     * entry — the ABECS "POS/E-commerce" message.
+     *
+     * Handles both response shapes returned by the Cielo API:
+     *  - the direct error array `[ { "Code": ..., "Message": ... } ]` (HTTP 4xx);
+     *  - the processed `Payment.ReturnCode` / `Payment.ReturnMessage` (declines).
+     *
+     * @param mixed  $responseDecoded Decoded Cielo response (object or array).
+     * @param string $fallback        Message used when there is no code.
+     * @return string
+     */
+    public static function getCieloErrorMessage($responseDecoded, $fallback = '')
+    {
+        $code = '';
+        $rawMessage = '';
+
+        if (is_array($responseDecoded) && isset($responseDecoded[0]) && isset($responseDecoded[0]->Code)) {
+            $code = (string) $responseDecoded[0]->Code;
+            $rawMessage = isset($responseDecoded[0]->Message) ? (string) $responseDecoded[0]->Message : '';
+        } elseif (is_object($responseDecoded) && isset($responseDecoded->Payment->ReturnCode)) {
+            $code = (string) $responseDecoded->Payment->ReturnCode;
+            $rawMessage = isset($responseDecoded->Payment->ReturnMessage) ? (string) $responseDecoded->Payment->ReturnMessage : '';
+        } elseif (is_object($responseDecoded) && isset($responseDecoded->Code)) {
+            $code = (string) $responseDecoded->Code;
+            $rawMessage = isset($responseDecoded->Message) ? (string) $responseDecoded->Message : '';
+        }
+
+        $code = trim($code);
+
+        if ('' === $code) {
+            return $fallback;
+        }
+
+        $message = LknCieloErrorCodes::translate($code, $rawMessage);
+
+        return $message . ' (Error code: ' . $code . ')';
+    }
+
+    /**
      * Mask credentials dynamically based on string length.
      *
      * @param string $credential
@@ -357,12 +403,14 @@ final class LknWcCieloHelper
         // Verificar se é erro direto da API (array de erros)
         if (is_array($responseDecoded) && isset($responseDecoded[0]) && isset($responseDecoded[0]->Code)) {
             $returnCode = (string)$responseDecoded[0]->Code;
-            $returnMessage = (string)$responseDecoded[0]->Message;
+            $rawReturnMessage = isset($responseDecoded[0]->Message) ? (string)$responseDecoded[0]->Message : '';
+            $returnMessage = LknCieloErrorCodes::translate($returnCode, $rawReturnMessage);
         }
         // Verificar se é resposta normal com Payment
         elseif (isset($responseDecoded->Payment->ReturnCode)) {
             $returnCode = $responseDecoded->Payment->ReturnCode;
-            $returnMessage = isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '';
+            $rawReturnMessage = isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '';
+            $returnMessage = LknCieloErrorCodes::translate($returnCode, $rawReturnMessage);
         }
         // Para PIX, verificar estrutura específica da resposta
         elseif ($gatewayType === 'Pix') {
