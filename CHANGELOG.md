@@ -1,3 +1,6 @@
+# 1.37.3 - 11/09/2026
+* Correção: As mensagens de recusa de pagamento agora seguem o padrão ABECS da Cielo.
+
 # 1.37.2 - 08/09/2026
 * Correção: Tratamento do erro MPI900 (falha de rede/HTTP) no fluxo de autenticação 3DS.
 * Ajuste: Melhorias no sistema de autenticação 3DS.
