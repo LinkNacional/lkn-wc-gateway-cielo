@@ -96,12 +96,31 @@ final class LknCieloErrorCodes
      */
     private static function lookup($map, $code, $fallback)
     {
+        // Camada de licença: o catálogo oficial Cielo/ABECS é um recurso do plano
+        // PRO. Sem licença PRO ativa, todos os gateways caem para a mensagem
+        // original devolvida pela Cielo (fallback) em vez da mensagem padronizada.
+        if (! self::isProLicenseActive()) {
+            return self::resolveFallback($fallback);
+        }
+
         $code = trim((string) $code);
 
         if ('' !== $code && isset($map[$code])) {
             return $map[$code];
         }
 
+        return self::resolveFallback($fallback);
+    }
+
+    /**
+     * Resolve the message to use when the code is not translated (or the
+     * Cielo/ABECS catalog is unavailable).
+     *
+     * @param string $fallback Original message returned by Cielo.
+     * @return string
+     */
+    private static function resolveFallback($fallback)
+    {
         $fallback = trim((string) $fallback);
 
         if ('' !== $fallback) {
@@ -109,6 +128,39 @@ final class LknCieloErrorCodes
         }
 
         return __('Unknown error', 'lkn-wc-gateway-cielo');
+    }
+
+    /**
+     * Whether the Cielo/ABECS catalog may be used (the PRO license is active).
+     *
+     * Result is memoized per request to avoid repeated option/plugin checks.
+     *
+     * @return bool
+     */
+    private static function isProLicenseActive(): bool
+    {
+        static $active = null;
+
+        if (null !== $active) {
+            return $active;
+        }
+
+        $helperClass = LknWcCieloHelper::class;
+
+        if (! class_exists($helperClass) || ! method_exists($helperClass, 'is_pro_license_active')) {
+            $active = false;
+
+            return $active;
+        }
+
+        // Garante que is_plugin_active() exista mesmo em contextos de frontend.
+        if (! function_exists('is_plugin_active') && defined('ABSPATH')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        $active = (bool) $helperClass::is_pro_license_active();
+
+        return $active;
     }
 
     /**
