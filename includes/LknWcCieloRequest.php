@@ -68,7 +68,7 @@ final class LknWcCieloRequest
         if (isset($response['Payment']['ReturnCode']) && $response['Payment']['ReturnCode'] === '422') {
             return array(
                 'sucess' => false,
-                'response' => LknCieloErrorCodes::translate($response['Payment']['ReturnCode'], 'Error on merchantResponse integration.')
+                'response' => LknCieloErrorCodes::resolveForGateway($instance->id, $response['Payment']['ReturnCode'], 'Error on merchantResponse integration.')
             );
         }
 
@@ -80,7 +80,7 @@ final class LknWcCieloRequest
             $credentialCode = (is_array($response) && isset($response[0]['Code'])) ? (string) $response[0]['Code'] : '';
             return array(
                 'sucess' => false,
-                'response' => LknCieloErrorCodes::translate($credentialCode, 'Invalid credential(s).')
+                'response' => LknCieloErrorCodes::resolveForGateway($instance->id, $credentialCode, 'Invalid credential(s).')
             );
         }
         if ($instance->get_option('debug') === 'yes') {

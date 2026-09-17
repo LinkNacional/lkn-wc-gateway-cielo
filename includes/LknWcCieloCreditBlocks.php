@@ -139,8 +139,11 @@ final class LknWcCieloCreditBlocks extends AbstractPaymentMethodType
             WC()->session->set('lkn_cielo_debit_installment', '1');
             // Não forçar 'Credit' cegamente: respeita o card_type_mode do gateway
             // de débito para não aplicar taxa como crédito quando está em 'only_debit'.
+            // Recurso PRO: sem licença ativa cai para 'both' (ignora valor salvo).
             $debit_settings = get_option('woocommerce_lkn_cielo_debit_settings', array());
-            $debit_card_type_mode = isset($debit_settings['card_type_mode']) ? $debit_settings['card_type_mode'] : 'both';
+            $debit_card_type_mode = (LknWcCieloHelper::is_pro_license_active() && isset($debit_settings['card_type_mode']))
+                ? $debit_settings['card_type_mode']
+                : 'both';
             $debit_default_card_type = 'only_debit' === $debit_card_type_mode ? 'Debit' : 'Credit';
             WC()->session->set('lkn_cielo_debit_card_type', $debit_default_card_type);
         }

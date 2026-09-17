@@ -33,7 +33,11 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
         // Tipo de cartão padrão conforme o card_type_mode do gateway (PRO).
         // Em 'only_debit' a sessão NÃO deve iniciar como 'Credit', senão o
         // cálculo de juros/desconto roda como se fosse crédito.
-        $default_card_type = 'only_debit' === $this->gateway->get_option('card_type_mode', 'both') ? 'Debit' : 'Credit';
+        // Recurso PRO: sem licença ativa cai para 'both' (ignora valor salvo).
+        $card_type_mode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->gateway->get_option('card_type_mode', 'both')
+            : 'both';
+        $default_card_type = 'only_debit' === $card_type_mode ? 'Debit' : 'Credit';
 
         // Gate exclusivo para carregar os scripts de UI do layout moderno
         $checkout_layout = isset($this->settings['checkout_layout']) ? $this->settings['checkout_layout'] : 'no';
@@ -302,6 +306,7 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             'cardTypeMode' => LknWcCieloHelper::is_pro_license_active()
                 ? $this->gateway->get_option('card_type_mode', 'both')
                 : 'both',
+            'hideCardTypeSelector' => LknWcCieloHelper::is_hide_card_type_selector_enabled($this->gateway->id) ? 'yes' : 'no',
             'client' => array(
                 'name' => $user->display_name,
                 'email' => $user->user_email,

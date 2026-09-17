@@ -66,44 +66,35 @@
     cursor: pointer;
 }
 
-.radio-tooltip[data-layout="modern"]:hover::after {
-    content: '';
-    position: absolute;
-    top: 120%;
-    left: 50%;
-    transform: translateX(-30%);
-    width: 200px;
-    height: 154px;
-    background-image: url('../../img/modern-version.png');
-    background-position: center;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    z-index: 1000;
+/* Preview do layout (imagem abaixo do campo, não mais tooltip no hover). */
+.lkn-cielo-layout-preview {
+    margin-top: 12px;
+    width: 100%;
 }
 
-.radio-tooltip[data-layout="standard"]:hover::after {
-    content: '';
-    position: absolute;
-    top: 120%;
-    left: 50%;
-    transform: translateX(-30%);
-    width: 200px;
-    height: 170px;
-    background-image: url('../../img/standard-version.png');
-    background-position: center;
-    background-size: 100%;
-    background-repeat: no-repeat;
-    background-color: white;
-    border: 1px solid #ccc;
+.lkn-cielo-layout-preview img {
+    max-width: 220px;
+    width: 100%;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    z-index: 1000;
+    background-color: #fff;
+}
+
+.lkn-cielo-layout-preview--both {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.lkn-cielo-layout-preview__item {
+    text-align: center;
+}
+
+.lkn-cielo-layout-preview__cap {
+    margin: 6px 0 0;
+    font-weight: bold;
+    font-size: 13px;
+    color: #2c3338;
 }
 
 .lkn-input-copy-container{
@@ -285,3 +276,27 @@
         width: 240px;
     }
 }
+
+/* Campos exclusivos do PRO: link "PRO" exibido no cabeçalho do campo. */
+.lkn-header-cart {
+    position: relative;
+}
+
+.lkn-cielo-become-pro {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    text-decoration: none;
+    color: #FF0D08;
+    font-size: 0.84rem;
+    font-weight: bold;
+    font-family: "Inter", sans-serif;
+    line-height: normal;
+}
+
+.lkn-cielo-become-pro:hover,
+.lkn-cielo-become-pro:focus {
+    color: #FF0D08;
+}
+

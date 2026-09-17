@@ -184,10 +184,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloDebitSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
                 'standardVersion' => plugin_dir_url(__FILE__) . '../resources/img/standard-version.png',
+                'isProValid' => LknWcCieloHelper::is_pro_license_active(),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
                 'gateway_settings' => $gateway_settings,
                 'whatsapp_number' => LKN_WC_CIELO_WPP_NUMBER,
@@ -421,6 +423,170 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'default'     => 'no',
                 'custom_attributes' => array(
                     'data-title-description' => __('Controls the display of the custom finish-order button at checkout.', 'lkn-wc-gateway-cielo'),
+                ),
+            ),
+            'abecs_norms' => array(
+                'title'       => esc_attr__('ABECS standard messages', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable ABECS-standard return messages', 'lkn-wc-gateway-cielo'),
+                'default'     => LknWcCieloHelper::is_abecs_enabled($this->id) ? 'yes' : 'no',
+                'description' => __('Default: enabled when the PRO license is active.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Use the official Cielo (ABECS) return messages instead of the default messages.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            // Migrado do plugin PRO: a restrição de tipo de cartão agora vive no gateway
+            // free (o comportamento continua gated pela licença em tempo de execução).
+            'card_type_mode' => array(
+                'title'       => __('Card Type Mode', 'lkn-wc-gateway-cielo'),
+                'type'        => 'select',
+                'class'       => 'wc-enhanced-select',
+                'description' => __('Defines which card types are accepted by this gateway.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Choose whether to accept both credit and debit cards, or restrict to only one type.', 'lkn-wc-gateway-cielo'),
+                'options'     => array(
+                    'both'        => __('Credit/Debit (both)', 'lkn-wc-gateway-cielo'),
+                    'only_credit' => __('Only Credit', 'lkn-wc-gateway-cielo'),
+                    'only_debit'  => __('Only Debit', 'lkn-wc-gateway-cielo'),
+                ),
+                'default'     => 'both',
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Restricts the gateway to accept only credit, only debit, or both card types.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            'hide_card_type_selector' => array(
+                'title'       => __('Hide Card Type Selector', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Do not show the card type selector on the checkout', 'lkn-wc-gateway-cielo'),
+                'description' => __('When enabled, the card type selector is hidden on the checkout. Available only when a single card type is accepted ("Only Credit" or "Only Debit").', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Hide the card type selector from customers on the checkout page. It is only available when only debit or only credit cards are accepted.', 'lkn-wc-gateway-cielo'),
+                'default'     => 'no',
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Hide the card type selector on the checkout. Available only when only debit or only credit cards are accepted.', 'lkn-wc-gateway-cielo'),
+                        'merge-top' => "woocommerce_{$this->id}_card_type_mode",
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            // Migrado do plugin PRO: validação online de BIN (consulta Cielo API 3.0).
+            'brand_validation' => array(
+                'title'       => __('Online Card Validation', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable online BIN validation via Cielo API 3.0', 'lkn-wc-gateway-cielo'),
+                'description' => __('Enables online BIN validation via Cielo API 3.0 (Requires Cielo BIN functionality enabled).', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Check this if your Cielo account supports online brand validation (BIN lookup).', 'lkn-wc-gateway-cielo'),
+                'default'     => 'no',
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Performs card brand validation using Cielo’s BIN database.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            // Cada atributo é uma whitelist (select2 múltiplo com opção custom). Vazio = permite tudo.
+            'bin_allowed_brands' => array(
+                'title'       => __('Allowed Card Brands', 'lkn-wc-gateway-cielo'),
+                'type'        => 'multiselect',
+                'class'       => 'wc-enhanced-select lkn-bin-tags-select',
+                'description' => __('Restrict the accepted card brands. Leave empty to allow all. You can type a custom brand.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Brands allowed at checkout, based on the BIN lookup.', 'lkn-wc-gateway-cielo'),
+                'options'     => LknWcCieloHelper::getKnownCardBrands(),
+                'default'     => array_keys(LknWcCieloHelper::getKnownCardBrands()),
+                'custom_attributes' => array_merge(
+                    array(
+                        'merge-top' => "woocommerce_{$this->id}_brand_validation",
+                        'lkn-bin-depends' => 'brand_validation',
+                        'data-title-description' => __('Brands allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            'bin_allowed_card_types' => array(
+                'title'       => __('Allowed Card Types', 'lkn-wc-gateway-cielo'),
+                'type'        => 'multiselect',
+                'class'       => 'wc-enhanced-select lkn-bin-tags-select',
+                'description' => __('Restrict the accepted card types. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Card types allowed at checkout, based on the BIN lookup.', 'lkn-wc-gateway-cielo'),
+                'options'     => array(
+                    'Credito'  => __('Credit', 'lkn-wc-gateway-cielo'),
+                    'Debito'   => __('Debit', 'lkn-wc-gateway-cielo'),
+                    'Multiplo' => __('Multiple (credit and debit)', 'lkn-wc-gateway-cielo'),
+                ),
+                'default'     => array('Credito', 'Debito', 'Multiplo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'merge-top' => "woocommerce_{$this->id}_brand_validation",
+                        'lkn-bin-depends' => 'brand_validation',
+                        'data-title-description' => __('Card types allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            'bin_allowed_nationality' => array(
+                'title'       => __('Allowed Card Nationality', 'lkn-wc-gateway-cielo'),
+                'type'        => 'multiselect',
+                'class'       => 'wc-enhanced-select lkn-bin-tags-select',
+                'description' => __('Restrict by card nationality. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('National (Brazil) or foreign cards, based on the BIN lookup.', 'lkn-wc-gateway-cielo'),
+                'options'     => array(
+                    'national' => __('National', 'lkn-wc-gateway-cielo'),
+                    'foreign'  => __('Foreign', 'lkn-wc-gateway-cielo'),
+                ),
+                'default'     => array('national', 'foreign'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'merge-top' => "woocommerce_{$this->id}_brand_validation",
+                        'lkn-bin-depends' => 'brand_validation',
+                        'data-title-description' => __('Card nationality allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            'bin_allowed_corporate' => array(
+                'title'       => __('Corporate Cards', 'lkn-wc-gateway-cielo'),
+                'type'        => 'multiselect',
+                'class'       => 'wc-enhanced-select lkn-bin-tags-select',
+                'description' => __('Restrict by corporate card. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Allow or block corporate cards, based on the BIN lookup.', 'lkn-wc-gateway-cielo'),
+                'options'     => array(
+                    'not_corporate' => __('Non-corporate', 'lkn-wc-gateway-cielo'),
+                    'corporate'     => __('Corporate', 'lkn-wc-gateway-cielo'),
+                ),
+                'default'     => array('not_corporate', 'corporate'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'merge-top' => "woocommerce_{$this->id}_brand_validation",
+                        'lkn-bin-depends' => 'brand_validation',
+                        'data-title-description' => __('Corporate card handling at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
+            'bin_allowed_prepaid' => array(
+                'title'       => __('Prepaid Cards', 'lkn-wc-gateway-cielo'),
+                'type'        => 'multiselect',
+                'class'       => 'wc-enhanced-select lkn-bin-tags-select',
+                'description' => __('Restrict by prepaid card. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Allow or block prepaid cards, based on the BIN lookup.', 'lkn-wc-gateway-cielo'),
+                'options'     => array(
+                    'not_prepaid' => __('Non-prepaid', 'lkn-wc-gateway-cielo'),
+                    'prepaid'     => __('Prepaid', 'lkn-wc-gateway-cielo'),
+                ),
+                'default'     => array('not_prepaid', 'prepaid'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'merge-top' => "woocommerce_{$this->id}_brand_validation",
+                        'lkn-bin-depends' => 'brand_validation',
+                        'data-title-description' => __('Prepaid card handling at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
                 ),
             ),
         );
@@ -949,10 +1115,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             'current_card_type' => (LknWcCieloHelper::is_pro_license_active() && $this->get_option('card_type_mode', 'both') === 'only_debit') ? 'Debit' : (WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit')
         ));
         
-        // Check checkout layout option
+        // Check checkout layout option. O layout moderno é recurso PRO: sem licença
+        // ativa cai para o layout padrão, ignorando o valor salvo (ex.: licença
+        // desativada depois de configurar, ou HTML manipulado).
         $checkout_layout = $this->get_option('checkout_layout', 'no');
         $show_card_brand_icons = $this->get_option('show_card_brand_icons', 'yes');
-        $use_modern_layout = ('yes' === $checkout_layout);
+        $use_modern_layout = LknWcCieloHelper::is_pro_license_active() && ('yes' === $checkout_layout);
 
         // Enqueue modern layout assets if enabled
         if ($use_modern_layout) {
@@ -1162,6 +1330,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $card_type_mode = LknWcCieloHelper::is_pro_license_active()
             ? $this->get_option('card_type_mode', 'both')
             : 'both';
+
+        // Esconde o seletor de tipo de cartão (PRO) apenas quando o modo é de um único
+        // tipo. Em 'both' a opção é ignorada (o seletor continua visível).
+        $hide_card_type_selector = ($card_type_mode !== 'both' && LknWcCieloHelper::is_hide_card_type_selector_enabled($this->id)) ? 'yes' : 'no';
         
         // --- Saved Cards (PRO feature) ---
         // card_array is only created by the PRO plugin; if it exists, show the saved cards list.
@@ -1261,13 +1433,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             return false;
         }
 
-        // Enforce card type mode (prevent HTML manipulation)
-        $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
-            ? $this->get_option('card_type_mode', 'both')
-            : 'both';
-        if ($cardTypeMode !== 'both') {
-            $forcedType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
-            $_POST['lkn_cc_type'] = $forcedType;
+        // Anti-manipulação do tipo de cartão (o fluxo de cartão salvo não envia o tipo).
+        if ($saveCardIndex == '') {
+            $this->resolve_card_type_or_throw();
         }
 
         if ('no' === $validateCompatMode && $saveCardIndex == '') {
@@ -1287,6 +1455,117 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
 
         return true;
+    }
+
+    /**
+     * Resolve o tipo de cartão (Credit/Debit) aplicando o card_type_mode e
+     * recusando (via exceção) valores adulterados no POST.
+     *
+     * - Valor fora de Credit/Debit → exceção.
+     * - card_type_mode de um único tipo e valor divergente → exceção.
+     * - Valor ausente → usa o tipo exigido pela restrição (ou Credit em 'both').
+     *
+     * @return string 'Credit' ou 'Debit'
+     */
+    private function resolve_card_type_or_throw(): string
+    {
+        $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
+            ? $this->get_option('card_type_mode', 'both')
+            : 'both';
+
+        $requiredCardType = null;
+        if ('only_credit' === $cardTypeMode) {
+            $requiredCardType = 'Credit';
+        } elseif ('only_debit' === $cardTypeMode) {
+            $requiredCardType = 'Debit';
+        }
+
+        $postedCardType = isset($_POST['lkn_cc_type']) ? ucfirst(strtolower(sanitize_text_field(wp_unslash($_POST['lkn_cc_type'])))) : '';
+
+        if ('' === $postedCardType) {
+            return (null !== $requiredCardType) ? $requiredCardType : 'Credit';
+        }
+
+        if (! in_array($postedCardType, array('Credit', 'Debit'), true)) {
+            throw new Exception(esc_html__('Invalid card type.', 'lkn-wc-gateway-cielo'));
+        }
+
+        if (null !== $requiredCardType && $postedCardType !== $requiredCardType) {
+            throw new Exception(esc_html__('The selected card type is not accepted by this gateway.', 'lkn-wc-gateway-cielo'));
+        }
+
+        return $postedCardType;
+    }
+
+    /**
+     * Valida o cartão contra as whitelists de BIN configuradas (PRO).
+     * Consulta a API Cielo e lança exceção se o cartão não corresponder ao permitido.
+     *
+     * @param string $cardNum Número do cartão.
+     * @return void
+     */
+    private function enforce_bin_restrictions($cardNum): void
+    {
+        // Recurso PRO com validação online ativa.
+        if (! LknWcCieloHelper::is_pro_license_active()) {
+            return;
+        }
+        if ('yes' !== $this->get_option('brand_validation', 'no')) {
+            return;
+        }
+
+        $allowedBrands      = array_filter((array) $this->get_option('bin_allowed_brands', array()));
+        $allowedTypes       = array_filter((array) $this->get_option('bin_allowed_card_types', array()));
+        $allowedNationality = array_filter((array) $this->get_option('bin_allowed_nationality', array()));
+        $allowedCorporate   = array_filter((array) $this->get_option('bin_allowed_corporate', array()));
+        $allowedPrepaid     = array_filter((array) $this->get_option('bin_allowed_prepaid', array()));
+
+        $hasRestrictions = $allowedBrands || $allowedTypes || $allowedNationality || $allowedCorporate || $allowedPrepaid;
+        if (! $hasRestrictions) {
+            return;
+        }
+
+        $binData = LknWCGatewayCieloEndpoint::queryCardBin($cardNum, get_option('woocommerce_lkn_cielo_debit_settings', array()));
+
+        // Sem resposta da consulta: não bloqueia (evita falso negativo por indisponibilidade).
+        if (! $binData) {
+            return;
+        }
+
+        // Bandeira
+        if ($allowedBrands && ! in_array(strtolower($binData['provider']), array_map('strtolower', $allowedBrands), true)) {
+            /* translators: %s: card brand name */
+            throw new Exception(sprintf(esc_html__('The card brand "%s" is not accepted by this store.', 'lkn-wc-gateway-cielo'), esc_html($binData['brandRaw'] !== '' ? $binData['brandRaw'] : $binData['provider'])));
+        }
+
+        // Tipo de cartão
+        if ($allowedTypes && ! in_array($binData['cardType'], $allowedTypes, true)) {
+            throw new Exception(esc_html__('This card type is not accepted by this store.', 'lkn-wc-gateway-cielo'));
+        }
+
+        // Nacionalidade
+        if ($allowedNationality && null !== $binData['foreignCard']) {
+            $nationalityToken = $binData['foreignCard'] ? 'foreign' : 'national';
+            if (! in_array($nationalityToken, $allowedNationality, true)) {
+                throw new Exception(esc_html__('This card nationality is not accepted by this store.', 'lkn-wc-gateway-cielo'));
+            }
+        }
+
+        // Corporativo
+        if ($allowedCorporate && null !== $binData['corporateCard']) {
+            $corporateToken = $binData['corporateCard'] ? 'corporate' : 'not_corporate';
+            if (! in_array($corporateToken, $allowedCorporate, true)) {
+                throw new Exception(esc_html__('Corporate cards are not accepted by this store.', 'lkn-wc-gateway-cielo'));
+            }
+        }
+
+        // Pré-pago
+        if ($allowedPrepaid && null !== $binData['prepaid']) {
+            $prepaidToken = $binData['prepaid'] ? 'prepaid' : 'not_prepaid';
+            if (! in_array($prepaidToken, $allowedPrepaid, true)) {
+                throw new Exception(esc_html__('Prepaid cards are not accepted by this store.', 'lkn-wc-gateway-cielo'));
+            }
+        }
     }
 
     /**
@@ -1333,17 +1612,21 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 $cardName = trim($firstName . ' ' . $lastName);
             }
 
-            $cardType = isset($_POST['lkn_cc_type']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_type'])) : '';
+            $cardType = $this->resolve_card_type_or_throw();
 
-            // Enforce card type mode (prevent HTML manipulation)
-            $cardTypeMode = LknWcCieloHelper::is_pro_license_active()
-                ? $this->get_option('card_type_mode', 'both')
-                : 'both';
-            if ($cardTypeMode !== 'both') {
-                $cardType = ($cardTypeMode === 'only_credit') ? 'Credit' : 'Debit';
-            }
+            // Whitelist de BIN (PRO): bloqueia cartões que não correspondem ao configurado.
+            $this->enforce_bin_restrictions($cardNum);
 
             $installments = (int) (isset($_POST['lkn_cc_dc_installments']) ? sanitize_text_field(wp_unslash($_POST['lkn_cc_dc_installments'])) : 1);
+
+            // Anti-manipulação do select de parcelas: débito é SEMPRE pagamento único
+            // e crédito só parcela quando a opção de parcelamento está ativa. Em
+            // qualquer outro caso força 1 — mesmo que o valor enviado seja adulterado.
+            $activeInstallment = $this->get_option('installment_payment');
+            if ($cardType === 'Debit' || 'yes' !== $activeInstallment) {
+                $installments = 1;
+            }
+
             $saveCard = isset($_POST['lkn_save_debit_credit_card']) && ($_POST['lkn_save_debit_credit_card'] === '1' || $this->get_option('save_card_token') == 'required' ) ? true : false;
 
             // Assinaturas (WooCommerce Subscriptions): apenas Cartão de Crédito é permitido.
@@ -1391,7 +1674,6 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             $provider = LknWcCieloHelper::getCardProvider($cardNum, $this->id);
             $debug = $this->get_option('debug');
             $currency = $order->get_currency();
-            $activeInstallment = $this->get_option('installment_payment');
 
             if (empty($provider)) {
                 $message = __("Bin query is not enabled for this merchant.", 'lkn-wc-gateway-cielo');
@@ -1897,7 +2179,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $responseDecoded = json_decode($response['body']);
 
         if (isset($responseDecoded->Code) && isset($responseDecoded->Message)) {
-            $this->add_error(LknWcCieloHelper::getCieloErrorMessage($responseDecoded, __('Order payment failed. Please review the gateway settings.', 'lkn-wc-gateway-cielo')));
+            // Legado (v1.37.1): mensagem crua da Cielo quando o ABECS está desligado.
+            $this->add_error(LknWcCieloHelper::getCieloErrorMessage($responseDecoded, __('Order payment failed. Please review the gateway settings.', 'lkn-wc-gateway-cielo'), $this->id, $responseDecoded->Message));
         }
 
         // Salvar metadados da resposta para o pedido (ambos os caminhos: novo cartão e cartão salvo)
@@ -2027,7 +2310,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
         if (isset($responseDecoded->Payment->ReturnCode) && 'GF' == $responseDecoded->Payment->ReturnCode) {
             // Error GF detected, notify site admin
-            $translatedReturnMessage = LknCieloErrorCodes::translate($responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
+            $translatedReturnMessage = LknCieloErrorCodes::resolveForGateway($this->id, $responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '', isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
             $error_message = "Return Code: " . $responseDecoded->Payment->ReturnCode . '. Return Message: ' . $translatedReturnMessage . '.' . __('Please contact Cielo for further assistance.', 'lkn-wc-gateway-cielo');
             //wp_mail(get_option('admin_email'), 'Erro na transação Cielo', $error_message);
 
@@ -2038,7 +2321,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             // código de retorno, em vez de uma mensagem genérica.
             $message = LknWcCieloHelper::getCieloErrorMessage(
                 $responseDecoded,
-                __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo')
+                __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo'),
+                $this->id
             );
 
             $this->add_error($message);
@@ -2061,7 +2345,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         // Devolver a mensagem oficial da Cielo (norma ABECS) com base no código de
         // retorno, mantendo a mensagem genérica apenas como fallback.
-        $message = LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $fallbackMessage);
+        $message = LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $fallbackMessage, $this->id);
 
         $this->add_error($message);
     }
@@ -2777,10 +3061,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         // Verificar se é um array (caso de erro da API) e pegar o primeiro elemento
         if (is_array($responseDecoded) && !empty($responseDecoded)) {
             $errorObj = $responseDecoded[0];
-            $error_message = isset($errorObj->Message) ? LknWcCieloHelper::getCieloErrorMessage($errorObj, $errorObj->Message) : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
+            $error_message = isset($errorObj->Message) ? LknWcCieloHelper::getCieloErrorMessage($errorObj, $errorObj->Message, $this->id) : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
         } else {
             $error_message = isset($responseDecoded->Message) 
-                ? LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $responseDecoded->Message) 
+                ? LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $responseDecoded->Message, $this->id) 
                 : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
         }
 

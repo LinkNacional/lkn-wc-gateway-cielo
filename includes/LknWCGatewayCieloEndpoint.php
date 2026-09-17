@@ -281,14 +281,17 @@ final class LknWCGatewayCieloEndpoint
             $option = get_option($optionKey, array());
 
             if (isset($option['brand_validation']) && 'yes' === $option['brand_validation']) {
-                $onlineBrand = $this->tryOnlineBin($number, $option);
+                $onlineBrand = self::queryCardBin($number, $option);
 
                 if ($onlineBrand) {
                     return new WP_REST_Response(array(
-                        'status'   => true,
-                        'brand'    => $onlineBrand['provider'],
-                        'cardType' => $onlineBrand['cardType'],
-                        'source'   => 'online',
+                        'status'        => true,
+                        'brand'         => $onlineBrand['provider'],
+                        'cardType'      => $onlineBrand['cardType'],
+                        'foreignCard'   => $onlineBrand['foreignCard'],
+                        'corporateCard' => $onlineBrand['corporateCard'],
+                        'prepaid'       => $onlineBrand['prepaid'],
+                        'source'        => 'online',
                     ), 200);
                 }
                 // Fallthrough para offline em caso de falha
@@ -335,6 +338,9 @@ final class LknWCGatewayCieloEndpoint
                     'status' => true,
                     'brand' => $brands[$index],
                     'cardType' => 'Multiplo',
+                    'foreignCard' => null,
+                    'corporateCard' => null,
+                    'prepaid' => null,
                     'source' => 'offline',
                 ], 200);
             }
@@ -388,18 +394,22 @@ final class LknWCGatewayCieloEndpoint
     }
 
     /**
-     * Tenta consulta online do BIN na API Cielo.
-     * Retorna array com provider e cardType, ou false se falhar.
+     * Consulta online do BIN na API Cielo (método reutilizável).
+     * Retorna os dados normalizados da bandeira/tipo + flags extras, ou false.
      *
-     * @param string $cardBin 6 primeiros dígitos do cartão
-     * @param array  $option  Configurações do gateway (debit ou credit)
-     * @return array{provider: string, cardType: string}|false
+     * @param string $cardBin Número do cartão (usa os 6 primeiros dígitos).
+     * @param array  $option  Configurações do gateway (debit ou credit).
+     * @return array{provider: string, brandRaw: string, cardType: string, foreignCard: bool|null, corporateCard: bool|null, prepaid: bool|null}|false
      */
-    private function tryOnlineBin($cardBin, $option)
+    public static function queryCardBin($cardBin, $option)
     {
         $bin = substr(str_replace(' ', '', $cardBin), 0, 6);
 
         if (strlen($bin) < 6) {
+            return false;
+        }
+
+        if (! isset($option['env']) || ! isset($option['merchant_id']) || ! isset($option['merchant_key'])) {
             return false;
         }
 
@@ -437,22 +447,73 @@ final class LknWCGatewayCieloEndpoint
 
         // Resposta com wrapper cardQuery (formato antigo)
         if (isset($data['cardQuery']['Provider'])) {
-            return array(
-                'provider' => $this->mapProviderToBrand($data['cardQuery']['Provider']),
-                'cardType' => $this->mapCardType(isset($data['cardQuery']['CardType']) ? $data['cardQuery']['CardType'] : 'Multiplo'),
-            );
+            return self::normalizeBinData($data['cardQuery']);
         }
 
         // Resposta direta: {Status, Provider, CardType, ...}
-        if (isset($data['Status']) && '00' === $data['Status'] && isset($data['Provider'])) {
-            return array(
-                'provider' => $this->mapProviderToBrand($data['Provider']),
-                'cardType' => $this->mapCardType(isset($data['CardType']) ? $data['CardType'] : 'Multiplo'),
-            );
+        if (isset($data['Provider']) && (! isset($data['Status']) || '00' === $data['Status'])) {
+            return self::normalizeBinData($data);
         }
 
         // Qualquer outra resposta é considerada falha
         return false;
+    }
+
+    /**
+     * Normaliza os dados crus do BIN (Cielo) no formato interno.
+     *
+     * @param array $data Array com Provider, CardType e, quando disponível,
+     *                    ForeignCard, CorporateCard e Prepaid.
+     * @return array{provider: string, brandRaw: string, cardType: string, foreignCard: bool|null, corporateCard: bool|null, prepaid: bool|null}
+     */
+    private static function normalizeBinData($data)
+    {
+        $brandRaw = isset($data['Provider']) ? trim((string) $data['Provider']) : '';
+
+        return array(
+            'provider'      => self::mapProviderToBrand($brandRaw),
+            'brandRaw'      => $brandRaw,
+            'cardType'      => self::mapCardType(isset($data['CardType']) ? $data['CardType'] : 'Multiplo'),
+            'foreignCard'   => self::readBoolFlag($data, 'ForeignCard'),
+            'corporateCard' => self::readBoolFlag($data, 'CorporateCard'),
+            'prepaid'       => self::readBoolFlag($data, 'Prepaid'),
+        );
+    }
+
+    /**
+     * Lê um campo booleano da resposta da Cielo de forma tolerante
+     * (aceita bool, 'true'/'false', 1/0 e variações de nome). Retorna null se ausente.
+     *
+     * @param array  $data
+     * @param string $key
+     * @return bool|null
+     */
+    private static function readBoolFlag($data, $key)
+    {
+        $candidates = array($key, strtolower($key), lcfirst($key));
+        foreach ($candidates as $candidate) {
+            if (! array_key_exists($candidate, $data)) {
+                continue;
+            }
+            $value = $data[$candidate];
+            if (is_bool($value)) {
+                return $value;
+            }
+            if (is_string($value)) {
+                $normalized = strtolower(trim($value));
+                if (in_array($normalized, array('true', '1', 'yes', 'sim'), true)) {
+                    return true;
+                }
+                if (in_array($normalized, array('false', '0', 'no', 'nao', 'não', ''), true)) {
+                    return false;
+                }
+            }
+            if (is_numeric($value)) {
+                return (int) $value === 1;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -462,7 +523,7 @@ final class LknWCGatewayCieloEndpoint
      * @param string $provider Nome do provider (ex: "VISA", "MASTERCARD")
      * @return string Nome da bandeira (ex: "visa", "mastercard")
      */
-    private function mapProviderToBrand($provider)
+    private static function mapProviderToBrand($provider)
     {
         $map = array(
             'VISA'             => 'visa',
@@ -490,7 +551,7 @@ final class LknWCGatewayCieloEndpoint
      * @param string $cardType Valor bruto do CardType da API
      * @return string "Credito", "Debito" ou "Multiplo"
      */
-    private function mapCardType($cardType)
+    private static function mapCardType($cardType)
     {
         // Remove acentos
         $normalized = preg_replace(

@@ -96,6 +96,7 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloGooglePaySettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
@@ -285,6 +286,20 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
                 'desc_tip' => __('Esta configuração aumenta a segurança, mas bloqueia alguns cartões que não suportam 3DS.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('Ative para exigir autenticação 3DS em todas as transações do Google Pay para maior segurança.', 'lkn-wc-gateway-cielo')
+                )
+            ),
+            'abecs_norms' => array(
+                'title'       => esc_attr__('ABECS standard messages', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable ABECS-standard return messages', 'lkn-wc-gateway-cielo'),
+                'default'     => LknWcCieloHelper::is_abecs_enabled($this->id) ? 'yes' : 'no',
+                'description' => __('Default: enabled when the PRO license is active.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Use the official Cielo (ABECS) return messages instead of the default messages.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo')
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
                 )
             )
         );
@@ -605,7 +620,7 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         }
         if (isset($responseDecoded->Payment->ReturnCode) && 'GF' == $responseDecoded->Payment->ReturnCode) {
             // Error GF detected, notify site admin
-            $translatedReturnMessage = LknCieloErrorCodes::translate($responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
+            $translatedReturnMessage = LknCieloErrorCodes::resolveForGateway($this->id, $responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '', isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
             $error_message = "Return Code: " . $responseDecoded->Payment->ReturnCode . '. Return Message: ' . $translatedReturnMessage . '.' . __('Please contact Cielo for further assistance.', 'lkn-wc-gateway-cielo');
             //wp_mail(get_option('admin_email'), 'Erro na transação Cielo', $error_message);
 
@@ -614,9 +629,13 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
 
             // Seguir a norma ABECS: devolver a mensagem oficial da Cielo para o
             // código de retorno, em vez de uma mensagem genérica.
+            // Legado (v1.37.1): mensagem detalhada com o texto cru da Cielo quando
+            // o ABECS está desligado.
             $message = LknWcCieloHelper::getCieloErrorMessage(
                 $responseDecoded,
-                __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo')
+                __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo'),
+                $this->id,
+                $error_message
             );
 
             $this->add_error($message);
@@ -629,7 +648,8 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         // retorno, mantendo a mensagem genérica apenas como fallback.
         $message = LknWcCieloHelper::getCieloErrorMessage(
             $responseDecoded,
-            __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo')
+            __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo'),
+            $this->id
         );
 
         $this->add_error($message);

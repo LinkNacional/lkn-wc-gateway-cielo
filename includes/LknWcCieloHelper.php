@@ -107,6 +107,11 @@ final class LknWcCieloHelper
      */
     public static function is_pro_license_active()
     {
+        // Garante que is_plugin_active() exista mesmo em contextos de frontend.
+        if (! function_exists('is_plugin_active') && defined('ABSPATH')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
         // Verifica se o plugin pro está ativo
         if (!is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php')) {
             return false;
@@ -120,9 +125,94 @@ final class LknWcCieloHelper
         return $license_result;
     }
 
+    /**
+     * Verifica se o gateway deve usar as mensagens padronizadas ABECS.
+     *
+     * Por padrão a opção segue a licença PRO: habilitada para quem tem a licença
+     * ativa e desabilitada para usuários free. Se o lojista salvar a configuração,
+     * o valor escolhido prevalece.
+     *
+     * @param string $gateway_id ID do gateway (lkn_cielo_credit, lkn_cielo_debit, ...).
+     * @return bool
+     */
+    final public static function is_abecs_enabled($gateway_id = ''): bool
+    {
+        // Camada de licença: ABECS é um recurso do plano PRO. Sem licença ativa,
+        // todos os gateways caem para o fluxo legado — mesmo que a opção esteja
+        // como "yes" na base (ex.: HTML manipulado pelo lojista).
+        if (! self::is_pro_license_active()) {
+            return false;
+        }
+
+        $gateway_id = (string) $gateway_id;
+
+        // Sem gateway definido, o resultado segue a licença PRO (uso interno/PRO).
+        if ('' === $gateway_id) {
+            return true;
+        }
+
+        $settings = get_option("woocommerce_{$gateway_id}_settings", array());
+
+        if (is_array($settings) && array_key_exists('abecs_norms', $settings)) {
+            return 'yes' === $settings['abecs_norms'];
+        }
+
+        // Opção ainda não salva: com PRO ativo fica habilitado por padrão.
+        return true;
+    }
+
+    /**
+     * Verifica se o seletor de tipo de cartão deve ser escondido no checkout (gateway de débito).
+     *
+     * Recurso exclusivo do plano PRO: sem licença ativa o resultado é sempre falso,
+     * ignorando o valor salvo na opção (ex.: HTML do painel manipulado pelo lojista).
+     * Só faz efeito quando o modo é de um único tipo (only_credit/only_debit); em
+     * 'both' a opção é ignorada.
+     *
+     * @param string $gateway_id ID do gateway (ex.: lkn_cielo_debit).
+     * @return bool
+     */
+    final public static function is_hide_card_type_selector_enabled($gateway_id = ''): bool
+    {
+        // Camada de licença: sem PRO ativo o recurso não se aplica.
+        if (! self::is_pro_license_active()) {
+            return false;
+        }
+
+        $gateway_id = (string) $gateway_id;
+
+        if ('' === $gateway_id) {
+            return false;
+        }
+
+        $settings = get_option("woocommerce_{$gateway_id}_settings", array());
+
+        return is_array($settings) && isset($settings['hide_card_type_selector']) && 'yes' === $settings['hide_card_type_selector'];
+    }
+
     public static function getIconUrl()
     {
         return plugin_dir_url(__FILE__) . '../includes/assets/icon.svg';
+    }
+
+    /**
+     * Bandeiras conhecidas para os campos de whitelist de BIN.
+     *
+     * @return array<string,string>
+     */
+    public static function getKnownCardBrands(): array
+    {
+        return array(
+            'visa'       => 'Visa',
+            'mastercard' => 'Mastercard',
+            'amex'       => __('American Express', 'lkn-wc-gateway-cielo'),
+            'elo'        => 'Elo',
+            'hipercard'  => 'Hipercard',
+            'diners'     => __('Diners Club', 'lkn-wc-gateway-cielo'),
+            'discover'   => 'Discover',
+            'jcb'        => 'JCB',
+            'aura'       => 'Aura',
+        );
     }
 
     /**
@@ -183,23 +273,27 @@ final class LknWcCieloHelper
     /**
      * Build a user-facing error message from a decoded Cielo response.
      *
-     * The return code is translated through the shared catalog
-     * (`LknCieloErrorCodes::translate`), so declined cards surface the official
-     * Cielo/ABECS reason as a translatable string (source strings live in the
-     * catalog, translatable via .po/.mo). The message returned by Cielo is used
-     * only as a fallback when the code is not mapped. Codes with multiple
-     * meanings (e.g. 57, which differs per brand) collapse to a single canonical
-     * entry — the ABECS "POS/E-commerce" message.
+     * Respects the gateway "ABECS standard messages" option (see
+     * {@see LknWcCieloHelper::is_abecs_enabled()}):
+     *
+     *  - ABECS enabled + PRO license: official catalog message (translatable at
+     *    translate.wordpress.org) with the ` (Error code: X)` suffix.
+     *  - ABECS enabled + free: the raw Cielo message (same English text the API
+     *    returns), with the ` (Error code: X)` suffix.
+     *  - ABECS disabled: the legacy message (previous plugin release), so the
+     *    behavior is preserved for stores that opt out.
      *
      * Handles both response shapes returned by the Cielo API:
      *  - the direct error array `[ { "Code": ..., "Message": ... } ]` (HTTP 4xx);
      *  - the processed `Payment.ReturnCode` / `Payment.ReturnMessage` (declines).
      *
-     * @param mixed  $responseDecoded Decoded Cielo response (object or array).
-     * @param string $fallback        Message used when there is no code.
+     * @param mixed       $responseDecoded Decoded Cielo response (object or array).
+     * @param string      $fallback        Message used when there is no code.
+     * @param string      $gatewayId       Gateway id used to resolve the ABECS option.
+     * @param string|null $legacyMessage   Message used when ABECS is disabled. Defaults to $fallback.
      * @return string
      */
-    public static function getCieloErrorMessage($responseDecoded, $fallback = '')
+    public static function getCieloErrorMessage($responseDecoded, $fallback = '', $gatewayId = '', $legacyMessage = null)
     {
         $code = '';
         $rawMessage = '';
@@ -221,9 +315,15 @@ final class LknWcCieloHelper
             return $fallback;
         }
 
-        $message = LknCieloErrorCodes::translate($code, $rawMessage);
+        $legacy = (null !== $legacyMessage) ? $legacyMessage : $fallback;
+        $message = LknCieloErrorCodes::resolveForGateway($gatewayId, $code, $rawMessage, $legacy);
 
-        return $message . ' (Error code: ' . $code . ')';
+        // O sufixo do código acompanha apenas o modo ABECS (ligado).
+        if (LknCieloErrorCodes::isAbecsEnabled($gatewayId)) {
+            $message .= ' (Error code: ' . $code . ')';
+        }
+
+        return $message;
     }
 
     /**
@@ -399,18 +499,19 @@ final class LknWcCieloHelper
         // Return code com descrição da resposta - verificar se é erro direto da API
         $returnCode = '';
         $returnMessage = '';
+        $metadataGatewayId = (is_object($gatewayInstance) && isset($gatewayInstance->id)) ? $gatewayInstance->id : '';
 
         // Verificar se é erro direto da API (array de erros)
         if (is_array($responseDecoded) && isset($responseDecoded[0]) && isset($responseDecoded[0]->Code)) {
             $returnCode = (string)$responseDecoded[0]->Code;
             $rawReturnMessage = isset($responseDecoded[0]->Message) ? (string)$responseDecoded[0]->Message : '';
-            $returnMessage = LknCieloErrorCodes::translate($returnCode, $rawReturnMessage);
+            $returnMessage = LknCieloErrorCodes::resolveForGateway($metadataGatewayId, $returnCode, $rawReturnMessage);
         }
         // Verificar se é resposta normal com Payment
         elseif (isset($responseDecoded->Payment->ReturnCode)) {
             $returnCode = $responseDecoded->Payment->ReturnCode;
             $rawReturnMessage = isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '';
-            $returnMessage = LknCieloErrorCodes::translate($returnCode, $rawReturnMessage);
+            $returnMessage = LknCieloErrorCodes::resolveForGateway($metadataGatewayId, $returnCode, $rawReturnMessage);
         }
         // Para PIX, verificar estrutura específica da resposta
         elseif ($gatewayType === 'Pix') {

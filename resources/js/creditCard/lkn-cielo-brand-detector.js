@@ -219,16 +219,24 @@
         if (wooSubmitBtn) {
             // Sync custom button with WooCommerce button state
             const syncButtonState = () => {
-                // Don't sync if button is in processing state (custom feedback)
-                if (cieloSubmitBtn.textContent === 'Processing...' && cieloSubmitBtn.style.backgroundColor === 'rgb(108, 117, 125)') {
+                // Durante um fluxo 3DS em andamento o botão é controlado pelo script
+                // de 3DS. Não mexe para não destravá-lo cedo demais.
+                if (window.__lkn3DSInProgress) {
                     return;
                 }
-                
+                // Don't sync if button is in processing state (custom feedback)
+                if (cieloSubmitBtn.disabled && cieloSubmitBtn.textContent === 'Processing...' && cieloSubmitBtn.style.backgroundColor === 'rgb(108, 117, 125)') {
+                    return;
+                }
+
                 if (wooSubmitBtn.disabled) {
                     cieloSubmitBtn.disabled = true;
                     cieloSubmitBtn.textContent = wooSubmitBtn.textContent || 'Processing...';
                 } else {
                     cieloSubmitBtn.disabled = false;
+                    cieloSubmitBtn.style.backgroundColor = '';
+                    cieloSubmitBtn.style.borderColor = '';
+                    cieloSubmitBtn.style.cursor = '';
                     cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Confirm Payment';
                 }
             };
@@ -241,6 +249,9 @@
             // Click handler - trigger WooCommerce submit with delay feedback
             cieloSubmitBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                if (window.__lkn3DSInProgress) {
+                    return;
+                }
                 if (!this.disabled && wooSubmitBtn && !wooSubmitBtn.disabled) {
                     // Immediate visual feedback
                     this.disabled = true;
@@ -255,13 +266,15 @@
                     // If no checkout error occurs, restore after 4 seconds
                     const restoreButton = () => {
                         setTimeout(() => {
-                            if (this.disabled) {
-                                this.disabled = false;
-                                this.style.backgroundColor = '';
-                                this.style.borderColor = '';
-                                this.style.cursor = '';
-                                this.textContent = this.getAttribute('data-original-text') || 'Confirm Payment';
+                            // Se o fluxo 3DS ainda está em andamento, NÃO restaura.
+                            if (window.__lkn3DSInProgress) {
+                                return;
                             }
+                            this.disabled = false;
+                            this.style.backgroundColor = '';
+                            this.style.borderColor = '';
+                            this.style.cursor = '';
+                            this.textContent = this.getAttribute('data-original-text') || 'Confirm Payment';
                         }, 4000);
                     };
                     

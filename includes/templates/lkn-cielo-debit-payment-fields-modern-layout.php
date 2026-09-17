@@ -227,6 +227,7 @@ if (!defined('ABSPATH')) {
                 </div>
             </div>
 
+            <?php if ('yes' !== $hide_card_type_selector) : ?>
             <div class="modern-field field-half">
                 <label for="lkn_cc_type" class="field-label">
                     <?php esc_html_e('Card Type', 'lkn-wc-gateway-cielo'); ?>
@@ -242,10 +243,11 @@ if (!defined('ABSPATH')) {
                     <option value="Debit"><?php esc_html_e('Debit card', 'lkn-wc-gateway-cielo'); ?></option>
                     <?php endif; ?>
                 </select>
-                <?php if ($card_type_mode !== 'both') : ?>
-                <input type="hidden" name="lkn_cc_type" value="<?php echo ($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'; ?>">
-                <?php endif; ?>
             </div>
+            <?php endif; ?>
+            <?php if ($card_type_mode !== 'both') : ?>
+            <input type="hidden" name="lkn_cc_type" value="<?php echo ($card_type_mode === 'only_debit') ? 'Debit' : 'Credit'; ?>">
+            <?php endif; ?>
         </div>
 
         <!-- Expiry Date and CVV Fields -->

@@ -138,8 +138,12 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloCreditSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
+                'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
+                'standardVersion' => plugin_dir_url(__FILE__) . '../resources/img/standard-version.png',
+                'isProValid' => LknWcCieloHelper::is_pro_license_active(),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
                 'gateway_settings' => $gateway_settings,
                 'whatsapp_number' => LKN_WC_CIELO_WPP_NUMBER,
@@ -301,6 +305,20 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                 'desc_tip'    => __('Displays an animated credit card in the checkout form.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('Enhance user experience by showing a dynamic card preview while filling out card details.', 'lkn-wc-gateway-cielo')
+                )
+            ),
+            'abecs_norms' => array(
+                'title'       => esc_attr__('ABECS standard messages', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable ABECS-standard return messages', 'lkn-wc-gateway-cielo'),
+                'default'     => LknWcCieloHelper::is_abecs_enabled($this->id) ? 'yes' : 'no',
+                'description' => __('Default: enabled when the PRO license is active.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Use the official Cielo (ABECS) return messages instead of the default messages.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo')
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
                 )
             )
         );
@@ -570,9 +588,10 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             }
         }
 
-        // Check if modern layout is enabled
+        // Check if modern layout is enabled. O layout moderno é recurso PRO: sem
+        // licença ativa cai para o layout padrão, ignorando o valor salvo.
         $checkout_layout = $this->get_option('checkout_layout', 'no');
-        $use_modern_layout = ('yes' === $checkout_layout);
+        $use_modern_layout = LknWcCieloHelper::is_pro_license_active() && ('yes' === $checkout_layout);
 
         // Enqueue specific scripts for modern layout
         if ($use_modern_layout) {
@@ -1043,7 +1062,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
         }
         if (isset($responseDecoded->Payment->ReturnCode) && 'GF' == $responseDecoded->Payment->ReturnCode) {
             // Error GF detected, notify site admin
-            $translatedReturnMessage = LknCieloErrorCodes::translate($responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
+            $translatedReturnMessage = LknCieloErrorCodes::resolveForGateway($this->id, $responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '', isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
             $error_message = "Return Code: " . $responseDecoded->Payment->ReturnCode . '. Return Message: ' . $translatedReturnMessage . '.' . __('Please contact Cielo for further assistance.', 'lkn-wc-gateway-cielo');
             //wp_mail(get_option('admin_email'), 'Erro na transação Cielo', $error_message);
 
@@ -1054,7 +1073,8 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             // código de retorno, em vez de uma mensagem genérica.
             $message = LknWcCieloHelper::getCieloErrorMessage(
                 $responseDecoded,
-                __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo')
+                __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo'),
+                $this->id
             );
 
             $this->add_error($message);
@@ -1073,7 +1093,8 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
         // retorno, mantendo a mensagem genérica apenas como fallback.
         $message = LknWcCieloHelper::getCieloErrorMessage(
             $responseDecoded,
-            __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo')
+            __('Order payment failed. Make sure your credit card is valid.', 'lkn-wc-gateway-cielo'),
+            $this->id
         );
 
         $this->add_error($message);
@@ -1959,10 +1980,10 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
         // Verificar se é um array (caso de erro da API) e pegar o primeiro elemento
         if (is_array($responseDecoded) && !empty($responseDecoded)) {
             $errorObj = $responseDecoded[0];
-            $error_message = isset($errorObj->Message) ? LknWcCieloHelper::getCieloErrorMessage($errorObj, $errorObj->Message) : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
+            $error_message = isset($errorObj->Message) ? LknWcCieloHelper::getCieloErrorMessage($errorObj, $errorObj->Message, $this->id) : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
         } else {
             $error_message = isset($responseDecoded->Message) 
-                ? LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $responseDecoded->Message) 
+                ? LknWcCieloHelper::getCieloErrorMessage($responseDecoded, $responseDecoded->Message, $this->id) 
                 : __('Unknown error in partial capture', 'lkn-wc-gateway-cielo');
         }
 

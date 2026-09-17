@@ -17,7 +17,7 @@
 
     if (wcForm && cardDiv && !wcFromFound) {
       wcFromFound = true
-      cardDiv.style.display = 'block'
+      cardDiv.style.display = 'flex'
       observer.disconnect()
       wcForm.appendChild(cardDiv) // ou insertBefore(cardDiv, wcForm.firstChild) se quiser no topo
     }

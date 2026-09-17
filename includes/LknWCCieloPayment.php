@@ -188,6 +188,65 @@ final class LknWCCieloPayment
         // Partial capture hooks centralized
         $this->loader->add_action('woocommerce_order_item_add_action_buttons', $this, 'add_partial_capture_button');
         $this->loader->add_action('wp_ajax_lkn_cielo_partial_capture', $this, 'handle_partial_capture_ajax');
+
+        // ABECS é recurso PRO: ao salvar as configurações, força 'no' no banco
+        // quando não há licença ativa (cobre o caso de HTML manipulado).
+        foreach (array('lkn_cielo_credit', 'lkn_cielo_debit', 'lkn_wc_cielo_pix', 'lkn_cielo_google_pay') as $cielo_gateway_id) {
+            $this->loader->add_filter(
+                'woocommerce_settings_api_sanitized_fields_' . $cielo_gateway_id,
+                $this,
+                'enforce_abecs_pro_only'
+            );
+
+            // Restrição/hide de tipo de cartão e layout moderno também são PRO: força
+            // os padrões no banco quando não há licença ativa (cobre HTML manipulado).
+            $this->loader->add_filter(
+                'woocommerce_settings_api_sanitized_fields_' . $cielo_gateway_id,
+                $this,
+                'enforce_pro_features_only'
+            );
+        }
+    }
+
+    /**
+     * Force PRO-only settings (card type mode/selector and modern checkout layout)
+     * back to defaults when the PRO license is not active.
+     *
+     * Runs during the gateway settings save (WooCommerce Settings API). Guarantees
+     * these features stay disabled in the database even if the fields were enabled
+     * by tampering with the rendered HTML or by a license deactivated after saving.
+     *
+     * @param array $settings Sanitized gateway settings about to be saved.
+     * @return array
+     */
+    public function enforce_pro_features_only($settings)
+    {
+        if (is_array($settings) && ! LknWcCieloHelper::is_pro_license_active()) {
+            $settings['card_type_mode'] = 'both';
+            $settings['hide_card_type_selector'] = 'no';
+            $settings['checkout_layout'] = 'no';
+        }
+
+        return $settings;
+    }
+
+    /**
+     * Force the ABECS option back to "no" when the PRO license is not active.
+     *
+     * Runs during the gateway settings save (WooCommerce Settings API). Guarantees
+     * the feature stays disabled in the database even if the field was enabled by
+     * tampering with the rendered HTML.
+     *
+     * @param array $settings Sanitized gateway settings about to be saved.
+     * @return array
+     */
+    public function enforce_abecs_pro_only($settings)
+    {
+        if (is_array($settings) && ! LknWcCieloHelper::is_pro_license_active()) {
+            $settings['abecs_norms'] = 'no';
+        }
+
+        return $settings;
     }
 
     /**
@@ -642,6 +701,17 @@ final class LknWCCieloPayment
             wp_enqueue_script('lknCieloForWoocommerceCard', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/js/admin/lkn-woocommerce-admin-card.js', array('jquery'), LKN_WC_CIELO_VERSION, false);
             wp_enqueue_style('lknCieloForWoocommerceCard', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/css/frontend/lkn-woocommerce-admin-card.css', array(), LKN_WC_CIELO_VERSION, 'all');
             wp_enqueue_script('lknCieloForWoocommerceProSettings', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/js/admin/lkn-settings-pro-fields.js', array(), LKN_WC_CIELO_VERSION, false);
+
+            // Variáveis usadas pelos cartões promocionais do admin (mesmo padrão do plugin Rede).
+            wp_localize_script(
+                'lknCieloForWoocommerceCard',
+                'lknCieloCardVars',
+                array(
+                    'plugin_slug' => 'invoice-payment-for-woocommerce',
+                    'install_nonce' => wp_create_nonce('install-plugin_invoice-payment-for-woocommerce'),
+                    'invoice_plugin_installed' => is_plugin_active('invoice-payment-for-woocommerce/invoice-payment-for-woocommerce.php'),
+                )
+            );
 
             wp_localize_script(
                 'lknCieloForWoocommerceProSettings',

@@ -20,22 +20,22 @@ if (!defined('ABSPATH')) {
                     <b>•</b><?php esc_html_e('Documentation', 'lkn-wc-gateway-cielo'); ?>
                 </a>
                 <a target="_blank" href=<?php echo esc_url('https://www.linknacional.com.br/wordpress/planos/?utm=plugin'); ?>>
-                    <b>•</b><?php esc_html_e('WordPress VIP', 'lkn-wc-gateway-cielo'); ?>
+                    <b>•</b><?php esc_html_e('Hosting', 'lkn-wc-gateway-cielo'); ?>
                 </a>
             </div>
             <div>
+                <a target="_blank" href=<?php echo esc_url('https://cliente.linknacional.com.br/solicitar/wordpress-woo-gratis/?utm=plugin'); ?>>
+                    <b>•</b><?php esc_html_e('WP Plugin', 'lkn-wc-gateway-cielo'); ?>
+                </a>
                 <a target="_blank" href=<?php echo esc_url('https://www.linknacional.com.br/wordpress/suporte/'); ?>>
                     <b>•</b><?php esc_html_e('Suporte WP', 'lkn-wc-gateway-cielo'); ?>
-                </a>
-                <a target="_blank" href=<?php echo esc_url('https://cliente.linknacional.com.br/solicitar/wordpress-woo-gratis/?utm=plugin'); ?>>
-                    <b>•</b><?php esc_html_e('WP Hosting', 'lkn-wc-gateway-cielo'); ?>
                 </a>
             </div>
         </div>
         <div class="LknWcCieloSupportLinks">
             <div id="lknWcCieloStarsDiv">
                 <a target="_blank" href=<?php echo esc_url('https://br.wordpress.org/plugins/lkn-wc-gateway-cielo/#reviews'); ?>>
-                    <p><?php esc_html_e('Rate plugin', 'lkn-wc-gateway-cielo'); ?></p>
+                    <p><?php esc_html_e('Rate Plugin', 'lkn-wc-gateway-cielo'); ?></p>
                     <div class="LknWcCieloStars">
                         <span class="dashicons dashicons-star-filled lkn-stars"></span>
                         <span class="dashicons dashicons-star-filled lkn-stars"></span>

@@ -55,7 +55,57 @@ final class LknCieloErrorCodes
      */
     public static function translate($code, $fallback = '')
     {
-        return self::lookup(self::codes(), $code, $fallback);
+        return self::resolveForGateway('', $code, $fallback);
+    }
+
+    /**
+     * Resolve a return message honoring the gateway "ABECS standard messages" option.
+     *
+     *  - ABECS disabled (default for free users): legacy message ($legacyFallback).
+     *  - ABECS enabled: the PRO license decides the source — with an active license
+     *    the official catalog is used; free users get the raw message returned by
+     *    Cielo ($abecsFallback), which already follows the ABECS standard.
+     *
+     * @param string      $gatewayId       Gateway id (e.g. lkn_cielo_credit). Empty uses the PRO license.
+     * @param string|int  $code            Return code (`Payment.ReturnCode` / error `Code`).
+     * @param string      $abecsFallback   Fallback used in ABECS mode (raw Cielo message).
+     * @param string|null $legacyFallback  Fallback used when ABECS is disabled. Defaults to $abecsFallback.
+     * @return string
+     */
+    public static function resolveForGateway($gatewayId, $code, $abecsFallback, $legacyFallback = null)
+    {
+        if (! self::isAbecsEnabled($gatewayId)) {
+            return self::resolveFallback(null !== $legacyFallback ? $legacyFallback : $abecsFallback);
+        }
+
+        // ABECS ligado: com licença PRO usa o catálogo; free cai na mensagem crua
+        // devolvida pela Cielo (o próprio `lookup` aplica a camada de licença).
+        return self::lookup(self::codes(), $code, $abecsFallback);
+    }
+
+    /**
+     * Whether the Cielo/ABECS catalog may be used for the given gateway.
+     *
+     * When no gateway id is given (internal/PRO usage) the result follows the PRO
+     * license. Otherwise it follows the gateway "ABECS standard messages" option.
+     *
+     * @param string $gatewayId
+     * @return bool
+     */
+    public static function isAbecsEnabled($gatewayId = ''): bool
+    {
+        $helperClass = LknWcCieloHelper::class;
+
+        if (! class_exists($helperClass) || ! method_exists($helperClass, 'is_abecs_enabled')) {
+            return self::isProLicenseActive();
+        }
+
+        // Garante que is_plugin_active() exista mesmo em contextos de frontend.
+        if (! function_exists('is_plugin_active') && defined('ABSPATH')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
+        return (bool) $helperClass::is_abecs_enabled($gatewayId);
     }
 
     /**

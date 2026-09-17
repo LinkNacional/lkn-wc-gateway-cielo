@@ -510,6 +510,52 @@
                 // Adiciona os radios
                 bodyDiv.insertBefore(radioNo, bodyDiv.firstChild)
                 bodyDiv.insertBefore(radioYes, bodyDiv.firstChild)
+
+                // Preview do layout abaixo do campo (substitui o antigo tooltip de hover).
+                const isLayoutField = checkboxInput.id.includes('fake_layout') || checkboxInput.id.includes('checkout_layout')
+                if (isLayoutField && typeof lknWcCieloTranslationsInput !== 'undefined') {
+                  const modernImg = lknWcCieloTranslationsInput.mordernVersion
+                  const standardImg = lknWcCieloTranslationsInput.standardVersion
+                  const isProValid = !!lknWcCieloTranslationsInput.isProValid
+
+                  const preview = document.createElement('div')
+
+                  if (isProValid) {
+                    // PRO ativo: preview único que segue a opção escolhida.
+                    preview.className = 'lkn-cielo-layout-preview'
+                    const img = document.createElement('img')
+                    const updatePreview = () => {
+                      const isModern = input.checked
+                      img.src = isModern ? modernImg : standardImg
+                      img.alt = isModern ? lknWcCieloTranslationsInput.modern : lknWcCieloTranslationsInput.standard
+                    }
+                    radioYesInput.addEventListener('change', updatePreview)
+                    radioNoInput.addEventListener('change', updatePreview)
+                    updatePreview()
+                    preview.appendChild(img)
+                  } else {
+                    // Sem PRO: exibe os dois layouts para o usuário comparar.
+                    preview.className = 'lkn-cielo-layout-preview lkn-cielo-layout-preview--both'
+                    const makeItem = (src, label) => {
+                      if (!src) return null
+                      const item = document.createElement('div')
+                      item.className = 'lkn-cielo-layout-preview__item'
+                      const img = document.createElement('img')
+                      img.src = src
+                      img.alt = label
+                      const cap = document.createElement('p')
+                      cap.className = 'lkn-cielo-layout-preview__cap'
+                      cap.textContent = label
+                      item.appendChild(img)
+                      item.appendChild(cap)
+                      return item
+                    }
+                    preview.appendChild(makeItem(modernImg, lknWcCieloTranslationsInput.modern))
+                    preview.appendChild(makeItem(standardImg, lknWcCieloTranslationsInput.standard))
+                  }
+
+                  bodyDiv.appendChild(preview)
+                }
               }
             }
 
@@ -527,6 +573,31 @@
                     parentInput.appendChild(labelCheckbox);
                 }
               }
+            }
+
+            // Campos exclusivos do PRO (marcados com lkn-is-pro="true" no PHP).
+            // Quando a licença PRO não está ativa, injeta o link "PRO" no título e
+            // desabilita o controle — mesmo padrão do plugin Rede.
+            const proMarkedInput = (inputElement && inputElement.getAttribute('lkn-is-pro') === 'true')
+              || (checkboxInput && checkboxInput.getAttribute('lkn-is-pro') === 'true')
+
+            if (proMarkedInput) {
+              headerDiv.style.position = 'relative'
+
+              const proLink = document.createElement('a')
+              proLink.className = 'lkn-cielo-become-pro'
+              proLink.href = 'https://www.linknacional.com.br/wordpress/woocommerce/cielo/'
+              proLink.target = '_blank'
+              proLink.rel = 'noopener noreferrer'
+              proLink.textContent = (typeof lknWcCieloTranslationsInput !== 'undefined' && lknWcCieloTranslationsInput.becomePRO)
+                ? lknWcCieloTranslationsInput.becomePRO
+                : 'PRO'
+              titleInside.appendChild(proLink)
+
+              // Bloqueia todos os controles do campo (radios + input oculto).
+              bodyDiv.querySelectorAll('input, select, textarea').forEach(el => {
+                el.disabled = true
+              })
             }
 
             // Limpa o fieldset e insere os novos containers
@@ -841,6 +912,133 @@
     lknWcCieloAddOnexInterestWarning()
 
     document.dispatchEvent(new Event('lknWcCieloFinishedAdminLayout'))
+
+    // === Condição: "esconder seletor de tipo de cartão" (debit) ===
+    // A opção só pode ser ativada quando o Modo Tipo de Cartão é de um único tipo
+    // (only_credit/only_debit). Em "both" ela fica "travada" — aparência de disabled
+    // (opacidade + pointer-events), SEM o atributo disabled, para o valor continuar
+    // sendo enviado no submit (que só vale quando a opção realmente libera o recurso).
+    ;(function () {
+      const modeField = document.getElementById('woocommerce_lkn_cielo_debit_card_type_mode')
+      const hideField = document.getElementById('woocommerce_lkn_cielo_debit_hide_card_type_selector')
+      if (!modeField || !hideField) return
+
+      const container = hideField.closest('.lkn-body-cart') || hideField.closest('fieldset')
+      if (!container || container.getAttribute('data-lkn-hide-condition-init') === 'true') return
+      container.setAttribute('data-lkn-hide-condition-init', 'true')
+
+      const controls = container.querySelectorAll('input, select')
+
+      const applyAvailability = () => {
+        // Se o campo foi desabilitado pelo PRO (lkn-is-pro sem licença), não mexemos.
+        if (hideField.hasAttribute('disabled')) return
+        // Só libera quando o modo é EXPLICITAMENTE de um único tipo. Qualquer outro
+        // valor (inclusive vazio/transitório do select2) mantém a opção travada.
+        const singleType = modeField.value === 'only_credit' || modeField.value === 'only_debit'
+        const fakeDisabled = !singleType
+        container.style.opacity = fakeDisabled ? '0.5' : ''
+        container.style.transition = 'opacity 0.2s'
+        controls.forEach(el => {
+          if (fakeDisabled) {
+            el.setAttribute('data-lkn-fake-disabled', 'true')
+            el.style.pointerEvents = 'none'
+            el.style.cursor = 'not-allowed'
+          } else {
+            el.removeAttribute('data-lkn-fake-disabled')
+            el.style.pointerEvents = ''
+            el.style.cursor = ''
+          }
+        })
+
+        // Quando travada, posiciona a opção em "Desativar" (valor 0) e desmarca
+        // "Ativar", para o estado visual refletir que o recurso está desligado.
+        if (fakeDisabled) {
+          container.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.checked = radio.value === '0'
+          })
+          hideField.checked = false
+        }
+      }
+
+      // Bloqueia a ativação (mouse/teclado) quando "fake disabled".
+      const blockFakeDisabled = (event) => {
+        if (hideField.getAttribute('data-lkn-fake-disabled') !== 'true') return
+        if (event.type === 'keydown' && event.key !== ' ' && event.key !== 'Enter' && event.key !== 'Spacebar') return
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      container.addEventListener('click', blockFakeDisabled, true)
+      container.addEventListener('keydown', blockFakeDisabled, true)
+
+      // O select2 dispara 'change' no <select> original e também 'select2:select';
+      // cobrimos os dois + um observer para garantir o toggle em qualquer caminho.
+      const onModeChange = () => applyAvailability()
+      modeField.addEventListener('change', onModeChange)
+      if (window.jQuery) {
+        window.jQuery(modeField).on('change select2:select select2:unselect', onModeChange)
+      }
+      try {
+        new MutationObserver(onModeChange).observe(modeField, { attributes: true, attributeFilter: ['value'] })
+      } catch (e) { /* noop */ }
+
+      applyAvailability()
+      setTimeout(applyAvailability, 300)
+    })()
+
+    // === BIN: dependência dos campos de whitelist + select2 com opção custom ===
+    ;(function () {
+      const cb = document.getElementById('woocommerce_lkn_cielo_debit_brand_validation')
+      if (!cb) return
+
+      const fieldIds = [
+        'woocommerce_lkn_cielo_debit_bin_allowed_brands',
+        'woocommerce_lkn_cielo_debit_bin_allowed_card_types',
+        'woocommerce_lkn_cielo_debit_bin_allowed_nationality',
+        'woocommerce_lkn_cielo_debit_bin_allowed_corporate',
+        'woocommerce_lkn_cielo_debit_bin_allowed_prepaid'
+      ]
+
+      const wrappers = fieldIds
+        .map(id => {
+          const el = document.getElementById(id)
+          return el ? el.closest('fieldset') : null
+        })
+        .filter(Boolean)
+
+      const applyDependency = () => {
+        const on = cb.checked
+        wrappers.forEach(w => {
+          w.style.display = on ? '' : 'none'
+        })
+      }
+
+      // A checkbox vira radios "-control"; reflete o estado no rádio e reaplica.
+      document
+        .querySelectorAll('input[name="woocommerce_lkn_cielo_debit_brand_validation-control"]')
+        .forEach(radio => radio.addEventListener('change', applyDependency))
+      cb.addEventListener('change', applyDependency)
+      applyDependency()
+
+      // select2 com tags:true para permitir valores customizados além dos predefinidos.
+      if (window.jQuery && jQuery.fn.select2) {
+        jQuery('.lkn-bin-tags-select').each(function () {
+          const $el = jQuery(this)
+          try {
+            if ($el.data('select2')) {
+              $el.select2('destroy')
+            }
+            $el.select2({
+              tags: true,
+              tokenSeparators: [',', ';'],
+              width: '100%',
+              placeholder: ''
+            })
+          } catch (e) {
+            /* mantém o select nativo em caso de erro */
+          }
+        })
+      }
+    })()
   })
 
   function lknWcCieloAddOnexInterestWarning() {

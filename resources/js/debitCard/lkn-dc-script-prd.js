@@ -25,6 +25,42 @@ window.__lknBpmpiReady = false
 window.__lknBpmpiLoading = false
 window.__lknPendingAuthenticate = false
 
+// Feedback visual do botão de envio durante o 3DS (cinza + texto "carregando") para
+// evitar cliques repetidos. Restaurado nas respostas do 3DS (falha/erro) e antes do
+// envio final (sucesso), sincronizando com o botão do WooCommerce.
+var lknSubmitLoadingEl = null
+function lknLockSubmitButton () {
+  if (lknSubmitLoadingEl) return
+  var btn = document.getElementById('sendOrder') ||
+    document.querySelector('.wc-block-components-checkout-place-order-button')
+  if (!btn) return
+  try {
+    if (btn.getAttribute('data-lkn-prev-html') === null) {
+      btn.setAttribute('data-lkn-prev-html', btn.innerHTML)
+    }
+    btn.disabled = true
+    btn.classList.add('lkn-btn-loading')
+    btn.textContent = wp.i18n.__('Processing...', 'lkn-wc-gateway-cielo')
+    window.__lkn3DSInProgress = true
+    lknSubmitLoadingEl = btn
+  } catch (e) {}
+}
+function lknUnlockSubmitButton () {
+  window.__lkn3DSInProgress = false
+  var btn = lknSubmitLoadingEl
+  if (!btn) return
+  try {
+    btn.disabled = false
+    btn.classList.remove('lkn-btn-loading')
+    var prev = btn.getAttribute('data-lkn-prev-html')
+    if (prev !== null) {
+      btn.innerHTML = prev
+      btn.removeAttribute('data-lkn-prev-html')
+    }
+  } catch (e) {}
+  lknSubmitLoadingEl = null
+}
+
 function bpmpi_config () {
   return {
     onReady: function () {
@@ -35,6 +71,7 @@ function bpmpi_config () {
       }
     },
     onSuccess: function (e) {
+      lknUnlockSubmitButton()
       // Card is eligible for authentication, and the bearer successfully authenticated
       const cavv = e.Cavv || ''
       const xid = e.Xid || ''
@@ -64,27 +101,15 @@ function bpmpi_config () {
       }
     },
     onFailure: function (e) {
+      lknUnlockSubmitButton()
+      // Autenticação FALHOU (ex.: usuário cancelou o desafio 3DS). NUNCA prosseguir
+      // com o pedido: desafio cancelado/recusado é tratado como recusa. A opção
+      // allow_card_ineligible vale apenas para cartões não elegíveis (onUnenrolled).
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
-
-      const allowCardIneligible = window.lknDCScriptAllowCardIneligible && window.lknDCScriptAllowCardIneligible.allow === 'yes'
-      if (allowCardIneligible) {
-        // User opted to continue even on 3DS failure — submit with whatever auth data we have
-        const Form3dsButton = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]?.closest('form')
-        if (Form3dsButton) {
-          Form3dsButton.setAttribute('data-payment-cavv', e.Cavv || '')
-          Form3dsButton.setAttribute('data-payment-eci', e.Eci || '')
-          Form3dsButton.setAttribute('data-payment-ref_id', e.ReferenceId || '')
-          Form3dsButton.setAttribute('data-payment-version', e.Version || '')
-          Form3dsButton.setAttribute('data-payment-xid', e.Xid || '')
-          const Button3ds = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]
-          const event = new MouseEvent('click', { bubbles: true, cancelable: true, view: window })
-          Button3ds.dispatchEvent(event)
-        }
-      } else {
-        alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
-      }
+      alert(wp.i18n.__('Authentication not completed. Your order was not placed. Please try again.', 'lkn-wc-gateway-cielo'))
     },
     onUnenrolled: function (e) {
+      lknUnlockSubmitButton()
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
 
       // ECI 04/07 = Data Only = NÃO autenticada (risco do lojista). Requer allow_card_ineligible.
@@ -114,6 +139,7 @@ function bpmpi_config () {
       }
     },
     onDisabled: function (e) {
+      lknUnlockSubmitButton()
       // Store don't require bearer authentication (class "bpmpi_auth" false -> disabled authentication).
       console.log('code ' + (e ? e.ReturnCode : 'N/A') + ' ' + ' message ' + (e ? e.ReturnMessage : 'N/A') + ' raw: ' + JSON.stringify(e || {}))
 
@@ -136,6 +162,7 @@ function bpmpi_config () {
       }
     },
     onError: function (e) {
+      lknUnlockSubmitButton()
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
 
       // MPI900 = falha de rede/HTTP (ex.: 400/403/CORS no /v2/3ds/enroll).
@@ -159,6 +186,7 @@ function bpmpi_config () {
       }
     },
     onUnsupportedBrand: function (e) {
+      lknUnlockSubmitButton()
       // Provider not supported for authentication — definitive error, always submit
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage + ' raw: ' + JSON.stringify(e))
       const Form3dsButton = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]?.closest('form')
@@ -180,6 +208,12 @@ function bpmpi_config () {
 }
 
 function lknDCProccessButton () {
+  // Reentrância: ignora se já há um fluxo 3DS em andamento.
+  if (window.__lkn3DSInProgress) {
+    return
+  }
+  // Feedback visual imediato e proteção contra duplo clique.
+  lknLockSubmitButton()
   // Sempre executar 3DS, independente do tipo de cartão
   lknProcessDebitCard()
 }
@@ -212,19 +246,23 @@ function lknProcessDebitCard () {
     // visibilidade, que fazia o pedido ser enviado sem 3DS (ECI/CAVV/XID
     // vazios) e resultava em "Autenticação Cielo 3DS 2.2 inválida".
     if (!dcNoEl || !cardNumber) {
+      lknUnlockSubmitButton()
       var btn = document.querySelectorAll('.wc-block-components-checkout-place-order-button')[0]
       if (btn) btn.click()
       return;
     }
 
     // Garante que o tipo enviado ao 3DS (bpmpi_paymentmethod) corresponda ao
-    // tipo de cartão selecionado. O bundle compilado fixa o valor em "Debit".
-    var cardTypeSelect = document.getElementById('lkn_cc_type') ||
-      document.querySelector('.lkn-credit-debit-card-type-select select') ||
-      document.querySelector('.lkn-select-type select')
+    // tipo de cartão. A Cielo exige "Credit"/"Debit" (valor inválido → 102).
+    // Usa o id real do select do React (#card_type_selector); NÃO cai no
+    // select de parcelas (.lkn-select-type), que não é o tipo de cartão.
+    var cardTypeSelect = document.getElementById('card_type_selector') ||
+      document.querySelector('.lkn-credit-debit-card-type-select select')
     var paymentMethodEl = document.querySelector('.bpmpi_paymentmethod')
-    var cardType = (cardTypeSelect && cardTypeSelect.value) ||
-      (paymentMethodEl && paymentMethodEl.value) || 'Debit'
+    var rawCardType = (cardTypeSelect && cardTypeSelect.value) ||
+      (typeof window.lknCurrentCardType !== 'undefined' ? window.lknCurrentCardType : '') ||
+      (paymentMethodEl && paymentMethodEl.value) || 'Credit'
+    var cardType = /^debit/i.test(rawCardType) ? 'Debit' : 'Credit'
     if (paymentMethodEl) {
       paymentMethodEl.value = cardType
     }
@@ -287,8 +325,9 @@ function lknProcessDebitCard () {
     // WooCommerce Blocks (fonte React), aguardando o refetch terminar.
     lknReadBlockTotalAndProceed(10)
   } catch (error) {
+    lknUnlockSubmitButton()
     console.log(error)
-    alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
+    alert(wp.i18n.__('Authentication not completed. Your order was not placed. Please try again.', 'lkn-wc-gateway-cielo'))
   }
 }
 

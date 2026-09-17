@@ -62,6 +62,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 contentContainer.classList.add('lkn-cielo-credit-debit-content-container')
 
                 const idsToCheck = ['lkn_dc_expdate', 'lkn_dc_cvc', 'lkn_dcno']
+                // Quando o seletor de tipo de cartão não é renderizado (escondido/PRO),
+                // o campo de número deve ocupar 100% da largura (senão sobra um buraco).
+                const hasCardTypeSelect = !!contentContainer.querySelector('.lkn-credit-debit-card-type-select')
                 const idsToIcons = {
                   lkn_dcno: lknCieloInputIcons.lock,
                   lkn_dc_expdate: lknCieloInputIcons.calendar,
@@ -161,7 +164,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     if (idsToCheck.includes(element.id)) {
-                      containerInput.style.width = '48%'
+                      // Campo de número vai a 100% quando o seletor de tipo não existe (some).
+                      containerInput.style.width = (element.id === 'lkn_dcno' && !hasCardTypeSelect) ? '100%' : '48%'
                     } else {
                       containerInput.style.width = '100%'
                     }

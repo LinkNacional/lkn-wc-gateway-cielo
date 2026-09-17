@@ -4,6 +4,14 @@ import 'react-credit-cards/es/styles-compiled.css'
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 const lknDCsettingsCielo = window.wc.wcSettings.getSetting('lkn_cielo_debit_data', {})
 const lknDCCardTypeMode = lknDCsettingsCielo.cardTypeMode || 'both'
+// Esconde o seletor de tipo de cartão (PRO) somente quando o modo é de um único tipo.
+const lknDCHideCardTypeSelector = lknDCCardTypeMode !== 'both' && (lknDCsettingsCielo.hideCardTypeSelector === 'yes')
+// Tipo de cartão fixo quando o modo restringe a um único tipo. Impede que a lista de
+// cartões salvos ou o botão "adicionar cartão" sobrescrevam o tipo — o que geraria
+// parcelas de crédito mesmo em débito (mesma regra do gateway Rede).
+const lknDCForcedCardType = lknDCCardTypeMode === 'only_debit'
+  ? 'Debit'
+  : (lknDCCardTypeMode === 'only_credit' ? 'Credit' : null)
 const lknDCLabelCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.title)
 const lknDCDescriptionCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.description)
 const lknDCAccessTokenCielo = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.accessToken)
@@ -111,7 +119,7 @@ const lknDCContentCielo = props => {
                 updatedebitObject('lkn_dcno', card.cardDigits);
                 updatedebitObject('lkn_dc_cardholder_name', card.description || '');
                 updatedebitObject('lkn_dc_expdate', card.expirationDate);
-                updatedebitObject('lkn_cc_type', card.brand);
+                updatedebitObject('lkn_cc_type', lknDCForcedCardType || card.brand);
               }}
               style={{
                 color:  "#2563eb",
@@ -144,7 +152,7 @@ const lknDCContentCielo = props => {
             updatedebitObject('lkn_dcno', '');
             updatedebitObject('lkn_dc_cardholder_name', '');
             updatedebitObject('lkn_dc_expdate', '');
-            updatedebitObject('lkn_cc_type', 'Credit');
+            updatedebitObject('lkn_cc_type', lknDCForcedCardType || 'Credit');
           }}
           style={{
             fontWeight: 500,
@@ -376,7 +384,7 @@ const lknDCContentCielo = props => {
       case 'lkn_dc_cvc':
         if (value.length > 8) return
       case 'lkn_dcno':
-        if (value.length > 7 && lknDCCardTypeMode === 'both') {
+        if (value.length > 7) {
           const cardBin = value.replace(' ', '').substring(0, 6)
           const restUrl = (typeof window.lknCieloDebitConfig !== 'undefined' && window.lknCieloDebitConfig.rest_url)
             ? window.lknCieloDebitConfig.rest_url
@@ -398,6 +406,11 @@ const lknDCContentCielo = props => {
 
               return response.json()
             }).then(data => {
+              // Só ajusta o tipo de cartão quando o seletor é editável (modo 'both').
+              // Com o tipo fixo, a seleção é travada e o servidor impõe o valor.
+              if (lknDCCardTypeMode !== 'both') {
+                return
+              }
               if (data.cardType == 'Credito') {
                 setCardTypeOptions([{
                   key: 'Credit',
@@ -849,7 +862,7 @@ const lknDCContentCielo = props => {
     },
     required: showAddCardForm,
     onFocus: () => setFocus('number')
-  }), lknCieloDebitConfig.isProPluginValid && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
+  }), lknCieloDebitConfig.isProPluginValid && !lknDCHideCardTypeSelector && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
     id: 'lkn_cc_type',
     value: debitObject.lkn_cc_type,
     disabled: lknDCCardTypeSelectDisabled,
@@ -930,7 +943,7 @@ const lknDCContentCielo = props => {
       marginBottom: '20px',
       width: '100%'
     }
-  }), !lknCieloDebitConfig.isProPluginValid && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
+  }), !lknCieloDebitConfig.isProPluginValid && !lknDCHideCardTypeSelector && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
     id: 'lkn_cc_type',
     label: lknDCTranslationsCielo.cardType,
     value: debitObject.lkn_cc_type,

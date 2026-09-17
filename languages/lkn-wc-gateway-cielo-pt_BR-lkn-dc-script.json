@@ -7,8 +7,11 @@
                 "plural_forms": "nplurals=2; plural=(n != 1);",
                 "lang": "pt_BR"
             },
-            "Authentication failed check the card information and try again": [
-                "Falha na autenticação verifique as informações do cartão e tente novamente"
+            "Authentication not completed. Your order was not placed. Please try again.": [
+                "Autenticação não concluída. O pedido não foi finalizado. Tente novamente."
+            ],
+            "Processing...": [
+                "Processando..."
             ],
             "Card Ineligible for Authentication": [
                 "Cartão Inelegível para Autenticação"
