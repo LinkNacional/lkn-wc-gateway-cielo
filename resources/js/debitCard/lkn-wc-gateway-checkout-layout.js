@@ -1,5 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
   let debounceTimeout = null
+  let lastBinErrorBin = null
+
+  // Alerta de falha da consulta online (deduplicado por BIN)
+  const showBinErrorAlert = (bin, message) => {
+    if (bin === lastBinErrorBin) return
+    lastBinErrorBin = bin
+    if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+      window.alert(message || 'Could not validate the card with the card issuer. Please try again or use another card.')
+    }
+  }
 
 
   // Define cardBrands globally to avoid reference erros
@@ -110,6 +120,14 @@ document.addEventListener('DOMContentLoaded', function () {
                                 })
                                   .then(response => response.json())
                                   .then(data => {
+                                    if (data && data.error) {
+                                      showBinErrorAlert(value.replace(/\s+/g, '').substring(0, 6), data.message)
+                                      iconsContainer.querySelectorAll('img').forEach(icon => {
+                                        icon.style.filter = 'none'
+                                        icon.style.opacity = '1'
+                                      })
+                                      return
+                                    }
                                     if (data.status) {
                                       const brand = data.brand.toLowerCase()
                                       iconsContainer.querySelectorAll('img').forEach(icon => {

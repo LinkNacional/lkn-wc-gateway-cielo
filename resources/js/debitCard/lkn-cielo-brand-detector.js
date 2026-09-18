@@ -28,9 +28,29 @@
     let brandIcons = null;
     let debounceTimer = null;
     let lastDetectedBrand = null;
+    let lastBinErrorShown = null;
+
+    /**
+     * Mostra o alerta de falha da consulta online (deduplicado por BIN).
+     * @param {string} bin - 6 primeiros dígitos do cartão
+     * @param {string} message - Mensagem vinda do servidor
+     */
+    function showBinErrorAlert(bin, message) {
+        if (bin === lastBinErrorShown) {
+            return;
+        }
+        lastBinErrorShown = bin;
+
+        if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert(message || 'Could not validate the card with the card issuer. Please try again or use another card.');
+        }
+    }
     
     /**
-     * Fetch card brand from the REST endpoint (online + offline fallback).
+     * Fetch card brand from the REST endpoint.
+     * Com a validação online habilitada o endpoint consulta APENAS online; em
+     * falha ele devolve um erro, que exibimos como alerta. Com ela desabilitada
+     * o endpoint devolve a bandeira via consulta offline.
      * @param {string} number - Card number
      * @returns {Promise<object|null>}
      */
@@ -61,6 +81,10 @@
             return response.json();
         })
         .then(function(data) {
+            if (data && data.error) {
+                showBinErrorAlert(cleanNumber.substring(0, 6), data.message);
+                return null;
+            }
             if (data.status && data.brand) {
                 return data.brand;
             }

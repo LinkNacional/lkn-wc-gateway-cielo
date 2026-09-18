@@ -7,6 +7,8 @@ let lkn3DSCompleted = false;
 let lknDetectedCardProvider = '';
 // Tipo do cartão detectado via BIN: 'Debit' | 'Credit' (vazio = indeterminado)
 let lknDetectedCardType = '';
+// Último BIN que já exibiu alerta de falha da consulta online (evita repetição)
+let lknBinErrorShown = '';
 
 // Estado de carregamento do BP.Mpi (3DS). O init (bpmpi_load) é adiado para o
 // clique de finalizar, para que amount e installments enviados ao MPI reflitam
@@ -176,6 +178,15 @@ function setupErrorDetection() {
             'X-WP-Nonce': nonce
           },
           success: function (response) {
+            // Consulta online falhou (sem fallback offline): alerta e interrompe.
+            if (response && response.error) {
+              if (lknBinErrorShown !== cardBin) {
+                lknBinErrorShown = cardBin;
+                alert((response.message) || wp.i18n.__('Could not validate the card with the card issuer. Please try again or use another card.', 'lkn-wc-gateway-cielo'));
+              }
+              return;
+            }
+
             // Guardar provider detectado para pré-filtro 3DS
             if (response.brand) {
               lknDetectedCardProvider = response.brand.charAt(0).toUpperCase() + response.brand.slice(1);

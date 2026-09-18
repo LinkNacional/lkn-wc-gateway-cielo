@@ -1499,7 +1499,11 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
     /**
      * Valida o cartão contra as whitelists de BIN configuradas (PRO).
-     * Consulta a API Cielo e lança exceção se o cartão não corresponder ao permitido.
+     *
+     * A decisão é baseada EXCLUSIVAMENTE na consulta online da Cielo (BIN). A
+     * consulta offline (regex) NÃO é usada aqui — ela serve apenas para identificar
+     * a bandeira enviada no pagamento. Se a consulta online não responder (após uma
+     * nova tentativa), falha fechado: lança exceção e o pedido não é enviado.
      *
      * @param string $cardNum Número do cartão.
      * @return void
@@ -1527,27 +1531,54 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         $binData = LknWCGatewayCieloEndpoint::queryCardBin($cardNum, get_option('woocommerce_lkn_cielo_debit_settings', array()));
 
-        // Sem resposta da consulta: não bloqueia (evita falso negativo por indisponibilidade).
+        // Segunda tentativa em caso de instabilidade momentânea da consulta online.
         if (! $binData) {
-            return;
+            $binData = LknWCGatewayCieloEndpoint::queryCardBin($cardNum, get_option('woocommerce_lkn_cielo_debit_settings', array()));
+        }
+
+        // Whitelist decidida só pela consulta online. Sem ela não há como validar
+        // com segurança: falha fechado (bloqueia o pedido) em vez de deixar passar.
+        if (! $binData) {
+            if ('yes' === $this->get_option('debug')) {
+                $binPrefix = substr(preg_replace('/\D/', '', $cardNum), 0, 6);
+                $this->log->log('error', '[CIELO BIN] Online validation failed after retry | cardBin=' . $binPrefix . '******', array('source' => 'woocommerce-cielo-debit'));
+            }
+
+            throw new Exception(esc_html__('Could not validate the card with the card issuer. Please try again or use another card.', 'lkn-wc-gateway-cielo'));
         }
 
         // Bandeira
         if ($allowedBrands && ! in_array(strtolower($binData['provider']), array_map('strtolower', $allowedBrands), true)) {
-            /* translators: %s: card brand name */
-            throw new Exception(sprintf(esc_html__('The card brand "%s" is not accepted by this store.', 'lkn-wc-gateway-cielo'), esc_html($binData['brandRaw'] !== '' ? $binData['brandRaw'] : $binData['provider'])));
+            $detectedBrand = $binData['brandRaw'] !== '' ? $binData['brandRaw'] : $binData['provider'];
+
+            throw new Exception(sprintf(
+                /* translators: %1$s: detected card brand; %2$s: comma-separated list of allowed brands */
+                esc_html__('The card brand "%1$s" is not accepted by this store. Accepted brands: %2$s.', 'lkn-wc-gateway-cielo'),
+                esc_html($detectedBrand),
+                esc_html($this->format_whitelist_list('brands', $allowedBrands))
+            ));
         }
 
         // Tipo de cartão
         if ($allowedTypes && ! in_array($binData['cardType'], $allowedTypes, true)) {
-            throw new Exception(esc_html__('This card type is not accepted by this store.', 'lkn-wc-gateway-cielo'));
+            throw new Exception(sprintf(
+                /* translators: %1$s: detected card type; %2$s: comma-separated list of allowed card types */
+                esc_html__('The card type "%1$s" is not accepted by this store. Accepted types: %2$s.', 'lkn-wc-gateway-cielo'),
+                esc_html($this->format_whitelist_token('card_types', $binData['cardType'])),
+                esc_html($this->format_whitelist_list('card_types', $allowedTypes))
+            ));
         }
 
         // Nacionalidade
         if ($allowedNationality && null !== $binData['foreignCard']) {
             $nationalityToken = $binData['foreignCard'] ? 'foreign' : 'national';
             if (! in_array($nationalityToken, $allowedNationality, true)) {
-                throw new Exception(esc_html__('This card nationality is not accepted by this store.', 'lkn-wc-gateway-cielo'));
+                throw new Exception(sprintf(
+                    /* translators: %1$s: detected nationality; %2$s: comma-separated list of allowed nationalities */
+                    esc_html__('The card nationality "%1$s" is not accepted by this store. Accepted: %2$s.', 'lkn-wc-gateway-cielo'),
+                    esc_html($this->format_whitelist_token('nationality', $nationalityToken)),
+                    esc_html($this->format_whitelist_list('nationality', $allowedNationality))
+                ));
             }
         }
 
@@ -1555,7 +1586,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         if ($allowedCorporate && null !== $binData['corporateCard']) {
             $corporateToken = $binData['corporateCard'] ? 'corporate' : 'not_corporate';
             if (! in_array($corporateToken, $allowedCorporate, true)) {
-                throw new Exception(esc_html__('Corporate cards are not accepted by this store.', 'lkn-wc-gateway-cielo'));
+                throw new Exception(sprintf(
+                    /* translators: %1$s: detected corporate/non-corporate; %2$s: comma-separated list of allowed values */
+                    esc_html__('The card is not accepted by this store: it is "%1$s". Accepted: %2$s.', 'lkn-wc-gateway-cielo'),
+                    esc_html($this->format_whitelist_token('corporate', $corporateToken)),
+                    esc_html($this->format_whitelist_list('corporate', $allowedCorporate))
+                ));
             }
         }
 
@@ -1563,9 +1599,70 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         if ($allowedPrepaid && null !== $binData['prepaid']) {
             $prepaidToken = $binData['prepaid'] ? 'prepaid' : 'not_prepaid';
             if (! in_array($prepaidToken, $allowedPrepaid, true)) {
-                throw new Exception(esc_html__('Prepaid cards are not accepted by this store.', 'lkn-wc-gateway-cielo'));
+                throw new Exception(sprintf(
+                    /* translators: %1$s: detected prepaid/non-prepaid; %2$s: comma-separated list of allowed values */
+                    esc_html__('The card is not accepted by this store: it is "%1$s". Accepted: %2$s.', 'lkn-wc-gateway-cielo'),
+                    esc_html($this->format_whitelist_token('prepaid', $prepaidToken)),
+                    esc_html($this->format_whitelist_list('prepaid', $allowedPrepaid))
+                ));
             }
         }
+    }
+
+    /**
+     * Converte um token da whitelist de BIN no rótulo exibido ao cliente.
+     *
+     * @param string $group Grupo da whitelist: brands|card_types|nationality|corporate|prepaid.
+     * @param string $token Valor salvo na opção (ex.: "visa", "Credito", "foreign").
+     * @return string Rótulo legível (ex.: "Visa", "Credit", "Foreign").
+     */
+    private function format_whitelist_token($group, $token)
+    {
+        if ('brands' === $group) {
+            $known = LknWcCieloHelper::getKnownCardBrands();
+            $key = strtolower((string) $token);
+
+            // Bandeira customizada (não mapeada) é exibida como foi digitada.
+            return isset($known[$key]) ? $known[$key] : (string) $token;
+        }
+
+        $maps = array(
+            'card_types'  => array(
+                'Credito'  => __('Credit', 'lkn-wc-gateway-cielo'),
+                'Debito'   => __('Debit', 'lkn-wc-gateway-cielo'),
+                'Multiplo' => __('Multiple (credit and debit)', 'lkn-wc-gateway-cielo'),
+            ),
+            'nationality' => array(
+                'national' => __('National', 'lkn-wc-gateway-cielo'),
+                'foreign'  => __('Foreign', 'lkn-wc-gateway-cielo'),
+            ),
+            'corporate'   => array(
+                'not_corporate' => __('Non-corporate', 'lkn-wc-gateway-cielo'),
+                'corporate'     => __('Corporate', 'lkn-wc-gateway-cielo'),
+            ),
+            'prepaid'     => array(
+                'not_prepaid' => __('Non-prepaid', 'lkn-wc-gateway-cielo'),
+                'prepaid'     => __('Prepaid', 'lkn-wc-gateway-cielo'),
+            ),
+        );
+
+        return isset($maps[$group][$token]) ? $maps[$group][$token] : (string) $token;
+    }
+
+    /**
+     * Monta a lista legível (separada por vírgulas) dos valores permitidos.
+     *
+     * @param string   $group  Grupo da whitelist.
+     * @param string[] $tokens Valores salvos na opção.
+     * @return string Ex.: "Visa, Mastercard, Elo".
+     */
+    private function format_whitelist_list($group, array $tokens)
+    {
+        $labels = array_map(function ($token) use ($group) {
+            return $this->format_whitelist_token($group, $token);
+        }, $tokens);
+
+        return implode(', ', $labels);
     }
 
     /**

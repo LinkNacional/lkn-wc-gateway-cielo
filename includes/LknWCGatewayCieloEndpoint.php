@@ -275,13 +275,20 @@ final class LknWCGatewayCieloEndpoint
         $number = str_replace(' ', '', trim($request->get_param('number')));
         $gateway = $request->get_param('gateway'); // 'debit' or 'credit'
 
-        // Se brand_validation estiver ativo e gateway informado, tenta online primeiro
+        // Fluxo ONLINE: quando a validação online está habilitada no gateway, roda
+        // APENAS a consulta online (com 1 nova tentativa). Não há fallback offline —
+        // se a consulta falhar, devolve erro para o front exibir o alerta.
         if (in_array($gateway, array('debit', 'credit'), true)) {
             $optionKey = 'woocommerce_lkn_cielo_' . $gateway . '_settings';
             $option = get_option($optionKey, array());
 
             if (isset($option['brand_validation']) && 'yes' === $option['brand_validation']) {
                 $onlineBrand = self::queryCardBin($number, $option);
+
+                // Segunda tentativa em caso de instabilidade momentânea.
+                if (! $onlineBrand) {
+                    $onlineBrand = self::queryCardBin($number, $option);
+                }
 
                 if ($onlineBrand) {
                     return new WP_REST_Response(array(
@@ -294,9 +301,19 @@ final class LknWCGatewayCieloEndpoint
                         'source'        => 'online',
                     ), 200);
                 }
-                // Fallthrough para offline em caso de falha
+
+                // Falhou após a nova tentativa: sinaliza erro (sem consulta offline).
+                return new WP_REST_Response(array(
+                    'status'  => false,
+                    'error'   => 'bin_query_failed',
+                    'message' => __('Could not validate the card with the card issuer. Please try again or use another card.', 'lkn-wc-gateway-cielo'),
+                    'source'  => 'online',
+                ), 200);
             }
         }
+
+        // Fluxo OFFLINE: validação online desabilitada (ou gateway não informado) —
+        // roda APENAS a consulta offline, apenas para identificar a bandeira.
 
         $bin = [
             // visa

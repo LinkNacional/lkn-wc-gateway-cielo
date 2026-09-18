@@ -4,6 +4,8 @@ import 'react-credit-cards/es/styles-compiled.css'
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 const lknDCsettingsCielo = window.wc.wcSettings.getSetting('lkn_cielo_debit_data', {})
 const lknDCCardTypeMode = lknDCsettingsCielo.cardTypeMode || 'both'
+// Último BIN que já exibiu alerta de falha da consulta online (evita repetição)
+let lknBinErrorShown = ''
 // Esconde o seletor de tipo de cartão (PRO) somente quando o modo é de um único tipo.
 const lknDCHideCardTypeSelector = lknDCCardTypeMode !== 'both' && (lknDCsettingsCielo.hideCardTypeSelector === 'yes')
 // Tipo de cartão fixo quando o modo restringe a um único tipo. Impede que a lista de
@@ -406,6 +408,14 @@ const lknDCContentCielo = props => {
 
               return response.json()
             }).then(data => {
+              // Consulta online falhou (sem fallback offline): alerta e interrompe.
+              if (data && data.error) {
+                if (lknBinErrorShown !== cardBin) {
+                  lknBinErrorShown = cardBin
+                  window.alert(data.message || 'Could not validate the card with the card issuer. Please try again or use another card.')
+                }
+                return
+              }
               // Só ajusta o tipo de cartão quando o seletor é editável (modo 'both').
               // Com o tipo fixo, a seleção é travada e o servidor impõe o valor.
               if (lknDCCardTypeMode !== 'both') {
