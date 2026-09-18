@@ -575,13 +575,17 @@
               }
             }
 
-            // Campos exclusivos do PRO (marcados com lkn-is-pro="true" no PHP).
-            // Quando a licença PRO não está ativa, injeta o link "PRO" no título e
-            // desabilita o controle — mesmo padrão do plugin Rede.
-            const proMarkedInput = (inputElement && inputElement.getAttribute('lkn-is-pro') === 'true')
+            // Campos PRO: marcados com lkn-is-pro="true" (travados) ou
+            // lkn-pro-badge="true" (selo "PRO", porém editável — usado nos campos fake
+            // do plano gratuito). Ambos recebem o link/selo "PRO" no título.
+            const proLockedInput = (inputElement && inputElement.getAttribute('lkn-is-pro') === 'true')
               || (checkboxInput && checkboxInput.getAttribute('lkn-is-pro') === 'true')
 
-            if (proMarkedInput) {
+            const proBadgeInput = (inputElement && inputElement.getAttribute('lkn-pro-badge') === 'true')
+              || (checkboxInput && checkboxInput.getAttribute('lkn-pro-badge') === 'true')
+              || !!bodyDiv.querySelector('[lkn-pro-badge="true"]')
+
+            if (proLockedInput || proBadgeInput) {
               headerDiv.style.position = 'relative'
 
               const proLink = document.createElement('a')
@@ -594,10 +598,13 @@
                 : 'PRO'
               titleInside.appendChild(proLink)
 
-              // Bloqueia todos os controles do campo (radios + input oculto).
-              bodyDiv.querySelectorAll('input, select, textarea').forEach(el => {
-                el.disabled = true
-              })
+              // Só bloqueia de fato os controles dos campos exclusivos do PRO (lkn-is-pro).
+              // Os campos com lkn-pro-badge permanecem editáveis (são fakes/simulação).
+              if (proLockedInput) {
+                bodyDiv.querySelectorAll('input, select, textarea').forEach(el => {
+                  el.disabled = true
+                })
+              }
             }
 
             // Limpa o fieldset e insere os novos containers
@@ -727,6 +734,10 @@
     const logsRow = document.querySelector('input[name$="_show_order_logs-control"]')?.closest('tr');
     const sendConfigsInput = document.querySelector('input[id^="woocommerce_lkn_"][id$="_send_configs"]');
 
+    // Licença PRO ativa? Define se o botão de suporte WhatsApp é funcional (verde)
+    // ou apenas decorativo (cinza) no plano gratuito.
+    const lknProLicenseActive = !!(typeof lknWcCieloTranslationsInput !== 'undefined' && lknWcCieloTranslationsInput.isProValid);
+
     // Seletores do PRO
     const proOn = document.querySelector('input[name$="_debug_pro-control"][value="1"]');
     const proOff = document.querySelector('input[name$="_debug_pro-control"][value="0"]');
@@ -738,7 +749,7 @@
       const initWppState = () => {
         // Verifica o estado inicial (como veio do banco de dados)
         const isDebugActive = debugOn.checked;
-        const isProActive = proOn ? proOn.checked : true;
+        const isProActive = lknProLicenseActive && (proOn ? proOn.checked : true);
 
         // Se estiver tudo Ativo no carregamento, habilita. Senão, bloqueia.
         if (isDebugActive && isProActive) {
@@ -809,6 +820,29 @@
       // Define o label do botão
       const supportLabel = lknWcCieloTranslations && lknWcCieloTranslations.sendConfigs ? lknWcCieloTranslations.sendConfigs : 'Suporte';
       sendConfigsInput.value = `${supportLabel}`.trim();
+
+      // Plano gratuito: botão apenas decorativo (cinza, sem ação).
+      if (!lknProLicenseActive) {
+        sendConfigsInput.type = 'button';
+        sendConfigsInput.disabled = true;
+        sendConfigsInput.classList.add('wpp-disabled');
+        sendConfigsInput.removeAttribute('onclick');
+        sendConfigsInput.style.width = 'fit-content';
+        sendConfigsInput.style.setProperty('padding', '10px 18px 10px 32px', 'important');
+        sendConfigsInput.style.background = 'url("https://cdn.simpleicons.org/whatsapp/999") no-repeat 8px center/18px, #f0f0f1';
+        sendConfigsInput.style.color = '#a7aaad';
+        sendConfigsInput.style.fill = '#a7aaad';
+        sendConfigsInput.style.border = '1px solid #dcdcde';
+        sendConfigsInput.style.borderRadius = '2px';
+        sendConfigsInput.style.fontWeight = 'bold';
+        sendConfigsInput.style.cursor = 'not-allowed';
+        sendConfigsInput.style.outline = 'none';
+        sendConfigsInput.onmouseover = null;
+        sendConfigsInput.onmouseout = null;
+        sendConfigsInput.title = (typeof lknWcCieloTranslations !== 'undefined' && lknWcCieloTranslations.sendConfigsPro)
+          ? lknWcCieloTranslations.sendConfigsPro
+          : 'Available only in the PRO plan.';
+      } else {
 
       // Adiciona o ícone do WhatsApp antes do texto
       sendConfigsInput.style.width = 'fit-content';
@@ -893,6 +927,7 @@
         message += ' Aguardo retorno, obrigado!';
         window.open(`https://api.whatsapp.com/send/?phone=${whatsappNumber}&text=${encodeURIComponent(message)}`,'_blank');
       };
+      }
     }
 
     const message = $('<p id="footer-left-lkn" class="alignleft"></p>')
@@ -1038,6 +1073,157 @@
           }
         })
       }
+    })()
+
+    // === Parcelas: juros x desconto (campos reais e "fake") ===
+    // Os checkboxes de juros/desconto são convertidos em rádios "-control" (o checkbox
+    // original fica oculto), então reagimos por delegação ao evento change — cobrindo
+    // rádios, checkboxes e o select (o select2 dispara 'change' no select nativo). Roda
+    // tanto para os campos reais (PRO ativo) quanto para os "fake" (showcase do free).
+    ;(function () {
+      const sectionMatch = window.location.search.match(/[?&]section=([^&]+)/)
+      const section = sectionMatch ? decodeURIComponent(sectionMatch[1]) : ''
+      if (section !== 'lkn_cielo_credit' && section !== 'lkn_cielo_debit') return
+
+      const base = 'woocommerce_' + section + '_'
+      const baseEsc = base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const suffixes = ['', '_fake']
+      const noInterestLabel = (typeof lknWcCieloTranslationsInput !== 'undefined' && lknWcCieloTranslationsInput.noInterest)
+        ? lknWcCieloTranslationsInput.noInterest
+        : 'Sem juros'
+
+      const isChecked = (key) => {
+        const radios = document.querySelectorAll('input[name="' + key + '-control"]')
+        if (radios.length) {
+          for (let i = 0; i < radios.length; i++) {
+            if (radios[i].checked) return radios[i].value === '1'
+          }
+          return false
+        }
+        const cb = document.getElementById(key)
+        return !!(cb && cb.checked)
+      }
+
+      const setRow = (el, show) => {
+        if (!el) return
+        const row = el.closest('tr')
+        if (row) row.style.display = show ? '' : 'none'
+      }
+
+      const apply = () => {
+        suffixes.forEach((suffix) => {
+          const sel = document.getElementById(base + 'interest_or_discount' + suffix)
+          if (!sel) return
+
+          const interestKey = base + 'installment_interest' + suffix
+          const discountKey = base + 'installment_discount' + suffix
+          const mode = sel.value
+          const interestChecked = isChecked(interestKey)
+          const discountChecked = isChecked(discountKey)
+
+          // Limite de parcelas: exibe apenas os campos Nx cujo índice <= limite.
+          const limitSel = document.getElementById(base + 'installment_limit' + suffix)
+          const limit = limitSel ? (parseInt(limitSel.value, 10) || 18) : 18
+
+          setRow(document.getElementById(interestKey), mode === 'interest')
+          setRow(document.getElementById(discountKey), mode === 'discount')
+
+          const nxRe = new RegExp('^' + baseEsc + '(\\d+)x' + suffix + '$')
+          const nxDiscRe = new RegExp('^' + baseEsc + '(\\d+)x_discount' + suffix + '$')
+
+          document.querySelectorAll('input[id^="' + base + '"]').forEach((el) => {
+            const discM = el.id.match(nxDiscRe)
+            const intM = el.id.match(nxRe)
+            if (discM) {
+              setRow(el, parseInt(discM[1], 10) <= limit && mode === 'discount' && discountChecked)
+            } else if (intM) {
+              setRow(el, parseInt(intM[1], 10) <= limit && mode === 'interest' && interestChecked)
+            }
+          })
+        })
+      }
+
+      // Checkbox "Sem juros" nos campos de juros por parcela (reais e fake).
+      const addNoInterest = (suffix) => {
+        const nxRe = new RegExp('^' + baseEsc + '(\\d+)x' + suffix + '$')
+        document.querySelectorAll('input[id^="' + base + '"]').forEach((input) => {
+          const m = input.id.match(nxRe)
+          if (!m) return
+          const fieldset = input.closest('fieldset')
+          if (!fieldset || fieldset.querySelector('.lkn-cielo-no-interest')) return
+
+          const wrapper = document.createElement('div')
+          wrapper.className = 'lkn-cielo-no-interest'
+          wrapper.style.marginTop = '8px'
+          wrapper.style.display = 'flex'
+          wrapper.style.alignItems = 'center'
+          wrapper.style.gap = '5px'
+
+          const checkbox = document.createElement('input')
+          checkbox.type = 'checkbox'
+          checkbox.name = base + m[1] + 'x' + suffix + '_no_interest'
+          checkbox.id = checkbox.name
+          checkbox.value = '1'
+
+          const label = document.createElement('label')
+          label.htmlFor = checkbox.id
+          label.textContent = noInterestLabel
+          label.style.fontSize = '13px'
+          label.style.color = '#666'
+
+          wrapper.appendChild(checkbox)
+          wrapper.appendChild(label)
+
+          const body = input.closest('.lkn-body-cart') || fieldset
+          body.appendChild(wrapper)
+
+          checkbox.addEventListener('change', function () {
+            if (this.checked) {
+              input.readOnly = true
+              input.value = 0
+            } else {
+              input.readOnly = false
+              input.value = ''
+            }
+          })
+          input.addEventListener('change', function (e) {
+            if (e.target.value === '0' || e.target.value === 0) {
+              checkbox.checked = true
+              checkbox.dispatchEvent(new Event('change'))
+            } else {
+              checkbox.checked = false
+            }
+          })
+          if (input.value === '0' || input.value === 0) {
+            checkbox.checked = true
+            checkbox.dispatchEvent(new Event('change'))
+          }
+        })
+      }
+
+      const onControlChange = function (e) {
+        const t = e.target
+        if (!t) return
+        const name = t.name || t.id || ''
+        if (name.indexOf(base + 'interest_or_discount') === 0 ||
+            name.indexOf(base + 'installment_interest') === 0 ||
+            name.indexOf(base + 'installment_discount') === 0 ||
+            name.indexOf(base + 'installment_limit') === 0) {
+          apply()
+        }
+      }
+
+      // O select2 dispara 'change' via jQuery (não gera evento nativo), então usamos
+      // a delegação do jQuery — que também cobre os rádios nativos (checkbox→-control).
+      if (window.jQuery) {
+        window.jQuery(document).on('change select2:select select2:unselect', onControlChange)
+      } else {
+        document.addEventListener('change', onControlChange)
+      }
+
+      suffixes.forEach(addNoInterest)
+      apply()
+      setTimeout(apply, 300)
     })()
   })
 

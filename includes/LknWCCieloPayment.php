@@ -197,9 +197,12 @@ final class LknWCCieloPayment
                 $this,
                 'enforce_abecs_pro_only'
             );
+        }
 
-            // Restrição/hide de tipo de cartão e layout moderno também são PRO: força
-            // os padrões no banco quando não há licença ativa (cobre HTML manipulado).
+        // Recursos PRO do cartão (tipo de cartão, layout moderno, parcelas e extras):
+        // força os padrões no banco quando não há licença ativa. Cobre tanto o HTML
+        // manipulado quanto os campos "fake" replicados no formulário (chaves *_fake).
+        foreach (array('lkn_cielo_credit', 'lkn_cielo_debit') as $cielo_gateway_id) {
             $this->loader->add_filter(
                 'woocommerce_settings_api_sanitized_fields_' . $cielo_gateway_id,
                 $this,
@@ -209,22 +212,54 @@ final class LknWCCieloPayment
     }
 
     /**
-     * Force PRO-only settings (card type mode/selector and modern checkout layout)
-     * back to defaults when the PRO license is not active.
+     * Force PRO-only card settings back to defaults when the PRO license is not active.
      *
-     * Runs during the gateway settings save (WooCommerce Settings API). Guarantees
-     * these features stay disabled in the database even if the fields were enabled
-     * by tampering with the rendered HTML or by a license deactivated after saving.
+     * Runs during the gateway settings save (WooCommerce Settings API) for the credit
+     * and debit gateways. Guarantees that no PRO feature stays enabled in the database
+     * when there is no active license — covering tampered HTML and the replicated
+     * "fake" fields (which use separate *_fake keys and are otherwise inert).
      *
      * @param array $settings Sanitized gateway settings about to be saved.
      * @return array
      */
     public function enforce_pro_features_only($settings)
     {
-        if (is_array($settings) && ! LknWcCieloHelper::is_pro_license_active()) {
-            $settings['card_type_mode'] = 'both';
-            $settings['hide_card_type_selector'] = 'no';
-            $settings['checkout_layout'] = 'no';
+        if (! is_array($settings) || LknWcCieloHelper::is_pro_license_active()) {
+            return $settings;
+        }
+
+        $settings['card_type_mode'] = 'both';
+        $settings['hide_card_type_selector'] = 'no';
+        $settings['checkout_layout'] = 'no';
+        $settings['brand_validation'] = 'no';
+        $settings['show_cardholder_name'] = 'no';
+        $settings['input_validation_compatibility'] = 'no';
+        $settings['capture'] = 'yes';
+        $settings['installment_min'] = '5,00';
+        $settings['interest_or_discount'] = 'interest';
+        $settings['installment_limit'] = '12';
+        $settings['installment_interest'] = 'no';
+        $settings['installment_discount'] = 'no';
+        $settings['show_card_brand_icons'] = 'yes';
+        $settings['implant_css'] = '';
+        $settings['payment_complete_status'] = 'processing';
+        $settings['auto_complete'] = '0';
+        $settings['elementor_checkout_compatibility'] = 'no';
+        $settings['zero_auth_validation'] = 'no';
+        $settings['retry_payments'] = 'no';
+        $settings['retry_interval'] = 6;
+        $settings['save_card_token'] = 'disabled';
+
+        for ($c = 1; $c <= 18; ++$c) {
+            $settings[$c . 'x'] = '0';
+            $settings[$c . 'x_discount'] = '0';
+        }
+
+        // Remove os campos "fake" (chaves *_fake) para não persistir valores inertes no banco.
+        foreach (array_keys($settings) as $key) {
+            if ('_fake' === substr($key, -5)) {
+                unset($settings[$key]);
+            }
         }
 
         return $settings;
@@ -700,7 +735,20 @@ final class LknWCCieloPayment
 
             wp_enqueue_script('lknCieloForWoocommerceCard', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/js/admin/lkn-woocommerce-admin-card.js', array('jquery'), LKN_WC_CIELO_VERSION, false);
             wp_enqueue_style('lknCieloForWoocommerceCard', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/css/frontend/lkn-woocommerce-admin-card.css', array(), LKN_WC_CIELO_VERSION, 'all');
-            wp_enqueue_script('lknCieloForWoocommerceProSettings', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/js/admin/lkn-settings-pro-fields.js', array(), LKN_WC_CIELO_VERSION, false);
+
+            // Dependências visuais dos campos "fake" dos recursos PRO (showcase free).
+            // Só faz sentido quando não há licença PRO ativa (é quando os fakes existem).
+            if (! LknWcCieloHelper::is_pro_license_active()) {
+                wp_enqueue_script('lknCieloFakeProFields', LKN_WC_GATEWAY_CIELO_DIR_URL . 'resources/js/admin/lkn-fake-pro-fields.js', array('jquery', 'wp-i18n'), LKN_WC_CIELO_VERSION, true);
+                wp_set_script_translations('lknCieloFakeProFields', 'lkn-wc-gateway-cielo');
+                wp_localize_script(
+                    'lknCieloFakeProFields',
+                    'lknFakeProFieldsI18n',
+                    array(
+                        'notice' => __('The features marked with the PRO badge are a preview in the free plan. You can adjust them freely to explore them, but they only take effect with an active PRO license.', 'lkn-wc-gateway-cielo'),
+                    )
+                );
+            }
 
             // Variáveis usadas pelos cartões promocionais do admin (mesmo padrão do plugin Rede).
             wp_localize_script(
@@ -710,14 +758,6 @@ final class LknWCCieloPayment
                     'plugin_slug' => 'invoice-payment-for-woocommerce',
                     'install_nonce' => wp_create_nonce('install-plugin_invoice-payment-for-woocommerce'),
                     'invoice_plugin_installed' => is_plugin_active('invoice-payment-for-woocommerce/invoice-payment-for-woocommerce.php'),
-                )
-            );
-
-            wp_localize_script(
-                'lknCieloForWoocommerceProSettings',
-                'lknCieloProSettingsVars',
-                array(
-                    'proOnly' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
                 )
             );
 

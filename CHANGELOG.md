@@ -1,5 +1,9 @@
 # 1.37.3 - 11/09/2026
 * Correção: As mensagens de recusa de pagamento agora seguem o padrão ABECS da Cielo.
+* Novo: recursos PRO replicados como campos de demonstração (selo PRO) no plano gratuito, interativos e sem gravar nas opções reais.
+* Ajuste: validação de BIN (whitelist) decide apenas pela consulta online, com nova tentativa e bloqueio quando a Cielo não responde; sem a opção, usa apenas a consulta offline.
+* Ajuste: endpoint de consulta de bandeira separa os fluxos online e offline e exibe alerta no checkout quando a consulta online falha.
+* Ajuste: mensagens das whitelists passam a informar as bandeiras/tipos permitidos.
 
 # 1.37.2 - 08/09/2026
 * Correção: Tratamento do erro MPI900 (falha de rede/HTTP) no fluxo de autenticação 3DS.

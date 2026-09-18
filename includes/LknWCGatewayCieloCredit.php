@@ -157,6 +157,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloCreditClearButtonScript', 'lknWcCieloTranslations', array(
                 'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
                 'sendConfigs' => __('Wordpress Support', 'lkn-wc-gateway-cielo'),
+                'sendConfigsPro' => __('Available only in the PRO plan.', 'lkn-wc-gateway-cielo'),
                 'alertText' => __('Deseja realmente deletar todos logs dos pedidos?', 'lkn-wc-gateway-cielo'),
                 'production' => __('Use this in the live store to charge real payments.', 'lkn-wc-gateway-cielo'),
                 'sandbox' => __('Use this for testing purposes in the Cielo sandbox environment.', 'lkn-wc-gateway-cielo'),
@@ -318,7 +319,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                     array(
                         'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo')
                     ),
-                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                    array('lkn-pro-badge' => 'true')
                 )
             )
         );
@@ -347,21 +348,24 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             ),
         );
 
-        // PRO section (send configs)
+        // Support section (send configs). No plano gratuito o botão continua visível,
+        // porém decorativo (cinza/desabilitado) — é um recurso do plano PRO.
         $pro_plugin_active = LknWcCieloHelper::is_pro_license_active();
-        if ($pro_plugin_active) {
-            $this->form_fields['send_configs'] = array(
-                'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
-                'type'  => 'button',
-                'id'    => 'sendConfigs',
-                'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
-                'desc_tip' => null,
-                'custom_attributes' => array(
+        $this->form_fields['send_configs'] = array(
+            'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
+            'type'  => 'button',
+            'id'    => 'sendConfigs',
+            'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
+            'desc_tip' => null,
+            'disabled' => ! $pro_plugin_active,
+            'custom_attributes' => array_merge(
+                array(
                     'merge-top' => "woocommerce_{$this->id}_debug",
                     'data-title-description' => __('Send the settings for this payment method to WordPress Support.', 'lkn-wc-gateway-cielo')
-                )
-            );
-        }
+                ),
+                ! $pro_plugin_active ? array('lkn-pro-badge' => 'true') : array()
+            )
+        );
 
         // Logs section (order logs and clear logs)
         $this->form_fields += array(
@@ -396,73 +400,403 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             'type'  => 'title',
         );
 
-        if (
-            ! file_exists(WP_PLUGIN_DIR . '/lkn-cielo-api-pro/lkn-cielo-api-pro.php') ||
-            ! (function_exists('is_plugin_active') && is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php'))
-        ) {
-            $this->form_fields['pro'] = array(
-                'title' => esc_attr__('PRO', 'lkn-wc-gateway-cielo'),
+        $customConfigs = apply_filters('lkn_wc_cielo_get_custom_configs', array(), $this->id);
+
+        if (LknWcCieloHelper::is_pro_license_active()) {
+            // Licença PRO ativa: usa os campos reais fornecidos pelo PRO.
+            if (! empty($customConfigs)) {
+                $this->form_fields = array_merge($this->form_fields, $customConfigs);
+            }
+        } else {
+            // Licença PRO inativa (ou plugin PRO ausente): replica os campos PRO como
+            // "fake" — chaves com sufixo _fake, porém totalmente interativos para o
+            // lojista explorar os recursos (toggles e dependências de exibição). Como
+            // são inertes, nada afeta as opções reais do PRO, que também são removidas
+            // do formulário. Se o plugin PRO estiver presente, os campos reais de licença
+            // (license/validate_license) são mantidos no lugar dos fakes para permitir
+            // a validação da chave.
+            $this->form_fields = array_merge($this->form_fields, $this->get_fake_pro_fields($customConfigs));
+        }
+    }
+
+    /**
+     * Monta o bloco "fake" dos campos PRO do gateway de crédito.
+     *
+     * Duplica explicitamente os campos definidos pelo plugin PRO (mesmos títulos,
+     * descrições e opções), porém com chave própria (sufixo _fake). Como são inertes,
+     * ficam totalmente interativos para o lojista explorar os recursos (toggles e
+     * dependências de exibição), sem gravar nada nas opções reais do PRO.
+     *
+     * @param array $customConfigs Campos retornados pelo PRO (vazio se o PRO não estiver instalado).
+     * @return array
+     */
+    private function get_fake_pro_fields($customConfigs): array
+    {
+        // Campos fake ficam editáveis, mas exibem o selo "PRO" (lkn-pro-badge)
+        // para deixar claro que são recursos do plano pago em modo demonstração.
+        $lock = array('lkn-pro-badge' => 'true');
+        $fields = array();
+
+        $fields['section_general_pro_fake'] = array(
+            'title' => __('General PRO', 'lkn-wc-gateway-cielo'),
+            'type'  => 'title',
+        );
+
+        if (isset($customConfigs['license'])) {
+            // Plugin PRO presente: mantém os campos reais de licença (funcionais).
+            $fields['license'] = $customConfigs['license'];
+            if (isset($customConfigs['validate_license'])) {
+                $fields['validate_license'] = $customConfigs['validate_license'];
+            }
+        } else {
+            $fields['license_fake'] = array(
+                'title'       => __('License', 'lkn-wc-gateway-cielo'),
+                'type'        => 'password',
+                'description' => __('License for Cielo API 3.0 plugin extensions.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Enter your Link nacional license key to activate PRO features.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Save to enable other options.', 'lkn-wc-gateway-cielo')),
+                    $lock
+                ),
+            );
+
+            $fields['validate_license_fake'] = array(
+                'title'       => __('Validate License', 'lkn-wc-gateway-cielo'),
+                'type'        => 'button',
+                'id'          => 'validateLicenseFake',
+                'class'       => 'woocommerce-save-button components-button',
+                // Valor exibido no botão: o WooCommerce usa get_option() para o value,
+                // que cai no default do campo quando a opção não existe.
+                'default'     => __('Validate License', 'lkn-wc-gateway-cielo'),
+                'disabled'    => true,
+                'description' => __('Click the button to validate your license.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Save to enable other options.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Validates your license key to unlock all PRO features.', 'lkn-wc-gateway-cielo')),
+                    $lock
+                ),
+            );
+        }
+
+        $fields['show_cardholder_name_fake'] = array(
+            'title'       => __('Cardholder Name Field', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Disable the cardholder name field', 'lkn-wc-gateway-cielo'),
+            'description' => __('Hide the cardholder name field and query the field from billing details.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Enable this option if you want to use the billing name instead of collecting the cardholder name separately.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Disables the name input and uses the billing name instead.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['input_validation_compatibility_fake'] = array(
+            'title'       => __('Validation Compatibility Mode', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Compatibility mode that prevents duplicate validation messages', 'lkn-wc-gateway-cielo'),
+            'description' => __('Enable only if you experience duplicate messages on the payment page.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Use this setting if your theme or plugins interfere with WooCommerce form validation.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Avoids duplicated validation warnings during checkout.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['capture_fake'] = array(
+            'title'       => __('Capture', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Enable automatic capture for payments', 'lkn-wc-gateway-cielo'),
+            'description' => __('If disabled, payments will only be authorized and must be captured manually.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Enable to automatically capture the amount upon transaction authorization.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'yes',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Automatically captures the payment once authorized by Cielo.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['brand_validation_fake'] = array(
+            'title'       => __('Online Card Validation', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'description' => __('Enables online BIN validation via Cielo API 3.0 (Requires Cielo BIN functionality enabled).', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Check this if your Cielo account supports online brand validation (BIN lookup).', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Performs card brand validation using Cielo’s BIN database.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        if ('yes' === $this->get_option('installment_payment')) {
+            $savedLimit = (int) $this->get_option('installment_limit', 12);
+            if ($savedLimit < 1) {
+                $savedLimit = 12;
+            }
+
+            $limitOptions = array();
+            for ($i = 1; $i <= 18; ++$i) {
+                $limitOptions[(string) $i] = sprintf('%dx', $i);
+            }
+
+            $fields['section_installments_fake'] = array(
+                'title' => __('Installments', 'lkn-wc-gateway-cielo'),
                 'type'  => 'title',
             );
 
-            $this->form_fields['fake_license_field'] = array(
-                'title'       => __('License', 'lkn-wc-gateway-cielo'),
+            $fields['installment_min_fake'] = array(
+                'title'       => __('Minimum Installment Value', 'lkn-wc-gateway-cielo'),
                 'type'        => 'text',
-                'description' => __('Enter your license key here. This field is disabled for editing.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('Enter your Link nacional license key to activate PRO features.', 'lkn-wc-gateway-cielo'),
-                'id'          => 'fake_license_field',
-                'custom_attributes' => array(
-                    'readonly' => 'readonly',
-                    'data-title-description' => __('This field displays your current license key. Editing is disabled.', 'lkn-wc-gateway-cielo'),
+                'description' => __('Sets the minimum accepted installment value. Cielo does not accept installments lower than R$ 5.00. Use a comma (,) to separate cents.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Recommended minimum is R$ 5.00. Enter the value in Brazilian format (e.g., 5,00).', 'lkn-wc-gateway-cielo'),
+                'default'     => '5,00',
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Defines the lowest possible value for each installment. Required by Cielo.', 'lkn-wc-gateway-cielo')),
+                    $lock
                 ),
             );
 
-            $this->form_fields['fake_cardholder_field'] = array(
-                'title'       => __('Cardholder Name', 'lkn-wc-gateway-cielo'),
-                'type'        => 'text',
-                'description' => __('Enter the cardholder name. This field is not editable.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('This cardholder name field is read-only for security reasons.', 'lkn-wc-gateway-cielo'),
-                'id'          => 'fake_cardholder_field',
-                'custom_attributes' => array(
-                    'readonly' => 'readonly',
-                    'data-title-description' => __('This field displays the cardholder name but is disabled for editing.', 'lkn-wc-gateway-cielo'),
+            $fields['installment_limit_fake'] = array(
+                'title'       => __('Set Installment Limit', 'lkn-wc-gateway-cielo'),
+                'type'        => 'select',
+                'description' => __('Sets a maximum number of installments. Only certain brands accept more than 12x.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Choose the highest number of installments allowed for card payments.', 'lkn-wc-gateway-cielo'),
+                'options'     => $limitOptions,
+                'default'     => (string) $savedLimit,
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Maximum number of times the purchase can be split into installments.', 'lkn-wc-gateway-cielo')),
+                    $lock
                 ),
             );
 
-            $this->form_fields['fake_layout'] = array(
-                'title'       => __('Layout', 'lkn-wc-gateway-cielo'),
-                'type'        => 'checkbox',
-                'description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('Select between Modern Version and Standard Version for the checkout layout.', 'lkn-wc-gateway-cielo'),
+            $fields['interest_or_discount_fake'] = array(
+                'title'       => esc_attr__('Installment Settings', 'lkn-wc-gateway-cielo'),
+                'type'        => 'select',
+                'class'       => 'wc-enhanced-select',
+                'desc_tip'    => __('Select the option interest or discount. Save to continue configuration.', 'lkn-wc-gateway-cielo'),
+                'description' => __('Allows the user to select discount or interest on credit card installments.', 'lkn-wc-gateway-cielo'),
                 'options'     => array(
-                    'yes'  => __('Modern Version', 'lkn-wc-gateway-cielo'),
-                    'no' => __('Standard Version', 'lkn-wc-gateway-cielo'),
+                    'interest' => __('Interest', 'lkn-wc-gateway-cielo'),
+                    'discount' => __('Discount', 'lkn-wc-gateway-cielo'),
                 ),
+                'default'     => 'interest',
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Defines whether the installment will apply interest or offer a discount. Save to load more settings.', 'lkn-wc-gateway-cielo')),
+                    $lock
+                ),
+            );
+
+            $fields['installment_interest_fake'] = array(
+                'title'       => __('Installment Interest', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'description' => __('Allows payment with interest in installments. Save to continue configuration.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Enable to allow interest to be charged on installment payments.', 'lkn-wc-gateway-cielo'),
                 'default'     => 'no',
-                'custom_attributes' => array(
-                    'readonly' => 'readonly',
-                    'data-title-description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Applies an interest rate to each installment. Use this if you want to charge extra per installment.', 'lkn-wc-gateway-cielo')),
+                    $lock
                 ),
             );
 
-            $this->form_fields['fake_and_more_field'] = array(
-                'title'       => __('And much more...', 'lkn-wc-gateway-cielo'),
-                'type'        => 'text',
-                'description' => __('Discover all PRO features by activating your license.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('Unlock advanced features and enhancements with the PRO version.', 'lkn-wc-gateway-cielo'),
-                'id'          => 'fake_and_more_field',
-                'custom_attributes' => array(
-                    'readonly' => 'readonly',
-                    'data-title-description' => __('This is just a sample field to highlight more PRO features.', 'lkn-wc-gateway-cielo'),
+            $fields['installment_discount_fake'] = array(
+                'title'       => __('Discount on Installments', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'description' => __('Enables payment with discount on installments.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Enable to give a discount when the customer chooses to pay in installments.', 'lkn-wc-gateway-cielo'),
+                'default'     => 'no',
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Applies a discount per installment when selected. Useful to encourage multi-payment options.', 'lkn-wc-gateway-cielo')),
+                    $lock
+                ),
+            );
+
+            // Gera todos os campos (1..18) para o seletor de limite poder exibi-los e
+            // ocultá-los dinamicamente; a quantidade visível segue o limite escolhido.
+            for ($c = 1; $c <= 18; ++$c) {
+                $fields[$c . 'x_fake'] = array(
+                    'title'       => __('Installment Interest', 'lkn-wc-gateway-cielo') . ' ' . $c . 'x',
+                    'type'        => 'number',
+                    'description' => __('Defines the interest rate per installment in percentage. Only numbers are accepted. E.g., enter 10 for 10% interest, leave blank or enter zero for no interest.', 'lkn-wc-gateway-cielo'),
+                    'default'     => '0',
+                    'desc_tip'    => __('Interest applied to each installment.', 'lkn-wc-gateway-cielo'),
+                    'custom_attributes' => array_merge(
+                        array(
+                            'min'  => '0',
+                            'step' => '0.01',
+                            'data-title-description' => sprintf(
+                                // translators: %d is the number of installments (e.g., 2x, 3x, etc.)
+                                __('Interest applied when customer selects to pay in %dx. Leave 0 for no interest.', 'lkn-wc-gateway-cielo'),
+                                $c
+                            ),
+                        ),
+                        $lock
+                    ),
+                );
+
+                $fields[$c . 'x_discount_fake'] = array(
+                    'title'       => __('Installment Discount', 'lkn-wc-gateway-cielo') . ' ' . $c . 'x',
+                    'type'        => 'number',
+                    'description' => __('Defines the discount rate per installment in percentage. Only numbers are accepted. E.g., enter 10 for 10% discount, leave blank or enter zero for no discount.', 'lkn-wc-gateway-cielo'),
+                    'default'     => '0',
+                    'desc_tip'    => __('Discount applied to each installment.', 'lkn-wc-gateway-cielo'),
+                    'custom_attributes' => array_merge(
+                        array(
+                            'min'  => '0',
+                            'step' => '0.01',
+                            'max'  => '100',
+                            'data-title-description' => sprintf(
+                                __('Discount applied when customer selects to pay in %dx. Leave 0 for no discount.', 'lkn-wc-gateway-cielo'),
+                                $c
+                            ),
+                        ),
+                        $lock
+                    ),
+                );
+            }
+        }
+
+        $fields['section_extras_fake'] = array(
+            'title' => __('Extras', 'lkn-wc-gateway-cielo'),
+            'type'  => 'title',
+        );
+
+        $fields['checkout_layout_fake'] = array(
+            'title'       => __('Layout', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Select between Modern Version and Standard Version for the checkout layout.', 'lkn-wc-gateway-cielo'),
+            'options'     => array(
+                'yes' => __('Modern Version', 'lkn-wc-gateway-cielo'),
+                'no'  => __('Standard Version', 'lkn-wc-gateway-cielo'),
+            ),
+            'default'     => 'yes',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['show_card_brand_icons_fake'] = array(
+            'title'       => __('Show card brand icons', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Enable display of card brand icons', 'lkn-wc-gateway-cielo'),
+            'description' => __('Show or hide card brand icons on the checkout page.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Enable to display card brand icons on the checkout page.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'yes',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Allows you to show or hide card brand icons on the checkout.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['implant_css_fake'] = array(
+            'title'       => __('Additional CSS', 'lkn-wc-gateway-cielo'),
+            'type'        => 'textarea',
+            'desc_tip'    => __('Add custom CSS to style credit and debit card fields on the checkout page.', 'lkn-wc-gateway-cielo'),
+            'description' => __('This setting allows you to inject custom CSS to style the credit and debit card fields in the checkout.', 'lkn-wc-gateway-cielo'),
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Customize visual appearance of card input fields using your own CSS rules.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['payment_complete_status_fake'] = array(
+            'title'       => esc_attr__('Payment Complete Status', 'lkn-wc-gateway-cielo'),
+            'type'        => 'select',
+            'class'       => 'wc-enhanced-select',
+            'desc_tip'    => __('Select what status should be set for the order once the payment is confirmed.', 'lkn-wc-gateway-cielo'),
+            'description' => esc_attr__('Option to automatically set the order status after payment confirmation through this gateway.', 'lkn-wc-gateway-cielo'),
+            'options'     => array(
+                'processing' => _x('Processing', 'Order status', 'lkn-wc-gateway-cielo'),
+                'on-hold'    => _x('On hold', 'Order status', 'lkn-wc-gateway-cielo'),
+                'completed'  => _x('Completed', 'Order status', 'lkn-wc-gateway-cielo'),
+            ),
+            'default'     => 'processing',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Choose the status WooCommerce should apply after a successful payment confirmation.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['auto_complete_fake'] = array(
+            'title'       => __('Autocomplete Orders', 'lkn-wc-gateway-cielo'),
+            'type'        => 'select',
+            'desc_tip'    => __('Defines if the order should be completed automatically based on product type.', 'lkn-wc-gateway-cielo'),
+            'description' => __('Setting to set the order status after payment confirmation according to the product type. None: follow default settings or full payment status.', 'lkn-wc-gateway-cielo'),
+            'default'     => '0',
+            'options'     => array(
+                __('None', 'lkn-wc-gateway-cielo'),
+                __('Virtual Orders', 'lkn-wc-gateway-cielo'),
+                __('Virtual & Downloadable Orders', 'lkn-wc-gateway-cielo'),
+            ),
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Allows automatic completion of orders based on the type of products being sold.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['elementor_checkout_compatibility_fake'] = array(
+            'title'       => __('Elementor Checkout Compatibility Mode', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Compatibility mode for WooCommerce checkout using Elementor', 'lkn-wc-gateway-cielo'),
+            'description' => __('Enable only if you use Elementor checkout. This setting is crucial for plugin functionality in this context.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Compatibility with Elementor’s custom checkout layout.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Activate this only when your checkout is built with Elementor to avoid layout or JS issues.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        $fields['zero_auth_validation_fake'] = array(
+            'title'       => __('Zero Auth Validation', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'description' => __('Enables Zero Auth validation (Requires enabling the Zero Auth feature on Cielo).', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Zero Auth allows validation of a card without charging the user.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Use this if your business process needs to verify card validity before an actual charge.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
+        if (function_exists('is_plugin_active') && is_plugin_active('woocommerce-subscriptions/woocommerce-subscriptions.php')) {
+            $fields['retry_payments_fake'] = array(
+                'title'       => __('Retry payments on subscriptions', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'description' => sprintf(
+                    '%1$s <a target="_blank" href="%2$s">%3$s</a>',
+                    __('Enables retry for subscription payments in case of', 'lkn-wc-gateway-cielo'),
+                    'https://www.linknacional.com.br/blog/codigos-erro-retorno-cielo-api/#reversivel',
+                    __('reversible errors of type.', 'lkn-wc-gateway-cielo')
+                ),
+                'desc_tip'    => __('Automatically attempts to charge again when Cielo returns a reversible error on subscriptions.', 'lkn-wc-gateway-cielo'),
+                'default'     => 'no',
+                'custom_attributes' => array_merge(
+                    array('data-title-description' => __('Useful to reduce failed subscription payments due to temporary issues like insufficient funds or communication problems.', 'lkn-wc-gateway-cielo')),
+                    $lock
+                ),
+            );
+
+            $fields['retry_interval_fake'] = array(
+                'title'       => __('Retry interval', 'lkn-wc-gateway-cielo'),
+                'type'        => 'number',
+                'description' => __('Set the time in hours until the second payment attempt. If it fails again, a third attempt will not be made.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Defines the waiting time between the first and second attempt when a reversible error occurs during subscription renewal.', 'lkn-wc-gateway-cielo'),
+                'default'     => 6,
+                'custom_attributes' => array_merge(
+                    array(
+                        'min'  => '1',
+                        'step' => '1',
+                        'data-title-description' => __('Enter the number of hours to wait before retrying a failed payment due to reversible error.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    $lock
                 ),
             );
         }
 
-        $customConfigs = apply_filters('lkn_wc_cielo_get_custom_configs', array(), $this->id);
-
-        if (! empty($customConfigs)) {
-            $this->form_fields = array_merge($this->form_fields, $customConfigs);
-        }
+        return $fields;
     }
 
     /**

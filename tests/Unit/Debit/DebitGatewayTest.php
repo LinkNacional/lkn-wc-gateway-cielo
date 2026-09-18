@@ -142,7 +142,7 @@ class DebitGatewayTest extends TestCase
         // Verificar campos essenciais
         $requiredFields = [
             'enabled', 'title', 'description', 'merchant_id', 'merchant_key', 
-            'env', 'debug', 'layout', 'fake_layout-control'
+            'env', 'debug', 'checkout_layout_fake'
         ];
 
         foreach ($requiredFields as $field) {
@@ -460,14 +460,14 @@ class DebitGatewayTest extends TestCase
 
     public function test_process_admin_options()
     {
-        $_POST['woocommerce_lkn_cielo_debit_fake_layout-control'] = '1';
+        $_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake-control'] = '1';
 
         Functions\expect('update_option')->atLeast()->once();
 
         $result = $this->gateway->process_admin_options();
 
         $this->assertTrue($result);
-        $this->assertEquals('0', $_POST['woocommerce_lkn_cielo_debit_fake_layout-control']);
+        $this->assertEquals('0', $_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake-control']);
     }
 
     public function test_add_partial_capture_button()
