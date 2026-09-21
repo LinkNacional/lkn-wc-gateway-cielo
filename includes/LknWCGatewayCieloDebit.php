@@ -153,10 +153,11 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
     public function process_admin_options()
     {
-        // Campo fake de layout: garante que o toggle replicado (PRO) nunca seja
-        // enviado como ativo. O recurso real é forçado no save por enforce_pro_features_only().
-        if (isset($_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake-control'])) {
-            $_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake-control'] = '0';
+        // Campo fake de layout: garante que a seleção replicada (PRO) nunca seja
+        // enviada como ativa. O recurso real é forçado no save por
+        // enforce_pro_features_only().
+        if (isset($_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake'])) {
+            $_POST['woocommerce_lkn_cielo_debit_checkout_layout_fake'] = 'standard';
         }
 
         parent::process_admin_options();
@@ -186,11 +187,13 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloDebitSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'compact' => __('Compact version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
                 'standardVersion' => plugin_dir_url(__FILE__) . '../resources/img/standard-version.png',
+                'compactVersion' => plugin_dir_url(__FILE__) . '../resources/img/compact-version.png',
                 'isProValid' => LknWcCieloHelper::is_pro_license_active(),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
                 'gateway_settings' => $gateway_settings,
@@ -224,6 +227,11 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
      */
     public function init_form_fields(): void
     {
+        // Selo "PRO": nos campos migrados do PRO ele só deve aparecer quando a
+        // licença PRO NÃO está ativa. Com a licença ativa o recurso está liberado
+        // e o selo perde o sentido.
+        $pro_badge = LknWcCieloHelper::is_pro_license_active() ? array() : array('lkn-pro-badge' => 'true');
+
         $this->form_fields = array(
             'general' => array(
                 'title' => esc_attr__('General', 'lkn-wc-gateway-cielo'),
@@ -439,7 +447,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     array(
                         'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             // Migrado do plugin PRO: a restrição de tipo de cartão agora vive no gateway
@@ -460,7 +468,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     array(
                         'data-title-description' => __('Restricts the gateway to accept only credit, only debit, or both card types.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             'hide_card_type_selector' => array(
@@ -475,7 +483,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'data-title-description' => __('Hide the card type selector on the checkout. Available only when only debit or only credit cards are accepted.', 'lkn-wc-gateway-cielo'),
                         'merge-top' => "woocommerce_{$this->id}_card_type_mode",
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             // Migrado do plugin PRO: validação online de BIN (consulta Cielo API 3.0).
@@ -490,7 +498,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     array(
                         'data-title-description' => __('Performs card brand validation using Cielo’s BIN database.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             // Cada atributo é uma whitelist (select2 múltiplo com opção custom). Vazio = permite tudo.
@@ -508,7 +516,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'lkn-bin-depends' => 'brand_validation',
                         'data-title-description' => __('Brands allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             'bin_allowed_card_types' => array(
@@ -529,7 +537,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'lkn-bin-depends' => 'brand_validation',
                         'data-title-description' => __('Card types allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             'bin_allowed_nationality' => array(
@@ -549,7 +557,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'lkn-bin-depends' => 'brand_validation',
                         'data-title-description' => __('Card nationality allowed at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             'bin_allowed_corporate' => array(
@@ -569,7 +577,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'lkn-bin-depends' => 'brand_validation',
                         'data-title-description' => __('Corporate card handling at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
             'bin_allowed_prepaid' => array(
@@ -589,7 +597,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                         'lkn-bin-depends' => 'brand_validation',
                         'data-title-description' => __('Prepaid card handling at checkout. Leave empty to allow all.', 'lkn-wc-gateway-cielo'),
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 ),
             ),
         );
@@ -921,14 +929,16 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         $fields['checkout_layout_fake'] = array(
             'title'       => __('Layout', 'lkn-wc-gateway-cielo'),
-            'type'        => 'checkbox',
+            'type'        => 'select',
+            'class'       => 'wc-enhanced-select',
             'description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo'),
-            'desc_tip'    => __('Select between Modern Version and Standard Version for the checkout layout.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Select between Standard, Modern and Compact versions for the checkout layout. Modern and Compact are PRO features.', 'lkn-wc-gateway-cielo'),
             'options'     => array(
-                'yes' => __('Modern Version', 'lkn-wc-gateway-cielo'),
-                'no'  => __('Standard Version', 'lkn-wc-gateway-cielo'),
+                'standard' => __('Standard Version', 'lkn-wc-gateway-cielo'),
+                'modern'   => __('Modern Version (PRO)', 'lkn-wc-gateway-cielo'),
+                'compact'  => __('Compact Version (PRO)', 'lkn-wc-gateway-cielo'),
             ),
-            'default'     => 'yes',
+            'default'     => 'standard',
             'custom_attributes' => array_merge(
                 array('data-title-description' => __('Choose the layout style for the checkout page.', 'lkn-wc-gateway-cielo')),
                 $lock
@@ -1390,32 +1400,65 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             'current_card_type' => (LknWcCieloHelper::is_pro_license_active() && $this->get_option('card_type_mode', 'both') === 'only_debit') ? 'Debit' : (WC()->session ? WC()->session->get('lkn_cielo_debit_card_type', 'Credit') : 'Credit')
         ));
         
-        // Check checkout layout option. O layout moderno é recurso PRO: sem licença
-        // ativa cai para o layout padrão, ignorando o valor salvo (ex.: licença
-        // desativada depois de configurar, ou HTML manipulado).
-        $checkout_layout = $this->get_option('checkout_layout', 'no');
+        // Check checkout layout option. Os layouts "moderno" e "compacto" são
+        // recursos PRO: sem licença ativa cai para o layout padrão, ignorando o
+        // valor salvo (ex.: licença desativada depois de configurar, ou HTML
+        // manipulado). Compatibilidade: valores legados 'yes' (moderno) e 'no'
+        // (padrão) continuam sendo aceitos.
+        $checkout_layout = $this->get_option('checkout_layout', 'standard');
+        if ('yes' === $checkout_layout) {
+            $checkout_layout = 'modern';
+        } elseif ('no' === $checkout_layout || '' === $checkout_layout) {
+            $checkout_layout = 'standard';
+        }
         $show_card_brand_icons = $this->get_option('show_card_brand_icons', 'yes');
-        $use_modern_layout = LknWcCieloHelper::is_pro_license_active() && ('yes' === $checkout_layout);
 
-        // Enqueue modern layout assets if enabled
-        if ($use_modern_layout) {
-            // Check if modern layout CSS is already enqueued to avoid duplicates
-            if (!wp_style_is('lkn-cielo-modern-layout', 'enqueued') && !wp_style_is('lkn-cielo-modern-layout', 'done')) {
-                wp_enqueue_style('lkn-cielo-modern-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-modern-layout.css', array(), $this->version, 'all');
+        $is_pro_license_active = LknWcCieloHelper::is_pro_license_active();
+        $use_modern_layout = $is_pro_license_active && ('modern' === $checkout_layout);
+        $use_compact_layout = $is_pro_license_active && ('compact' === $checkout_layout);
+
+        // Enqueue layout assets (moderno/compacto) if enabled
+        if ($use_modern_layout || $use_compact_layout) {
+            // CSS específico de cada layout
+            if ($use_compact_layout) {
+                if (!wp_style_is('lkn-cielo-compact-layout', 'enqueued') && !wp_style_is('lkn-cielo-compact-layout', 'done')) {
+                    $compact_css_path = plugin_dir_path(__FILE__) . '../resources/css/frontend/lkn-cielo-compact-layout.css';
+                    $compact_css_ver = $this->version . '.' . (file_exists($compact_css_path) ? filemtime($compact_css_path) : '0');
+                    wp_enqueue_style('lkn-cielo-compact-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-compact-layout.css', array(), $compact_css_ver, 'all');
+                }
+            } else {
+                // Check if modern layout CSS is already enqueued to avoid duplicates
+                if (!wp_style_is('lkn-cielo-modern-layout', 'enqueued') && !wp_style_is('lkn-cielo-modern-layout', 'done')) {
+                    wp_enqueue_style('lkn-cielo-modern-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-modern-layout.css', array(), $this->version, 'all');
+                }
             }
-            
-            // Always enqueue debit brand detector script
-            if (!wp_script_is('lkn-cielo-debit-brand-detector', 'enqueued') && !wp_script_is('lkn-cielo-debit-brand-detector', 'done')) {
-                wp_enqueue_script('lkn-cielo-debit-brand-detector', plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-cielo-brand-detector.js', array('jquery'), $this->version, true);
-                
-                // Always send variable to JavaScript (JS decides what to do with icons)
-                wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloDebitBrandConfig', array(
-                    'show_card_brand_icons' => $show_card_brand_icons
-                ));
-                wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloRestSettings', array(
-                    'rest_url'  => esc_url_raw(rest_url()),
-                    'nonce' => wp_create_nonce('wp_rest'),
-                ));
+
+            // Script de animação das bandeiras, específico por layout.
+            if ($use_compact_layout) {
+                // Compacto (clássico): JS dedicado, compilado pelo webpack.
+                if (!wp_script_is('lkn-cielo-compact-classic', 'enqueued') && !wp_script_is('lkn-cielo-compact-classic', 'done')) {
+                    $compact_classic_path = plugin_dir_path(__FILE__) . '../resources/js/debitCard/lkn-cielo-debit-compact-classicCompiled.js';
+                    $compact_classic_ver = $this->version . '.' . (file_exists($compact_classic_path) ? filemtime($compact_classic_path) : '0');
+                    wp_enqueue_script('lkn-cielo-compact-classic', plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-cielo-debit-compact-classicCompiled.js', array('jquery'), $compact_classic_ver, true);
+                    wp_localize_script('lkn-cielo-compact-classic', 'lknCieloRestSettings', array(
+                        'rest_url'  => esc_url_raw(rest_url()),
+                        'nonce' => wp_create_nonce('wp_rest'),
+                    ));
+                }
+            } else {
+                // Moderno: brand detector (fonte crua, compartilhada).
+                if (!wp_script_is('lkn-cielo-debit-brand-detector', 'enqueued') && !wp_script_is('lkn-cielo-debit-brand-detector', 'done')) {
+                    wp_enqueue_script('lkn-cielo-debit-brand-detector', plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-cielo-brand-detector.js', array('jquery'), $this->version, true);
+
+                    // Always send variable to JavaScript (JS decides what to do with icons)
+                    wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloDebitBrandConfig', array(
+                        'show_card_brand_icons' => $show_card_brand_icons
+                    ));
+                    wp_localize_script('lkn-cielo-debit-brand-detector', 'lknCieloRestSettings', array(
+                        'rest_url'  => esc_url_raw(rest_url()),
+                        'nonce' => wp_create_nonce('wp_rest'),
+                    ));
+                }
             }
         }
         
@@ -1675,7 +1718,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         }
         
         // Check checkout layout and load appropriate template
-        if ($use_modern_layout) {
+        if ($use_compact_layout) {
+            // Include compact layout template
+            include plugin_dir_path(__FILE__) . 'templates/lkn-cielo-debit-payment-fields-compact-layout.php';
+        } elseif ($use_modern_layout) {
             // Include modern layout template
             include plugin_dir_path(__FILE__) . 'templates/lkn-cielo-debit-payment-fields-modern-layout.php';
         } else {

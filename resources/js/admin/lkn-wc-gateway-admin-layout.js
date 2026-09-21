@@ -516,6 +516,7 @@
                 if (isLayoutField && typeof lknWcCieloTranslationsInput !== 'undefined') {
                   const modernImg = lknWcCieloTranslationsInput.mordernVersion
                   const standardImg = lknWcCieloTranslationsInput.standardVersion
+                  const compactImg = lknWcCieloTranslationsInput.compactVersion
                   const isProValid = !!lknWcCieloTranslationsInput.isProValid
 
                   const preview = document.createElement('div')
@@ -534,7 +535,8 @@
                     updatePreview()
                     preview.appendChild(img)
                   } else {
-                    // Sem PRO: exibe os dois layouts para o usuário comparar.
+                    // Sem PRO: exibe os 3 layouts (Padrão, moderno e compacto)
+                    // como demonstração, igual ao campo de layout do débito.
                     preview.className = 'lkn-cielo-layout-preview lkn-cielo-layout-preview--both'
                     const makeItem = (src, label) => {
                       if (!src) return null
@@ -550,13 +552,75 @@
                       item.appendChild(cap)
                       return item
                     }
-                    preview.appendChild(makeItem(modernImg, lknWcCieloTranslationsInput.modern))
-                    preview.appendChild(makeItem(standardImg, lknWcCieloTranslationsInput.standard))
+                    const addItem = (src, label) => {
+                      const item = makeItem(src, label)
+                      if (item) preview.appendChild(item)
+                    }
+                    addItem(standardImg, lknWcCieloTranslationsInput.standard)
+                    addItem(modernImg, lknWcCieloTranslationsInput.modern)
+                    addItem(compactImg, lknWcCieloTranslationsInput.compact || 'Compact')
                   }
 
                   bodyDiv.appendChild(preview)
                 }
               }
+            }
+
+            // Preview do layout quando o campo é um <select> (gateway de débito).
+            // O checkbox de layout do crédito continua usando o bloco acima.
+            const layoutSelect = bodyDiv.querySelector('select[id*="checkout_layout"]')
+            if (layoutSelect && typeof lknWcCieloTranslationsInput !== 'undefined') {
+              const layoutImages = {
+                standard: lknWcCieloTranslationsInput.standardVersion,
+                modern: lknWcCieloTranslationsInput.mordernVersion,
+                compact: lknWcCieloTranslationsInput.compactVersion
+              }
+              const layoutLabels = {
+                standard: lknWcCieloTranslationsInput.standard,
+                modern: lknWcCieloTranslationsInput.modern,
+                compact: lknWcCieloTranslationsInput.compact || 'Compact'
+              }
+              const layoutOrder = ['standard', 'modern', 'compact']
+              const isLayoutProValid = !!lknWcCieloTranslationsInput.isProValid
+
+              const layoutPreview = document.createElement('div')
+
+              if (isLayoutProValid) {
+                layoutPreview.className = 'lkn-cielo-layout-preview'
+                const layoutImg = document.createElement('img')
+                const updateLayoutPreview = () => {
+                  const val = layoutSelect.value
+                  layoutImg.src = layoutImages[val] || layoutImages.standard
+                  layoutImg.alt = layoutLabels[val] || ''
+                }
+                // O select é "enhanced select" (select2), que dispara 'change' via
+                // jQuery — o addEventListener nativo nem sempre captura. Bind nos dois.
+                layoutSelect.addEventListener('change', updateLayoutPreview)
+                if (window.jQuery) {
+                  window.jQuery(layoutSelect).on('change select2:select', updateLayoutPreview)
+                }
+                updateLayoutPreview()
+                layoutPreview.appendChild(layoutImg)
+              } else {
+                layoutPreview.className = 'lkn-cielo-layout-preview lkn-cielo-layout-preview--both'
+                layoutOrder.forEach((key) => {
+                  const src = layoutImages[key]
+                  if (!src) return
+                  const item = document.createElement('div')
+                  item.className = 'lkn-cielo-layout-preview__item'
+                  const img = document.createElement('img')
+                  img.src = src
+                  img.alt = layoutLabels[key]
+                  const cap = document.createElement('p')
+                  cap.className = 'lkn-cielo-layout-preview__cap'
+                  cap.textContent = layoutLabels[key]
+                  item.appendChild(img)
+                  item.appendChild(cap)
+                  layoutPreview.appendChild(item)
+                })
+              }
+
+              bodyDiv.appendChild(layoutPreview)
             }
 
             if(checkboxInput) {

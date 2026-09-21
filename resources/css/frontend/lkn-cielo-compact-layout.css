@@ -1,0 +1,603 @@
+/**
+ * Cielo Compact Layout Styles
+ *
+ * Compact checkout layout for the debit/credit gateway:
+ * - Row 1: Card Holder Name | Card Type
+ * - Row 2: Card Number (with brand icons) | Expiry | Security Code
+ * - Row 3: Installments / save card / submit
+ *
+ * The Row 2 fields are ALWAYS kept side by side (even on mobile) and shrink
+ * to fit, since Expiry and Security Code need much less width than the number.
+ *
+ * @package Lkn\WCCieloPaymentGateway
+ * @author  Link Nacional
+ *
+ * Used by: lkn-cielo-debit-payment-fields-compact-layout.php
+ * JS Support: lkn-cielo-brand-detector.js
+ */
+
+/* === COMPACT LAYOUT CONTAINER === */
+.lkn-debit-compact-layout {
+    padding: 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e9ecef;
+    /* O <fieldset> traz min-inline-size: min-content do UA (o WooCommerce usa
+     * <fieldset> no shortcode; no Gutenberg é <div>). Isso força uma largura
+     * mínima e estoura/quebra no mobile. Zerar permite encolher até a largura
+     * disponível — o resto da cadeia já tem min-width:0. */
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Wrappers intermediários (block) também podem encolher sem largura mínima. */
+.lkn-debit-compact-layout .cielo-debit-fields-wrapper,
+.lkn-debit-compact-layout .compact-form-fields,
+.lkn-debit-compact-layout #lkn-debit-new-card-fields {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+.lkn-debit-compact-layout .compact-form-fields {
+    overflow: hidden;
+}
+
+/* === ROWS === */
+.lkn-debit-compact-layout .compact-row {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    column-gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lkn-debit-compact-layout .compact-row--card {
+    align-items: flex-end;
+}
+
+/* === FIELDS === */
+.lkn-debit-compact-layout .compact-field {
+    position: relative;
+    min-width: 0 !important; /* permite encolher */
+    display: flex;
+    flex-direction: column;
+}
+
+.lkn-debit-compact-layout .compact-field--name {
+    flex: 1 1 50%;
+}
+
+.lkn-debit-compact-layout .compact-field--type {
+    flex: 0 1 42%;
+}
+
+.lkn-debit-compact-layout .compact-field--installments,
+.lkn-debit-compact-layout .compact-field--save-card {
+    flex: 1 1 100%;
+    margin-bottom: 8px;
+}
+
+/* Quando só um dos campos da linha 1 está visível, ele ocupa a linha inteira */
+.lkn-debit-compact-layout .compact-row--name-only .compact-field--name,
+.lkn-debit-compact-layout .compact-row--type-only .compact-field--type {
+    flex: 1 1 100%;
+}
+
+/* Checkbox "salvar cartão": permite quebra de linha no rótulo */
+.lkn-debit-compact-layout .compact-field--save-card .compact-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: normal;
+    overflow: visible;
+    text-transform: none;
+    font-size: 13px;
+}
+
+/* Row 2: número largo, validade e CVV encurtados (encolhem juntos) */
+.lkn-debit-compact-layout .compact-field--number {
+    flex: 3 1 0;
+}
+
+.lkn-debit-compact-layout .compact-field--exp {
+    flex: 1.05 1 0;
+}
+
+.lkn-debit-compact-layout .compact-field--cvc {
+    flex: 1 1 0;
+}
+
+.lkn-debit-compact-layout .compact-label {
+    display: block;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0 !important;
+    max-width: 100%;
+}
+
+.lkn-debit-compact-layout .required {
+    color: #dc3545;
+    margin-left: 3px;
+}
+
+.lkn-debit-compact-layout .compact-field-wrapper {
+    display: flex;
+    position: relative;
+    width: 100%;
+    min-width: 0 !important;
+}
+
+/* === INPUTS & SELECTS === */
+.lkn-debit-compact-layout .compact-input,
+.lkn-debit-compact-layout .compact-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    /* Sem border-box, o padding (ex.: 118px reservado para as bandeiras) seria
+     * SOMADO à largura de 100%, estourando a linha — especialmente no mobile. */
+    box-sizing: border-box !important;
+    border: 2px solid #e9ecef !important;
+    padding: .5em .8em !important;
+    border-radius: 8px !important;
+    font-size: 1rem !important;
+    font-family: inherit;
+    background-color: #ffffff;
+    color: #495057;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    vertical-align: middle;
+    outline: none;
+}
+
+.lkn-debit-compact-layout .compact-input::placeholder {
+    font-size: 1rem !important;
+    color: #adb5bd;
+}
+
+.lkn-debit-compact-layout .compact-input:focus,
+.lkn-debit-compact-layout .compact-select:focus {
+    border-color: #007cba !important;
+    box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+.lkn-debit-compact-layout .compact-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px !important;
+    appearance: none;
+}
+
+/* === FIELD ICONS (expiry / cvc) === */
+.lkn-debit-compact-layout .compact-field-icon {
+    display: flex;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.1rem;
+    height: 1.1rem;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.lkn-debit-compact-layout .compact-field-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: grayscale(100%);
+    margin: 0 !important;
+}
+
+.lkn-debit-compact-layout .compact-field--exp .compact-input,
+.lkn-debit-compact-layout .compact-field--cvc .compact-input {
+    padding-right: 34px !important;
+}
+
+/* === CARD BRAND ICONS (inside the number field) === */
+.lkn-debit-compact-layout .compact-card-brands {
+    display: flex;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+}
+
+.lkn-debit-compact-layout .compact-card-brands .card-brand-icon {
+    width: 30px;
+    height: auto;
+    border-radius: 3px;
+    filter: grayscale(30%) opacity(0.85);
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin: 0 !important;
+}
+
+.lkn-debit-compact-layout .compact-card-brands .card-brand-icon:not([src]),
+.lkn-debit-compact-layout .compact-card-brands .card-brand-icon[src=""] {
+    display: none;
+}
+
+/* Espaço no input de número para os ícones de bandeira não cobrirem o texto */
+.lkn-debit-compact-layout .compact-field--number .compact-input {
+    padding-right: 118px !important;
+}
+
+/* === SUBMIT SECTION === */
+.lkn-debit-compact-layout .payment-submit-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.lkn-debit-compact-layout .cielo-submit-button {
+    background-color: #306FC5 !important;
+    color: #fff !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border: none !important;
+    transition: background-color 0.3s ease-in-out !important;
+    padding: 14px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lkn-debit-compact-layout .cielo-submit-button:hover {
+    background-color: #2557a3 !important;
+}
+
+.lkn-debit-compact-layout .cielo-submit-button:disabled {
+    background-color: #6c757d !important;
+    cursor: not-allowed;
+}
+
+.lkn-debit-compact-layout .submit-description {
+    margin-top: 12px;
+    margin-bottom: 0;
+    color: #8e9ba8;
+    font-size: 13px;
+    font-style: italic;
+}
+
+/* === RESPONSIVE: mantém os campos lado a lado sempre (apenas encolhem) === */
+@media (max-width: 768px) {
+    .lkn-debit-compact-layout {
+        padding: 14px;
+    }
+
+    .lkn-debit-compact-layout .compact-row {
+        column-gap: 8px;
+    }
+
+    .lkn-debit-compact-layout .compact-label {
+        font-size: 11px;
+    }
+
+    .lkn-debit-compact-layout .compact-input,
+    .lkn-debit-compact-layout .compact-select {
+        padding: .45em .5em !important;
+        font-size: 0.95rem !important;
+    }
+
+    .lkn-debit-compact-layout .compact-card-brands .card-brand-icon {
+        width: 24px;
+    }
+
+    .lkn-debit-compact-layout .compact-field--number .compact-input {
+        padding-right: 96px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .lkn-debit-compact-layout {
+        padding: 10px;
+    }
+
+    .lkn-debit-compact-layout .compact-row {
+        column-gap: 6px;
+    }
+
+    .lkn-debit-compact-layout .compact-label {
+        font-size: 10px;
+        letter-spacing: 0;
+    }
+
+    .lkn-debit-compact-layout .compact-input,
+    .lkn-debit-compact-layout .compact-select {
+        font-size: 0.85rem !important;
+        padding: .4em .45em !important;
+    }
+
+    .lkn-debit-compact-layout .compact-select {
+        padding-right: 26px !important;
+        background-position: right 6px center;
+    }
+
+    .lkn-debit-compact-layout .compact-card-brands {
+        gap: 3px;
+        right: 6px;
+    }
+
+    .lkn-debit-compact-layout .compact-card-brands .card-brand-icon {
+        width: 20px;
+    }
+
+    .lkn-debit-compact-layout .compact-field--number .compact-input {
+        padding-right: 76px !important;
+    }
+}
+
+@media (max-width: 400px) {
+    .lkn-debit-compact-layout .compact-row {
+        column-gap: 5px;
+    }
+
+    .lkn-debit-compact-layout .compact-input,
+    .lkn-debit-compact-layout .compact-select {
+        font-size: 0.8rem !important;
+        padding: .35em .4em !important;
+    }
+
+    .lkn-debit-compact-layout .compact-card-brands .card-brand-icon {
+        width: 18px;
+    }
+
+    .lkn-debit-compact-layout .compact-field--number .compact-input {
+        padding-right: 68px !important;
+    }
+}
+
+/* ============================================================
+ * BLOCKS (GUTENBERG) CHECKOUT
+ *
+ * Escopado pelo id do container de conteúdo do método (fixo) e por seletores
+ * :has(<id do input>) / [style*="contents"]. NÃO depende de classes adicionadas
+ * pelo JS — o React reescreve a className do wrapper ao alternar .is-active
+ * (foco/valor), o que removia as classes e fazia o layout "pular"/ser recriado
+ * ao digitar. Como este arquivo só é enfileirado no layout compacto, escopar
+ * pelo id é seguro.
+ * ============================================================ */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    column-gap: 12px !important;
+    row-gap: 10px !important;
+    align-items: end !important;
+    padding: 1em !important;
+}
+
+/* Itens diretos e filhos do wrapper display:contents ocupam a linha inteira por
+ * padrão; a ordem explícita (style.order, via JS) posiciona cada bloco. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > *,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content [style*="display: contents"] > * {
+    grid-column: 1 / -1 !important;
+    min-width: 0 !important;
+    order: 100;
+}
+
+/* Cartões salvos ficam no topo */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-saved-cards-list {
+    order: 1 !important;
+}
+
+/* Larguras por :has (estáveis, mesmo que o React reescreva a className):
+ * Linha 1: Nome (6) + Tipo (6). Linha 2: Número (6) + Data (3) + Código (3). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_cardholder_name) {
+    grid-column: span 6 !important;
+    margin: 0 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-credit-debit-card-type-select {
+    grid-column: span 6 !important;
+    margin: 0 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dcno) {
+    grid-column: span 6 !important;
+    margin: 0 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_expdate) {
+    grid-column: span 3 !important;
+    margin: 0 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_cvc) {
+    grid-column: span 3 !important;
+    margin: 0 !important;
+}
+
+/* Sem o seletor de tipo (modo de um só tipo), o Nome ocupa a linha toda. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content [style*="display: contents"]:not(:has(.lkn-credit-debit-card-type-select)) .wc-block-components-text-input:has(#lkn_dc_cardholder_name) {
+    grid-column: 1 / -1 !important;
+}
+
+/* Aparência base dos campos */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select select {
+    border: 1px solid #ccc !important;
+    height: 50px !important;
+    background-color: #fff !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    font-size: 16px !important;
+    padding: 0 12px !important;
+}
+
+/* Containers dos campos também precisam poder encolher (min-width:auto de
+ * itens de grid/flex herdava o tamanho intrínseco do input → quebra no mobile). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select {
+    min-width: 0 !important;
+}
+
+/* Labels ACIMA do input: reserva espaço no topo do campo e fixa o label acima,
+ * sempre visível (não flutua e não "sobe" ao digitar). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input {
+    position: relative !important;
+    padding-top: 22px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input label,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input.is-active label {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    color: #495057 !important;
+    letter-spacing: 0.2px;
+    max-width: 100% !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Label do seletor (Parcelas/tipo) já vem acima; padroniza o estilo */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select__label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 6px !important;
+}
+
+/* Bandeiras e ícones: centralizados verticalmente NO INPUT, ancorados entre o
+ * topo do input (após o padding-top de 22px) e a base do campo. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-icon {
+    position: absolute;
+    right: 10px;
+    top: 22px;
+    bottom: 0;
+    margin: auto 0;
+    pointer-events: none;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands img {
+    width: 30px;
+    height: auto;
+    display: block;
+    filter: none;
+    opacity: 1;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-icon {
+    width: 20px;
+    height: 20px;
+    opacity: 0.55;
+}
+
+/* Reserva de espaço (no compacto os ícones são sempre renderizados) */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dcno) input {
+    padding-right: 116px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_expdate) input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_cvc) input {
+    padding-right: 36px !important;
+}
+
+/* Botão Finalizar: mesma cor do layout moderno (azul #306FC5, hover #172B85),
+ * em vez de seguir o tema. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder {
+    background-color: #306FC5 !important;
+    color: #fff !important;
+    width: 100% !important;
+    border: none !important;
+    transition: background-color 0.3s ease-in-out !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder:hover {
+    background-color: #172B85 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder .wc-block-components-button__text,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder span {
+    color: #fff !important;
+}
+
+@media (max-width: 640px) {
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content {
+        column-gap: 8px !important;
+        row-gap: 8px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input,
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select select {
+        font-size: 15px !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input label {
+        font-size: 11px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dcno) input {
+        padding-right: 82px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_expdate) input,
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dc_cvc) input {
+        padding-right: 28px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands {
+        gap: 3px;
+        right: 6px;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands img {
+        width: 22px;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-icon {
+        width: 16px;
+        height: 16px;
+        right: 6px;
+    }
+}
+
+@media (max-width: 400px) {
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content {
+        column-gap: 6px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input,
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select select {
+        font-size: 14px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:has(#lkn_dcno) input {
+        padding-right: 68px !important;
+    }
+
+    #radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-compact-brands img {
+        width: 18px;
+    }
+}

@@ -526,3 +526,14 @@ msgstr ""
 
 msgid "This will permanently remove all stored logs from WooCommerce orders. Ideal after resolving issues or for privacy."
 msgstr ""
+msgid "Standard Version"
+msgstr ""
+
+msgid "Modern Version (PRO)"
+msgstr ""
+
+msgid "Compact Version (PRO)"
+msgstr ""
+
+msgid "Select between Standard, Modern and Compact versions for the checkout layout. Modern and Compact are PRO features."
+msgstr ""

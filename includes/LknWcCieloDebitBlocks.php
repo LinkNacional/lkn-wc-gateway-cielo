@@ -39,9 +39,17 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             : 'both';
         $default_card_type = 'only_debit' === $card_type_mode ? 'Debit' : 'Credit';
 
-        // Gate exclusivo para carregar os scripts de UI do layout moderno
-        $checkout_layout = isset($this->settings['checkout_layout']) ? $this->settings['checkout_layout'] : 'no';
-        $use_modern_layout = $is_pro_plugin_valid && $checkout_layout === 'yes';
+        // Gate exclusivo para carregar os scripts de UI dos layouts moderno/compacto.
+        // Os layouts moderno e compacto são recursos PRO.
+        // Compatibilidade: 'yes' (moderno) e 'no' (padrão) legados.
+        $checkout_layout = isset($this->settings['checkout_layout']) ? $this->settings['checkout_layout'] : 'standard';
+        if ('yes' === $checkout_layout) {
+            $checkout_layout = 'modern';
+        } elseif ('no' === $checkout_layout || '' === $checkout_layout) {
+            $checkout_layout = 'standard';
+        }
+        $use_modern_layout = $is_pro_plugin_valid && $checkout_layout === 'modern';
+        $use_compact_layout = $is_pro_plugin_valid && $checkout_layout === 'compact';
 
         // Enqueue base styles
         wp_enqueue_style('lkn-dc-style', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-dc-style.css', array(), LKN_WC_CIELO_VERSION, 'all');
@@ -163,7 +171,22 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
                 'position' => get_option('woocommerce_currency_pos', 'left')
             ),
             'card_array' => $cardsArray,
-            'default_card' => $defaultCard
+            'default_card' => $defaultCard,
+            // Sempre presente (mesmo sem layout moderno/compacto): fonte confiável
+            // para o layout compacto montar as bandeiras e os ícones dos campos.
+            'showCardBrandIcons' => isset($this->settings['show_card_brand_icons']) ? $this->settings['show_card_brand_icons'] : 'yes',
+            'cardIcons' => array(
+                'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
+                'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
+                'elo'        => plugin_dir_url(__FILE__) . '../resources/img/elo-icon.svg',
+                'amex'       => plugin_dir_url(__FILE__) . '../resources/img/amex-icon.svg',
+                'other_card' => plugin_dir_url(__FILE__) . '../resources/img/other-card.svg'
+            ),
+            'inputIcons' => array(
+                'calendar' => plugin_dir_url(__FILE__) . '../resources/img/calendar.svg',
+                'key'      => plugin_dir_url(__FILE__) . '../resources/img/key.svg',
+                'lock'     => plugin_dir_url(__FILE__) . '../resources/img/lock.svg'
+            )
         ));
 
         // Ícones das bandeiras usados nos botões de cartões salvos (React).
@@ -184,17 +207,33 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
             wp_set_script_translations('lkn_cielo_debit-blocks-integration');
         }
 
-        if ($use_modern_layout) {
-            wp_enqueue_script('lkn-wc-gateway-debit-checkout-layout', plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-wc-gateway-checkout-layout.js', array(), LKN_WC_CIELO_VERSION, false);
-            wp_localize_script('lkn-wc-gateway-debit-checkout-layout', 'lknCieloRestSettings', array(
+        if ($use_modern_layout || $use_compact_layout) {
+            // Verificar se os ícones de marca do cartão devem ser exibidos
+            $show_card_brand_icons = isset($this->settings['show_card_brand_icons']) ? $this->settings['show_card_brand_icons'] : 'yes';
+
+            if ($use_compact_layout) {
+                $layout_handle = 'lkn-wc-gateway-debit-compact-layout';
+                // Carrega o bundle compilado pelo webpack (npm run build). A fonte
+                // fica em resources/js/debitCard/lkn-wc-gateway-debit-compact-layout.js.
+                $compact_js_path  = plugin_dir_path(__FILE__) . '../resources/js/debitCard/lkn-wc-gateway-debit-compact-layoutCompiled.js';
+                $compact_css_path = plugin_dir_path(__FILE__) . '../resources/css/frontend/lkn-cielo-compact-layout.css';
+                // filemtime no ?ver garante que as correções carreguem sem hard refresh.
+                $compact_js_ver  = LKN_WC_CIELO_VERSION . '.' . (file_exists($compact_js_path) ? filemtime($compact_js_path) : '0');
+                $compact_css_ver = LKN_WC_CIELO_VERSION . '.' . (file_exists($compact_css_path) ? filemtime($compact_css_path) : '0');
+                wp_enqueue_script($layout_handle, plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-wc-gateway-debit-compact-layoutCompiled.js', array(), $compact_js_ver, true);
+                wp_enqueue_style('lkn-cielo-compact-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-compact-layout.css', array(), $compact_css_ver, 'all');
+            } else {
+                $layout_handle = 'lkn-wc-gateway-debit-checkout-layout';
+                wp_enqueue_script($layout_handle, plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-wc-gateway-checkout-layout.js', array(), LKN_WC_CIELO_VERSION, false);
+                wp_enqueue_style('lkn-wc-gateway-debit-checkout-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-wc-gateway-debit-card-checkout-layout.css', array(), LKN_WC_CIELO_VERSION, 'all');
+            }
+
+            wp_localize_script($layout_handle, 'lknCieloRestSettings', array(
                 'rest_url' => esc_url_raw(rest_url()),
                 'nonce'    => wp_create_nonce('wp_rest'),
             ));
 
-            // Verificar se os ícones de marca do cartão devem ser exibidos
-            $show_card_brand_icons = isset($this->settings['show_card_brand_icons']) ? $this->settings['show_card_brand_icons'] : 'yes'; 
-
-            wp_localize_script('lkn-wc-gateway-debit-checkout-layout', 'lknCieloDebitCardIcons', array(
+            wp_localize_script($layout_handle, 'lknCieloDebitCardIcons', array(
                 'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
                 'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
                 'amex'       => plugin_dir_url(__FILE__) . '../resources/img/amex-icon.svg',
@@ -203,12 +242,22 @@ final class LknWcCieloDebitBlocks extends AbstractPaymentMethodType
                 'other_card_alt'    => __('other card', 'lkn-wc-gateway-cielo'),
                 'show_card_brand_icons' => $show_card_brand_icons
             ));
-            wp_localize_script('lkn-wc-gateway-debit-checkout-layout', 'lknCieloInputIcons', array(
+
+            // O layout compacto usa uma variável dedicada (evita colisão com o
+            // lknCieloDebitCardIcons do bloco padrão, que não traz o flag de exibição).
+            if ($use_compact_layout) {
+                wp_localize_script($layout_handle, 'lknCieloDebitCompactIcons', array(
+                    'visa'       => plugin_dir_url(__FILE__) . '../resources/img/visa-icon.svg',
+                    'mastercard' => plugin_dir_url(__FILE__) . '../resources/img/mastercard-icon.svg',
+                    'elo'        => plugin_dir_url(__FILE__) . '../resources/img/elo-icon.svg',
+                    'show_card_brand_icons' => $show_card_brand_icons
+                ));
+            }
+            wp_localize_script($layout_handle, 'lknCieloInputIcons', array(
                 'calendar'       => plugin_dir_url(__FILE__) . '../resources/img/calendar.svg',
                 'key' => plugin_dir_url(__FILE__) . '../resources/img/key.svg',
                 'lock'       => plugin_dir_url(__FILE__) . '../resources/img/lock.svg'
             ));
-            wp_enqueue_style('lkn-wc-gateway-debit-checkout-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-wc-gateway-debit-card-checkout-layout.css', array(), LKN_WC_CIELO_VERSION, 'all');
 
             // Checkout installment select script
             if (function_exists('WC') && WC()->session) {

@@ -17,7 +17,8 @@
  * @author Link Nacional
  * 
  * Used with: lkn-cielo-debit-payment-fields-modern-layout.php
- * CSS Support: lkn-cielo-modern-layout.css
+ *            lkn-cielo-debit-payment-fields-compact-layout.php
+ * CSS Support: lkn-cielo-modern-layout.css / lkn-cielo-compact-layout.css
  */
 
 (function() {
@@ -100,13 +101,13 @@
      * @param {string|null} detectedBrand - Brand name or null
      */
     function updateBrandIcons(detectedBrand) {
-        // Só manipular ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons !== 'yes') {
-            return; // Não manipular os ícones se não estiverem habilitados
-        }
-        
         if (!brandIcons || brandIcons.length === 0) {
             brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        // Só manipular se houver ícones renderizados (o layout moderno só os
+        // renderiza quando habilitado; o compacto sempre os renderiza).
+        if (!brandIcons || brandIcons.length === 0) {
+            return;
         }
         
         brandIcons.forEach(icon => {
@@ -140,11 +141,15 @@
         const cardNumber = cardNumberInput.value;
         const cleanNumber = cardNumber.replace(/\s+/g, '');
         
-        // Só aplicar efeitos nos ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons === 'yes') {
+        // Só aplicar efeitos quando houver ícones de bandeira renderizados.
+        if (!brandIcons || brandIcons.length === 0) {
+            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        if (brandIcons && brandIcons.length > 0) {
             // Apply gray filter when user starts typing (1+ digits)
             if (cleanNumber.length >= 1 && cleanNumber.length < 6) {
                 // Gray out all brands when typing but not enough digits to detect
+                clearTimeout(debounceTimer);
                 applyGrayFilterToAll();
                 return;
             }
@@ -157,6 +162,10 @@
                         updateBrandIcons(detectedBrand);
                     });
                 }, 500);
+            } else if (cleanNumber.length === 0) {
+                // Campo vazio: cancela consulta pendente e volta ao estado colorido
+                clearTimeout(debounceTimer);
+                updateBrandIcons(null);
             }
         }
         
@@ -167,9 +176,12 @@
      * Apply gray filter to all brand icons
      */
     function applyGrayFilterToAll() {
-        // Só manipular ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons !== 'yes') {
-            return; // Não manipular os ícones se não estiverem habilitados
+        if (!brandIcons || brandIcons.length === 0) {
+            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        // Só manipular se houver ícones renderizados.
+        if (!brandIcons || brandIcons.length === 0) {
+            return;
         }
         
         if (!brandIcons || brandIcons.length === 0) {

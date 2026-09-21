@@ -541,3 +541,14 @@ msgstr "Use apenas se não precisar mais dos logs de transação Cielo para pedi
 
 msgid "This will permanently remove all stored logs from WooCommerce orders. Ideal after resolving issues or for privacy."
 msgstr "Isto removerá permanentemente todos os logs armazenados dos pedidos WooCommerce. Ideal após resolver problemas ou por privacidade."
+msgid "Standard Version"
+msgstr "Versão Padrão"
+
+msgid "Modern Version (PRO)"
+msgstr "Versão moderna (PRO)"
+
+msgid "Compact Version (PRO)"
+msgstr "Versão compacta (PRO)"
+
+msgid "Select between Standard, Modern and Compact versions for the checkout layout. Modern and Compact are PRO features."
+msgstr "Selecione entre as versões Padrão, Moderna e Compacta para o layout de finalização da compra. Moderna e Compacta são recursos PRO."

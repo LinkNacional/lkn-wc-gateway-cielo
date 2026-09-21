@@ -138,11 +138,13 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloCreditSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'compact' => __('Compact version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
                 'standardVersion' => plugin_dir_url(__FILE__) . '../resources/img/standard-version.png',
+                'compactVersion' => plugin_dir_url(__FILE__) . '../resources/img/compact-version.png',
                 'isProValid' => LknWcCieloHelper::is_pro_license_active(),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
                 'gateway_settings' => $gateway_settings,
@@ -176,6 +178,10 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
      */
     public function init_form_fields(): void
     {
+        // Selo "PRO": nos campos migrados do PRO ele só deve aparecer quando a
+        // licença PRO NÃO está ativa.
+        $pro_badge = LknWcCieloHelper::is_pro_license_active() ? array() : array('lkn-pro-badge' => 'true');
+
         $this->form_fields = array(
             'general' => array(
                 'title' => esc_attr__('General', 'lkn-wc-gateway-cielo'),
@@ -319,7 +325,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                     array(
                         'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo')
                     ),
-                    array('lkn-pro-badge' => 'true')
+                    $pro_badge
                 )
             )
         );

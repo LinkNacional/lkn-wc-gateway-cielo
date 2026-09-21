@@ -209,6 +209,11 @@ final class LknWCCieloPayment
                 'enforce_pro_features_only'
             );
         }
+
+        // Migração: normaliza valores legados de layout do gateway de débito
+        // ('yes' → 'modern', 'no' → 'standard') para o novo campo de 3 opções
+        // (standard/modern/compact). Roda apenas com licença PRO ativa.
+        $this->loader->add_action('admin_init', $this, 'migrate_cielo_debit_checkout_layout');
     }
 
     /**
@@ -282,6 +287,45 @@ final class LknWCCieloPayment
         }
 
         return $settings;
+    }
+
+    /**
+     * Normaliza valores legados do layout do gateway de débito.
+     *
+     * O campo "Layout" do gateway de débito passou a usar os valores
+     * standard/modern/compact. Lojas que já tinham 'yes' (moderno) ou 'no'
+     * (padrão) salvos precisam migrar, senão o novo <select> não mostraria a
+     * opção correta e um novo save poderia rebaixar o layout silenciosamente.
+     *
+     * Executa apenas com licença PRO ativa (sem licença o valor já é forçado a
+     * 'no' por enforce_pro_features_only()). Idempotente: depois de migrar, o
+     * valor deixa de casar com o mapa e nada mais é gravado.
+     *
+     * @return void
+     */
+    public function migrate_cielo_debit_checkout_layout(): void
+    {
+        if (! LknWcCieloHelper::is_pro_license_active()) {
+            return;
+        }
+
+        $option_key = 'woocommerce_lkn_cielo_debit_settings';
+        $settings = get_option($option_key);
+
+        if (! is_array($settings) || ! isset($settings['checkout_layout'])) {
+            return;
+        }
+
+        $map = array(
+            'yes' => 'modern',
+            'no'  => 'standard',
+        );
+
+        $current = $settings['checkout_layout'];
+        if (is_string($current) && isset($map[$current])) {
+            $settings['checkout_layout'] = $map[$current];
+            update_option($option_key, $settings);
+        }
     }
 
     /**
