@@ -14,16 +14,24 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+// Labels personalizáveis (seção "Fields" do admin, recurso PRO).
+// Layout Padrão do shortcode: a label fica ACIMA do input, então o placeholder
+// é personalizável aqui (nos Blocos a label é flutuante dentro do input).
+$lkn_fields_gtw = $gateway_id;
+$lkn_lbl = function ($field) use ($lkn_fields_gtw) {
+    return \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldLabel($lkn_fields_gtw, 'standard', $field, 'classic');
+};
+$lkn_ph = function ($field, $default) use ($lkn_fields_gtw) {
+    $custom = \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldOverride($lkn_fields_gtw, 'standard', $field, 'placeholder', $default, 'classic');
+    return '' !== $custom ? $custom : $default;
+};
+
 ?>
 <fieldset
     id="wc-<?php echo esc_attr($gateway_id); ?>-cc-form"
     class="wc-credit-card-form wc-payment-form"
     style="background:transparent;">
 
-    <p class="debit-card-description">
-        <?php echo esc_html($description); ?>
-    </p>
-    
     <div class="cielo-debit-fields-wrapper">
 
         <!-- Saved Cards List (PRO feature - shortcode) -->
@@ -37,7 +45,7 @@ if (! defined('ABSPATH')) {
                 $icon_url = isset($card_brand_icons[$icon_key]) ? $card_brand_icons[$icon_key] : $card_brand_icons['other_card'];
                 $card_digits = isset($card['cardDigits']) ? $card['cardDigits'] : '';
                 $last_four = preg_replace('/.*(\d{4})$/', '•••• $1', $card_digits);
-                $description = isset($card['description']) ? $card['description'] : '';
+                $lkn_card_description = isset($card['description']) ? $card['description'] : '';
                 $exp_date = isset($card['expirationDate']) ? $card['expirationDate'] : '';
                 $is_default = (string) $idx === (string) $default_card;
             ?>
@@ -46,7 +54,7 @@ if (! defined('ABSPATH')) {
                 data-card-index="<?php echo esc_attr($idx); ?>"
                 data-card-brand="<?php echo esc_attr($brand); ?>"
                 data-card-digits="<?php echo esc_attr($card_digits); ?>"
-                data-card-description="<?php echo esc_attr($description); ?>"
+                data-card-description="<?php echo esc_attr($lkn_card_description); ?>"
                 data-card-expiration="<?php echo esc_attr($exp_date); ?>"
                 style="color: #2563eb; font-weight: 500; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; width: 225px; border: none; transition: all 0.2s; outline: <?php echo $is_default ? '2px solid #2563eb' : 'none'; ?>;">
                 <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>" style="height: 40px; margin-right: 8px;">
@@ -354,7 +362,7 @@ if (! defined('ABSPATH')) {
     <?php if ($this->get_option('show_cardholder_name', 'no') !== 'yes') : ?>
     <div class="form-row form-row-wide">
         <label
-            for="lkn_dc_cardholder_name"><?php esc_html_e('Card Holder Name', 'lkn-wc-gateway-cielo'); ?>
+            for="lkn_dc_cardholder_name"><?php echo esc_html($lkn_lbl('holder_name')); ?>
             <span class="required">*</span></label>
         <input
             id="lkn_dc_cardholder_name"
@@ -362,8 +370,8 @@ if (! defined('ABSPATH')) {
             type="text"
             autocomplete="cc-name"
             required
-            placeholder="<?php echo $placeholder_enabled ? esc_attr('John Doe') : ''; ?>"
-            data-placeholder="<?php echo $placeholder_enabled ? esc_attr('John Doe') : ''; ?>"
+            placeholder="<?php echo esc_attr($lkn_ph('holder_name', 'John Doe')); ?>"
+            data-placeholder="<?php echo esc_attr($lkn_ph('holder_name', 'John Doe')); ?>"
             class="lkn-wc-gateway-cielo-input">
     </div>
     <?php else : ?>
@@ -373,7 +381,7 @@ if (! defined('ABSPATH')) {
 
     <div class="form-row form-row-wide">
         <label
-            for="lkn_dcno"><?php esc_html_e('Card Number', 'lkn-wc-gateway-cielo'); ?>
+            for="lkn_dcno"><?php echo esc_html($lkn_lbl('card_number')); ?>
             <span class="required">*</span></label>
         <input
             id="lkn_dcno"
@@ -383,12 +391,12 @@ if (! defined('ABSPATH')) {
             class="lkn-card-num lkn-wc-gateway-cielo-input"
             maxlength="24"
             required
-            placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>"
-            data-placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>">
+            placeholder="<?php echo esc_attr($lkn_ph('card_number', '0000 0000 0000 0000')); ?>"
+            data-placeholder="<?php echo esc_attr($lkn_ph('card_number', '0000 0000 0000 0000')); ?>">
     </div>
     <div class="form-row form-row-wide">
         <label
-            for="lkn_dc_expdate"><?php esc_html_e('Expiry Date', 'lkn-wc-gateway-cielo'); ?>
+            for="lkn_dc_expdate"><?php echo esc_html($lkn_lbl('expiry')); ?>
             <span class="required">*</span></label>
         <input
             id="lkn_dc_expdate"
@@ -398,12 +406,12 @@ if (! defined('ABSPATH')) {
             class="lkn-card-exp lkn-wc-gateway-cielo-input"
             maxlength="7"
             required
-            placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>"
-            data-placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>">
+            placeholder="<?php echo esc_attr($lkn_ph('expiry', 'MM/AA')); ?>"
+            data-placeholder="<?php echo esc_attr($lkn_ph('expiry', 'MM/AA')); ?>">
     </div>
     <div class="form-row form-row-wide">
         <label
-            for="lkn_dc_cvc"><?php esc_html_e('Security Code', 'lkn-wc-gateway-cielo'); ?>
+            for="lkn_dc_cvc"><?php echo esc_html($lkn_lbl('cvc')); ?>
             <span class="required">*</span></label>
         <input
             id="lkn_dc_cvc"
@@ -414,13 +422,13 @@ if (! defined('ABSPATH')) {
             class="lkn-cvv lkn-wc-gateway-cielo-input"
             maxlength="4"
             required
-            placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>"
-            data-placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>">
+            placeholder="<?php echo esc_attr($lkn_ph('cvc', 'CVC')); ?>"
+            data-placeholder="<?php echo esc_attr($lkn_ph('cvc', 'CVC')); ?>">
     </div>
     <?php if ('yes' !== $hide_card_type_selector) : ?>
     <div class="form-row form-row-wide">
         <label
-            for="lkn_cc_type"><?php esc_html_e('Card type', 'lkn-wc-gateway-cielo'); ?>
+            for="lkn_cc_type"><?php echo esc_html($lkn_lbl('card_type')); ?>
             <span class="required">*</span>
         </label>
         <select
@@ -481,7 +489,7 @@ if (! defined('ABSPATH')) {
             class="form-row form-row-wide"
             style="display: none;">
             <label
-                for="lkn_cc_dc_installments"><?php esc_html_e('Installments', 'lkn-wc-gateway-cielo'); ?>
+                for="lkn_cc_dc_installments"><?php echo esc_html($lkn_lbl('installments')); ?>
                 <span class="required">*</span>
             </label>
             <select
@@ -515,14 +523,19 @@ if (! defined('ABSPATH')) {
 
     </div><!-- end #lkn-debit-new-card-fields -->
 
-    <!-- Submit Button -->
-    <?php if ($this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
+    <!-- Submit Button (recurso PRO) -->
+    <?php if (\Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::is_pro_license_active() && $this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
     <div class="lkn-debit-submit-section">
         <button type="button" id="cielo-debit-submit-btn" class="button alt wc-forward">
-            <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
+            <?php echo esc_html($lkn_lbl('button')); ?>
         </button>
     </div>
     <?php endif; ?>
+
+    <!-- Descrição do gateway: no rodapé, abaixo do botão de finalizar. -->
+    <p class="debit-card-description">
+        <?php echo esc_html($description); ?>
+    </p>
 
     <div class="clear"></div>
 

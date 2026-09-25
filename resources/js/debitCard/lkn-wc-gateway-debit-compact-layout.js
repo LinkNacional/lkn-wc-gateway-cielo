@@ -239,21 +239,8 @@
         input.addEventListener('input', function () { refreshFlags(input.value) })
     }
 
-    // Placeholders no Gutenberg (o componente TextInput do React não os aceita).
-    function setupPlaceholders () {
-        var placeholders = {
-            lkn_dc_cardholder_name: 'Nome impresso no cartão',
-            lkn_dcno: '0000 0000 0000 0000',
-            lkn_dc_expdate: 'MM/AA',
-            lkn_dc_cvc: 'CVC'
-        }
-        Object.keys(placeholders).forEach(function (id) {
-            var input = document.getElementById(id)
-            if (input && input.getAttribute('placeholder') !== placeholders[id]) {
-                input.setAttribute('placeholder', placeholders[id])
-            }
-        })
-    }
+    // Placeholders agora são aplicados pelo componente React (lknCieloDebit.js),
+    // que usa o valor do layout ativo (seção "Fields").
 
     // Formatação do código de segurança: só dígitos, no máximo 4. Sincroniza com
     // o estado do React usando o setter nativo (o setter do React deduplica
@@ -341,7 +328,6 @@
         buildFieldIcons()
         setupNumberInput()
         setupCvcMask()
-        setupPlaceholders()
         hideEmptySpacers()
 
         // Sincroniza as bandeiras com o valor atual (cobre mudanças programáticas,

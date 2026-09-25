@@ -237,7 +237,7 @@
                     cieloSubmitBtn.style.backgroundColor = '';
                     cieloSubmitBtn.style.borderColor = '';
                     cieloSubmitBtn.style.cursor = '';
-                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Confirm Payment';
+                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Place order';
                 }
             };
             
@@ -274,7 +274,7 @@
                             this.style.backgroundColor = '';
                             this.style.borderColor = '';
                             this.style.cursor = '';
-                            this.textContent = this.getAttribute('data-original-text') || 'Confirm Payment';
+                            this.textContent = this.getAttribute('data-original-text') || 'Place order';
                         }, 4000);
                     };
                     
@@ -302,7 +302,7 @@
                     cieloSubmitBtn.style.backgroundColor = '';
                     cieloSubmitBtn.style.borderColor = '';
                     cieloSubmitBtn.style.cursor = '';
-                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Confirm Payment';
+                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Place order';
                 }
                 syncButtonState();
             });

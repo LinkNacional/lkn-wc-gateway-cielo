@@ -59,7 +59,7 @@
     function updateBrandIcons(detectedBrand) {
         lastDetectedBrand = detectedBrand || null;
         if (!brandIcons || brandIcons.length === 0) {
-            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+            brandIcons = document.querySelectorAll('.lkn-debit-compact-layout .card-brand-icon');
         }
         if (!brandIcons || brandIcons.length === 0) {
             return;
@@ -87,7 +87,7 @@
     function applyGrayFilterToAll() {
         lastDetectedBrand = null;
         if (!brandIcons || brandIcons.length === 0) {
-            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+            brandIcons = document.querySelectorAll('.lkn-debit-compact-layout .card-brand-icon');
         }
         if (!brandIcons || brandIcons.length === 0) {
             return;
@@ -104,7 +104,7 @@
         var cleanNumber = cardNumberInput.value.replace(/\s+/g, '');
 
         if (!brandIcons || brandIcons.length === 0) {
-            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+            brandIcons = document.querySelectorAll('.lkn-debit-compact-layout .card-brand-icon');
         }
         if (!brandIcons || brandIcons.length === 0) {
             return;
@@ -135,7 +135,7 @@
 
     function initialize() {
         cardNumberInput = document.getElementById('lkn_dcno');
-        brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        brandIcons = document.querySelectorAll('.lkn-debit-compact-layout .card-brand-icon');
 
         if (cardNumberInput && !cardNumberInput.hasAttribute('data-lkn-compact-classic-init')) {
             cardNumberInput.setAttribute('data-lkn-compact-classic-init', 'true');
@@ -161,7 +161,7 @@
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                     var hasTarget = Array.prototype.some.call(mutation.addedNodes, function (node) {
                         if (node.nodeType !== Node.ELEMENT_NODE) return false;
-                        return node.querySelector('#cielo-debit-card-brands .card-brand-icon') ||
+                        return node.querySelector('.lkn-debit-compact-layout .card-brand-icon') ||
                             node.classList && node.classList.contains('card-brand-icon') ||
                             node.id === 'lkn_dcno';
                     });

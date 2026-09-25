@@ -182,8 +182,29 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         $section = isset($_GET['section']) ? sanitize_text_field(wp_unslash($_GET['section'])) : '';
 
         if ('wc-settings' === $page && 'checkout' === $tab && $section == $this->id) {
-            wp_enqueue_script('lknWCGatewayCieloDebitSettingsLayoutScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $this->version, false);
+            // Cache-bust por filemtime: garante que alterações no JS do layout
+            // (ex.: teste da consulta de BIN) carreguem sem depender de bump da versão.
+            $cielo_layout_js_path = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js';
+            $cielo_layout_js_ver  = $this->version . '.' . (file_exists($cielo_layout_js_path) ? filemtime($cielo_layout_js_path) : '0');
+            wp_enqueue_script('lknWCGatewayCieloDebitSettingsLayoutScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $cielo_layout_js_ver, false);
+            // Lightbox nativo do WordPress (Thickbox) para ampliar as imagens do layout.
+            wp_enqueue_script('thickbox');
+            wp_enqueue_style('thickbox');
+            $cielo_tb_css = plugin_dir_path(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css';
+            wp_enqueue_style('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_css) ? filemtime($cielo_tb_css) : '0'));
+            $cielo_tb_js = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js';
+            wp_enqueue_script('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_js) ? filemtime($cielo_tb_js) : '0'), true);
             $gateway_settings = $this->settings;
+
+            // Estado do indicador de BIN persistido: 'active' (verde) quando o
+            // recurso está ligado; 'failed' (vermelho) quando o último teste falhou;
+            // vazio quando nunca foi testado. Mostrado já no carregamento (F5).
+            $lkn_bin_validation = (string) $this->get_option('brand_validation', 'no');
+            $lkn_bin_status_saved = (string) $this->get_option('brand_validation_status', '');
+            $lkn_bin_initial_status = ('yes' === $lkn_bin_validation)
+                ? 'active'
+                : (('failed' === $lkn_bin_status_saved) ? 'failed' : '');
+
             wp_localize_script('lknWCGatewayCieloDebitSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
@@ -194,6 +215,21 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
                 'standardVersion' => plugin_dir_url(__FILE__) . '../resources/img/standard-version.png',
                 'compactVersion' => plugin_dir_url(__FILE__) . '../resources/img/compact-version.png',
+                // Previews do layout do débito por tipo de checkout
+                // (Block/Gutenberg x Shortcode/Clássico). O template "standard"
+                // (padrão) usa a imagem *-default-version.
+                'layoutVersions' => array(
+                    'blocks'  => array(
+                        'standard' => plugin_dir_url(__FILE__) . '../resources/img/gutenberg-default-version.png',
+                        'modern'   => plugin_dir_url(__FILE__) . '../resources/img/gutenberg-modern-version.png',
+                        'compact'  => plugin_dir_url(__FILE__) . '../resources/img/gutenberg-compact-version.png',
+                    ),
+                    'classic' => array(
+                        'standard' => plugin_dir_url(__FILE__) . '../resources/img/shortcode-default-version.png',
+                        'modern'   => plugin_dir_url(__FILE__) . '../resources/img/shortcode-modern-version.png',
+                        'compact'  => plugin_dir_url(__FILE__) . '../resources/img/shortcode-compact-version.png',
+                    ),
+                ),
                 'isProValid' => LknWcCieloHelper::is_pro_license_active(),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
                 'gateway_settings' => $gateway_settings,
@@ -201,9 +237,60 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'site_domain' => home_url(),
                 'gateway_id' => $this->id,
                 'version_free' => LKN_WC_CIELO_VERSION,
-                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A'
+                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A',
+                // Dados para o teste da consulta de BIN (ativar "Online Card Validation").
+                'lknBinTest' => array(
+                    'nonce'        => wp_create_nonce('lkn_cielo_test_bin_nonce'),
+                    'ajaxUrl'      => admin_url('admin-ajax.php'),
+                    'gateway'      => 'debit',
+                    'isSandbox'    => ('production' !== $this->get_option('env', 'production')),
+                    'initialStatus' => $lkn_bin_initial_status,
+                    'cieloUrl'     => 'https://developercielo.github.io/manual/cielo-ecommerce#consulta-bin',
+                    'sandboxCards' => array(
+                        array('brand' => 'Visa', 'number' => '455187'),
+                        array('brand' => 'Mastercard', 'number' => '555566'),
+                        array('brand' => 'Elo', 'number' => '636297'),
+                        array('brand' => 'Amex', 'number' => '376449'),
+                    ),
+                    'i18n' => array(
+                        'modalTitle'    => __('Brief BIN query test', 'lkn-wc-gateway-cielo'),
+                        'modalIntro'    => __('Before enabling, let’s confirm the BIN query is actually active on your Cielo account. Enter the first 6 digits of the card (the BIN) and run the test.', 'lkn-wc-gateway-cielo'),
+                        'digitsLabel'   => __('First 6 digits (BIN)', 'lkn-wc-gateway-cielo'),
+                        'digitsPh'      => __('0000 00', 'lkn-wc-gateway-cielo'),
+                        'sandboxHint'   => __('You are in sandbox. You can test with the BIN of one of these cards:', 'lkn-wc-gateway-cielo'),
+                        'test'          => __('Test', 'lkn-wc-gateway-cielo'),
+                        'cancel'        => __('Cancel', 'lkn-wc-gateway-cielo'),
+                        'testing'       => __('Testing…', 'lkn-wc-gateway-cielo'),
+                        'close'         => __('Close', 'lkn-wc-gateway-cielo'),
+                        'successTitle'  => __('BIN query is active', 'lkn-wc-gateway-cielo'),
+                        'errorTitle'    => __('BIN query failed', 'lkn-wc-gateway-cielo'),
+                        'configLink'    => __('Configure the feature in Cielo', 'lkn-wc-gateway-cielo'),
+                        'configHint'    => __('Enable the BIN query feature on your Cielo account and try again.', 'lkn-wc-gateway-cielo'),
+                        'statusActive'  => __('Resource active', 'lkn-wc-gateway-cielo'),
+                        'statusFailed'  => __('Resource failed', 'lkn-wc-gateway-cielo'),
+                    ),
+                ),
             ));
-            wp_enqueue_style('lkn-admin-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css', array(), $this->version, 'all');
+            $cielo_admin_css_path = plugin_dir_path(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css';
+            $cielo_admin_css_ver  = $this->version . '.' . (file_exists($cielo_admin_css_path) ? filemtime($cielo_admin_css_path) : '0');
+            wp_enqueue_style('lkn-admin-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css', array(), $cielo_admin_css_ver, 'all');
+            // Editor visual da seção "Fields" (preview + lápis de label/placeholder).
+            $fields_preview_js_path = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-cielo-fields-preview.js';
+            $fields_preview_js_ver  = $this->version . '.' . (file_exists($fields_preview_js_path) ? filemtime($fields_preview_js_path) : '0');
+            wp_enqueue_script('lknCieloFieldsPreview', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-cielo-fields-preview.js', array(), $fields_preview_js_ver, true);
+
+            $fields_preview_css_path = plugin_dir_path(__FILE__) . '../resources/css/admin/lkn-cielo-fields-preview.css';
+            $fields_preview_css_ver  = $this->version . '.' . (file_exists($fields_preview_css_path) ? filemtime($fields_preview_css_path) : '0');
+            wp_enqueue_style('lknCieloFieldsPreviewStyle', plugin_dir_url(__FILE__) . '../resources/css/admin/lkn-cielo-fields-preview.css', array(), $fields_preview_css_ver);
+
+            // CSS reais do checkout (para o preview ficar fiel ao front).
+            $cielo_front_css = plugin_dir_url(__FILE__) . '../resources/css/frontend/';
+            wp_enqueue_style('lknCieloFieldsPreviewDc', $cielo_front_css . 'lkn-dc-style.css', array(), $this->version);
+            wp_enqueue_style('lknCieloFieldsPreviewCc', $cielo_front_css . 'lkn-cc-style.css', array(), $this->version);
+            wp_enqueue_style('lknCieloFieldsPreviewIcons', $cielo_front_css . 'lkn-fix-icons-styles.css', array(), $this->version);
+            wp_enqueue_style('lknCieloFieldsPreviewModern', $cielo_front_css . 'lkn-cielo-modern-layout.css', array(), $this->version);
+            wp_enqueue_style('lknCieloFieldsPreviewCompact', $cielo_front_css . 'lkn-cielo-compact-layout.css', array(), $this->version);
+            wp_enqueue_style('lknCieloFieldsPreviewBlocks', $cielo_front_css . 'lkn-wc-gateway-debit-card-checkout-layout.css', array(), $this->version);
             wp_enqueue_script('lknWCGatewayCieloDebitClearButtonScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('lknWCGatewayCieloDebitClearButtonScript', 'lknWcCieloTranslations', array(
                 'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
@@ -680,6 +767,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         $customConfigs = apply_filters('lkn_wc_cielo_get_custom_configs', array(), $this->id);
 
+        // Seção "Fields": personalização de label/placeholder por layout (PRO).
+        $this->form_fields = array_merge($this->form_fields, $this->get_fields_customization_fields());
+
         if (LknWcCieloHelper::is_pro_license_active()) {
             // Licença PRO ativa: usa os campos reais fornecidos pelo PRO.
             if (! empty($customConfigs)) {
@@ -695,6 +785,217 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             // a validação da chave.
             $this->form_fields = array_merge($this->form_fields, $this->get_fake_pro_fields($customConfigs));
         }
+
+        // Editor "Fields": o seletor de Layout (real) passa a viver aqui, logo após
+        // o select "Checkout", e o antigo select "Template" (que só servia ao
+        // preview) é removido — evita duplicar a escolha de layout.
+        $this->move_layout_field_to_fields_section();
+    }
+
+    /**
+     * Move os campos da seção "Fields" (select "Checkout" + Layout real
+     * checkout_layout / checkout_layout_fake) para logo após o título Fields e
+     * remove o select "Template" (fields_preview_template), que era redundante.
+     */
+    private function move_layout_field_to_fields_section(): void
+    {
+        $fields = $this->form_fields;
+
+        if (! isset($fields['fields_section'])) {
+            return;
+        }
+
+        // Campos que vivem dentro da seção Fields, nesta ordem, logo após o título.
+        $section_fields = array();
+        foreach (array('checkout_type', 'checkout_layout', 'checkout_layout_fake') as $candidate) {
+            if (isset($fields[$candidate])) {
+                $section_fields[] = $candidate;
+            }
+        }
+        if (empty($section_fields)) {
+            return;
+        }
+
+        $reordered = array();
+        foreach ($fields as $key => $value) {
+            if ('fields_preview_template' === $key || in_array($key, $section_fields, true)) {
+                continue; // remove o Template; os campos da seção são reinseridos após o título
+            }
+            $reordered[$key] = $value;
+            if ('fields_section' === $key) {
+                foreach ($section_fields as $sf) {
+                    $reordered[$sf] = $fields[$sf];
+                }
+            }
+        }
+
+        $this->form_fields = $reordered;
+    }
+
+    /**
+     * Seção "Fields": personalização de label/placeholder de cada campo de cartão,
+     * por layout (Padrão/Moderno/Compacto). Recurso PRO — sem licença ativa aparece
+     * apenas como demonstração (selo PRO) e não é persistido (ver enforce_pro_features_only).
+     *
+     * @return array
+     */
+    private function get_fields_customization_fields(): array
+    {
+        $fields = array();
+        $templates = LknWcCieloHelper::getCheckoutFieldTemplates();
+        $defs = LknWcCieloHelper::getCheckoutFieldDefinitions();
+        $modes = array('blocks', 'classic');
+
+        $is_pro = LknWcCieloHelper::is_pro_license_active();
+        $badge = $is_pro ? array() : array('lkn-pro-badge' => 'true');
+
+        $fields['fields_section'] = array(
+            'title' => __('Fields', 'lkn-wc-gateway-cielo'),
+            'type'  => 'title',
+        );
+
+        // Tipo de checkout (Blocos/Gutenberg x Shortcode/Clássico). Define qual
+        // preview é exibido para personalizar label/placeholder. O default vem da
+        // página de checkout padrão do WooCommerce (has_blocks). Não força o
+        // frontend: cada checkout lê os overrides do seu próprio modo.
+        $fields['checkout_type'] = array(
+            'title'       => __('Checkout', 'lkn-wc-gateway-cielo'),
+            'type'        => 'select',
+            'class'       => 'wc-enhanced-select',
+            'default'     => LknWcCieloHelper::getDefaultCheckoutMode(),
+            'description' => __('Choose which checkout is previewed below so you can edit its labels/placeholders.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Detected automatically from the WordPress checkout page. Block (Gutenberg) uses floating labels; the classic shortcode shows the label above the input, which allows setting a placeholder.', 'lkn-wc-gateway-cielo'),
+            'options'     => array(
+                'blocks'  => __('Block (Gutenberg)', 'lkn-wc-gateway-cielo'),
+                'classic' => __('Shortcode/Classic', 'lkn-wc-gateway-cielo'),
+            ),
+            // Título-descrição (frase curta sob o título) + selo "PRO" (quando free).
+            // Diferente da 'description' (explicação exibida abaixo do select).
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Select which checkout the preview uses.', 'lkn-wc-gateway-cielo')),
+                $badge
+            ),
+        );
+
+        // (O select "Template" foi removido: o layout é escolhido pelo campo de
+        // Layout real, movido para cá em move_layout_field_to_fields_section().)
+
+        // Editor visual (preview dos formulários + lápis de edição de label/placeholder).
+        $fields['fields_preview'] = array(
+            'title'       => __('Preview', 'lkn-wc-gateway-cielo'),
+            'type'        => 'lkn_fields_preview',
+            'description' => __('Below is the result: the checkout form rendered with the selected checkout and template.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Click the pencil next to a label or placeholder to edit it, then use "Save changes" to apply.', 'lkn-wc-gateway-cielo'),
+            // Recurso PRO: exibe o selo "PRO" no título.
+            'custom_attributes' => $badge,
+        );
+
+        foreach ($modes as $mode) {
+            foreach ($templates as $template => $template_label) {
+                foreach ($defs as $field_key => $def) {
+                    $fields['field_label_' . $mode . '_' . $template . '_' . $field_key] = array(
+                        'type'    => 'lkn_fields_hidden',
+                        'default' => $def['label'],
+                        'custom_attributes' => array(
+                            'data-lkn-field'    => $field_key,
+                            'data-lkn-kind'     => 'label',
+                            'data-lkn-mode'     => $mode,
+                            'data-lkn-template' => $template,
+                        ),
+                    );
+
+                    // Placeholder existe em todos os templates do clássico e, nos
+                    // blocos, apenas no compacto.
+                    if (LknWcCieloHelper::checkoutModeHasPlaceholder($mode, $template) && '' !== (string) $def['placeholder']) {
+                        $fields['field_placeholder_' . $mode . '_' . $template . '_' . $field_key] = array(
+                            'type'    => 'lkn_fields_hidden',
+                            'default' => $def['placeholder'],
+                            'custom_attributes' => array(
+                                'data-lkn-field'    => $field_key,
+                                'data-lkn-kind'     => 'placeholder',
+                                'data-lkn-mode'     => $mode,
+                                'data-lkn-template' => $template,
+                            ),
+                        );
+                    }
+                }
+            }
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Campo oculto que persiste um override de label/placeholder (seção Fields).
+     *
+     * Mantém o mesmo nome/chave (field_label_* / field_placeholder_*) para que o
+     * salvamento via WooCommerce continue idêntico.
+     *
+     * @param string $key
+     * @param array  $data
+     * @return string
+     */
+    public function generate_lkn_fields_hidden_html($key, $data)
+    {
+        $field_key = $this->get_field_key($key);
+        $defaults  = array('default' => '', 'custom_attributes' => array());
+        $data      = wp_parse_args($data, $defaults);
+        $value     = $this->get_option($key, $data['default']);
+
+        ob_start();
+        ?>
+        <tr valign="top" class="lkn-fields-hidden-row" style="display:none;">
+            <td colspan="2">
+                <input type="hidden"
+                    name="<?php echo esc_attr($field_key); ?>"
+                    id="<?php echo esc_attr($field_key); ?>"
+                    value="<?php echo esc_attr($value); ?>"
+                    <?php echo $this->get_custom_attribute_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+            </td>
+        </tr>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Editor visual da seção Fields: renderiza o preview dos formulários do
+     * checkout (Blocks/Classic) para cada template.
+     *
+     * @param string $key
+     * @param array  $data
+     * @return string
+     */
+    public function generate_lkn_fields_preview_html($key, $data)
+    {
+        $field_key = $this->get_field_key($key);
+        $gateway_id = $this->id;
+        $defaults = array(
+            'title'       => '',
+            'desc_tip'    => false,
+            'description' => '',
+            'custom_attributes' => array(),
+        );
+        $data = wp_parse_args($data, $defaults);
+
+        ob_start();
+        ?>
+        <tr valign="top" class="lkn-fields-preview-row">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo esc_html($data['title']); ?> <?php echo $this->get_tooltip_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></label>
+            </th>
+            <td class="forminp">
+                <fieldset>
+                    <legend class="screen-reader-text"><span><?php echo esc_html($data['title']); ?></span></legend>
+                    <input type="text" class="lkn-fields-preview-input" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" style="display:none;" data-title-description="<?php echo esc_attr($data['description']); ?>" <?php echo $this->get_custom_attribute_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+                    <div class="lkn-fields-editor" data-gateway="<?php echo esc_attr($gateway_id); ?>">
+                        <?php include plugin_dir_path(__FILE__) . 'templates/admin/lkn-cielo-fields-preview.php'; ?>
+                    </div>
+                    <?php echo $this->get_description_html($data); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+        return ob_get_clean();
     }
 
     /**
@@ -1370,9 +1671,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             'nonce' => wp_create_nonce('wp_rest'),
         ));
         
-        // Enqueue mask and token scripts
-        wp_enqueue_script('lkn-mask-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/formatter.js', array('jquery'), $this->version, false);
-        wp_enqueue_script('lkn-mask-script-load', plugin_dir_url(__FILE__) . '../resources/js/frontend/define-mask.js', array('lkn-mask-script', 'jquery'), $this->version, false);
+        // Padronização dos campos de cartão (número/validade/CVC): máscara,
+        // filtro de dígitos, inputmode numérico e normalização da validade.
+        wp_enqueue_script('lkn-card-fields', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-card-fields.js', array(), $this->version, true);
         wp_enqueue_script('lkn-fix-token-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-fix-token-script.js', array('jquery'), $this->version, false);
         wp_localize_script('lkn-fix-token-script', 'lknCieloRestSettings', array(
             'rest_url'  => esc_url_raw(rest_url()),
@@ -1429,7 +1730,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             } else {
                 // Check if modern layout CSS is already enqueued to avoid duplicates
                 if (!wp_style_is('lkn-cielo-modern-layout', 'enqueued') && !wp_style_is('lkn-cielo-modern-layout', 'done')) {
-                    wp_enqueue_style('lkn-cielo-modern-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-modern-layout.css', array(), $this->version, 'all');
+                    $modern_css_path = plugin_dir_path(__FILE__) . '../resources/css/frontend/lkn-cielo-modern-layout.css';
+                    $modern_css_ver = $this->version . '.' . (file_exists($modern_css_path) ? filemtime($modern_css_path) : '0');
+                    wp_enqueue_style('lkn-cielo-modern-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cielo-modern-layout.css', array(), $modern_css_ver, 'all');
                 }
             }
 

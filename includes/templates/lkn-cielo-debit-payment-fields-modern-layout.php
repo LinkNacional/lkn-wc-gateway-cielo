@@ -38,6 +38,18 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Labels personalizáveis (seção "Fields" do admin, recurso PRO).
+// Layout Moderno do shortcode: a label fica ACIMA do input, então o placeholder
+// é personalizável aqui (nos Blocos a label é flutuante dentro do input).
+$lkn_fields_gtw = $gateway_id;
+$lkn_lbl = function ($field) use ($lkn_fields_gtw) {
+    return \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldLabel($lkn_fields_gtw, 'modern', $field, 'classic');
+};
+$lkn_ph = function ($field, $default) use ($lkn_fields_gtw) {
+    $custom = \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldOverride($lkn_fields_gtw, 'modern', $field, 'placeholder', $default, 'classic');
+    return '' !== $custom ? $custom : $default;
+};
 ?>
 <fieldset
     id="wc-<?php echo esc_attr($gateway_id); ?>-cc-form"
@@ -57,7 +69,7 @@ if (!defined('ABSPATH')) {
                 $icon_url = isset($card_brand_icons[$icon_key]) ? $card_brand_icons[$icon_key] : $card_brand_icons['other_card'];
                 $card_digits = isset($card['cardDigits']) ? $card['cardDigits'] : '';
                 $last_four = preg_replace('/.*(\d{4})$/', '•••• $1', $card_digits);
-                $description = isset($card['description']) ? $card['description'] : '';
+                $lkn_card_description = isset($card['description']) ? $card['description'] : '';
                 $exp_date = isset($card['expirationDate']) ? $card['expirationDate'] : '';
                 $is_default = (string) $idx === (string) $default_card;
             ?>
@@ -66,7 +78,7 @@ if (!defined('ABSPATH')) {
                 data-card-index="<?php echo esc_attr($idx); ?>"
                 data-card-brand="<?php echo esc_attr($brand); ?>"
                 data-card-digits="<?php echo esc_attr($card_digits); ?>"
-                data-card-description="<?php echo esc_attr($description); ?>"
+                data-card-description="<?php echo esc_attr($lkn_card_description); ?>"
                 data-card-expiration="<?php echo esc_attr($exp_date); ?>"
                 style="color: #2563eb; font-weight: 500; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; width: 225px; border: none; transition: all 0.2s; outline: <?php echo $is_default ? '2px solid #2563eb' : 'none'; ?>;">
                 <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>" style="height: 40px; margin-right: 8px;">
@@ -185,7 +197,7 @@ if (!defined('ABSPATH')) {
         <!-- Card Holder Name Field -->
         <div class="modern-field">
             <label for="lkn_dc_cardholder_name" class="field-label">
-                <?php esc_html_e('Card Holder Name', 'lkn-wc-gateway-cielo'); ?>
+                <?php echo esc_html($lkn_lbl('holder_name')); ?>
                 <span class="required">*</span>
             </label>
             <div class="field-wrapper">
@@ -195,7 +207,7 @@ if (!defined('ABSPATH')) {
                     type="text"
                     autocomplete="cc-name"
                     required
-                    placeholder="<?php echo $placeholder_enabled ? esc_attr('John Doe') : ''; ?>"
+                    placeholder="<?php echo esc_attr($lkn_ph('holder_name', 'John Doe')); ?>"
                     class="field-input">
             </div>
         </div>
@@ -208,7 +220,7 @@ if (!defined('ABSPATH')) {
         <div class="field-group">
             <div class="modern-field field-half">
                 <label for="lkn_dcno" class="field-label">
-                    <?php esc_html_e('Card Number', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('card_number')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="field-wrapper">
@@ -220,7 +232,7 @@ if (!defined('ABSPATH')) {
                         class="field-input lkn-card-num"
                         maxlength="24"
                         required
-                        placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>">
+                        placeholder="<?php echo esc_attr($lkn_ph('card_number', '0000 0000 0000 0000')); ?>">
                     <div class="field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/lock.svg'); ?>" alt="Security" />
                     </div>
@@ -230,7 +242,7 @@ if (!defined('ABSPATH')) {
             <?php if ('yes' !== $hide_card_type_selector) : ?>
             <div class="modern-field field-half">
                 <label for="lkn_cc_type" class="field-label">
-                    <?php esc_html_e('Card Type', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('card_type')); ?>
                     <span class="required">*</span>
                 </label>
                 <select id="lkn_cc_type" name="lkn_cc_type" class="field-select"<?php echo ($card_type_mode !== 'both') ? ' disabled style="color:#bfbfbf !important;opacity:1 !important;background-color:#f5f5f5 !important;cursor:default;"' : ''; ?>>
@@ -254,7 +266,7 @@ if (!defined('ABSPATH')) {
         <div class="field-group">
             <div class="modern-field field-half">
                 <label for="lkn_dc_expdate" class="field-label">
-                    <?php esc_html_e('Expiry Date', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('expiry')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="field-wrapper">
@@ -266,7 +278,7 @@ if (!defined('ABSPATH')) {
                         class="field-input lkn-card-exp"
                         maxlength="7"
                         required
-                        placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>">
+                        placeholder="<?php echo esc_attr($lkn_ph('expiry', 'MM/AA')); ?>">
                     <div class="field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/calendar.svg'); ?>" alt="Calendar" />
                     </div>
@@ -275,7 +287,7 @@ if (!defined('ABSPATH')) {
 
             <div class="modern-field field-half">
                 <label for="lkn_dc_cvc" class="field-label">
-                    <?php esc_html_e('Security Code', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('cvc')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="field-wrapper">
@@ -288,7 +300,7 @@ if (!defined('ABSPATH')) {
                         class="field-input lkn-cvv"
                         maxlength="4"
                         required
-                        placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>">
+                        placeholder="<?php echo esc_attr($lkn_ph('cvc', 'CVC')); ?>">
                     <div class="field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/key.svg'); ?>" alt="Security Code" />
                     </div>
@@ -312,7 +324,7 @@ if (!defined('ABSPATH')) {
             <!-- Installments Selection -->
             <div id="lkn-cc-dc-installment-row" class="modern-field" style="display: none;">
                 <label for="lkn_cc_dc_installments" class="field-label">
-                    <?php esc_html_e('Installments', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('installments')); ?>
                     <span class="required">*</span>
                 </label>
                 <select id="lkn_cc_dc_installments" name="lkn_cc_dc_installments" class="field-select">
@@ -343,7 +355,7 @@ if (!defined('ABSPATH')) {
         <?php if ($this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
         <div class="payment-submit-section">
             <button type="button" id="cielo-debit-submit-btn" class="cielo-submit-button debit-submit">
-                <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
+                <?php echo esc_html($lkn_lbl('button')); ?>
             </button>
             <p class="submit-description">
                 <?php echo esc_html($description); ?>

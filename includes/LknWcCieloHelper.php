@@ -196,6 +196,188 @@ final class LknWcCieloHelper
     }
 
     /**
+     * Definição canônica dos campos de cartão personalizáveis (label/placeholder).
+     * Não inclui o select de parcelas.
+     *
+     * @return array<string,array{label:string,placeholder:string}>
+     */
+    final public static function getCheckoutFieldDefinitions(): array
+    {
+        return array(
+            'holder_name' => array(
+                'label'       => __('Name on Card', 'lkn-wc-gateway-cielo'),
+                'placeholder' => 'John Doe',
+            ),
+            'card_number' => array(
+                'label'       => __('Card Number', 'lkn-wc-gateway-cielo'),
+                'placeholder' => '0000 0000 0000 0000',
+            ),
+            'expiry' => array(
+                'label'       => __('Card Expiring Date', 'lkn-wc-gateway-cielo'),
+                'placeholder' => 'MM/AA',
+            ),
+            'cvc' => array(
+                'label'       => __('Security Code', 'lkn-wc-gateway-cielo'),
+                'placeholder' => 'CVC',
+            ),
+            'card_type' => array(
+                'label'       => __('Card Type', 'lkn-wc-gateway-cielo'),
+                'placeholder' => '',
+            ),
+            'installments' => array(
+                'label'       => __('Installments', 'lkn-wc-gateway-cielo'),
+                'placeholder' => '',
+            ),
+            'button' => array(
+                'label'       => __('Place order', 'lkn-wc-gateway-cielo'),
+                'placeholder' => '',
+            ),
+        );
+    }
+
+    /**
+     * Templates de layout disponíveis para personalização de campos.
+     *
+     * @return array<string,string>
+     */
+    final public static function getCheckoutFieldTemplates(): array
+    {
+        return array(
+            'standard' => __('Standard', 'lkn-wc-gateway-cielo'),
+            'modern'   => __('Modern', 'lkn-wc-gateway-cielo'),
+            'compact'  => __('Compact', 'lkn-wc-gateway-cielo'),
+        );
+    }
+
+    /**
+     * Template de checkout ativo do gateway (standard/modern/compact). Recurso PRO:
+     * sem licença ativa é sempre 'standard' (o layout moderno/compacto não se aplica).
+     *
+     * @param string $gateway_id
+     * @return string
+     */
+    final public static function getActiveCheckoutTemplate($gateway_id = ''): string
+    {
+        $gateway_id = (string) $gateway_id;
+        if ('' === $gateway_id || ! self::is_pro_license_active()) {
+            return 'standard';
+        }
+        $settings = get_option("woocommerce_{$gateway_id}_settings", array());
+        $layout = (is_array($settings) && isset($settings['checkout_layout'])) ? $settings['checkout_layout'] : 'standard';
+        if ('yes' === $layout) {
+            $layout = 'modern';
+        } elseif ('no' === $layout || '' === $layout) {
+            $layout = 'standard';
+        }
+        return in_array($layout, array('modern', 'compact'), true) ? $layout : 'standard';
+    }
+
+    /**
+     * Modo de checkout detectado pela página de checkout padrão do WooCommerce.
+     *
+     * Usa has_blocks() no conteúdo da página "Checkout": se ela usa o editor de
+     * blocos (Gutenberg) o checkout é o de Blocos; caso contrário (shortcode
+     * [woocommerce_checkout]) é o clássico. Serve apenas como valor PADRÃO da
+     * opção "Checkout" da seção Fields — o lojista pode trocar manualmente.
+     *
+     * @return string 'blocks' | 'classic'
+     */
+    final public static function getDefaultCheckoutMode(): string
+    {
+        if (! function_exists('wc_get_page_id')) {
+            return 'classic';
+        }
+
+        $page_id = absint(wc_get_page_id('checkout'));
+        if ($page_id > 0 && function_exists('has_blocks') && has_blocks($page_id)) {
+            return 'blocks';
+        }
+
+        return 'classic';
+    }
+
+    /**
+     * Informa se um par modo/template aceita placeholder.
+     *
+     * - Clássico/shortcode: a label fica ACIMA do input em todos os templates,
+     *   então o placeholder existe em standard, modern e compact.
+     * - Blocos/Gutenberg: standard e modern usam a label flutuante (dentro do
+     *   input), então só o compact aceita placeholder.
+     *
+     * @param string $mode     blocks|classic
+     * @param string $template standard|modern|compact
+     * @return bool
+     */
+    final public static function checkoutModeHasPlaceholder($mode, $template): bool
+    {
+        if ('blocks' === $mode) {
+            return 'compact' === $template;
+        }
+        return in_array($template, array('standard', 'modern', 'compact'), true);
+    }
+
+    /**
+     * Rótulo personalizado de um campo, por template/modo. Vazio = usa o padrão do tema.
+     *
+     * @param string $gateway_id
+     * @param string $template standard|modern|compact
+     * @param string $field holder_name|card_number|expiry|cvc|card_type
+     * @param string $mode blocks|classic
+     * @return string
+     */
+    final public static function getFieldLabel($gateway_id, $template, $field, $mode = 'classic'): string
+    {
+        $defs = self::getCheckoutFieldDefinitions();
+        $default = isset($defs[$field]['label']) ? $defs[$field]['label'] : '';
+        return self::getFieldOverride($gateway_id, $template, $field, 'label', $default, $mode);
+    }
+
+    /**
+     * Placeholder personalizado de um campo, por template/modo. Vazio = usa o padrão.
+     *
+     * @param string $gateway_id
+     * @param string $template standard|modern|compact
+     * @param string $field holder_name|card_number|expiry|cvc|card_type
+     * @param string $mode blocks|classic
+     * @return string
+     */
+    final public static function getFieldPlaceholder($gateway_id, $template, $field, $mode = 'classic'): string
+    {
+        $defs = self::getCheckoutFieldDefinitions();
+        $default = isset($defs[$field]['placeholder']) ? $defs[$field]['placeholder'] : '';
+        return self::getFieldOverride($gateway_id, $template, $field, 'placeholder', $default, $mode);
+    }
+
+    /**
+     * Lê o override salvo (label/placeholder) para um modo/template/campo, caindo no padrão.
+     * Recurso PRO: sem licença ativa sempre retorna o padrão.
+     */
+    final public static function getFieldOverride($gateway_id, $template, $field, $kind, $default = '', $mode = 'classic'): string
+    {
+        // O placeholder só existe nos templates em que a label fica ACIMA do input:
+        // no clássico (todos) e, nos blocos, apenas no compacto. Em blocos standard/
+        // modern a própria label age como placeholder (flutuante) — inclusive sem
+        // licença PRO (onde o layout ativo é 'standard').
+        if ('placeholder' === $kind && ! self::checkoutModeHasPlaceholder($mode, $template)) {
+            return '';
+        }
+        if (! self::is_pro_license_active()) {
+            return (string) $default;
+        }
+        $gateway_id = (string) $gateway_id;
+        $mode = ('blocks' === $mode) ? 'blocks' : 'classic';
+        if ('' === $gateway_id || ! in_array($template, array('standard', 'modern', 'compact'), true)) {
+            return (string) $default;
+        }
+        $settings = get_option("woocommerce_{$gateway_id}_settings", array());
+        $key = 'field_' . ('placeholder' === $kind ? 'placeholder' : 'label') . '_' . $mode . '_' . $template . '_' . $field;
+        if (is_array($settings) && isset($settings[$key]) && '' !== trim((string) $settings[$key])) {
+            return (string) $settings[$key];
+        }
+        return (string) $default;
+    }
+
+    /**
      * Bandeiras conhecidas para os campos de whitelist de BIN.
      *
      * @return array<string,string>

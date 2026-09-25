@@ -108,12 +108,48 @@
     flex: 1 1 0;
 }
 
+/* Linha 1 (Nome + Tipo) e Linha 2 (Número + Validade + Código) com a MESMA grade:
+ * o NOME e o NÚMERO do cartão ficam com larguras idênticas. O tipo do cartão
+ * ocupa as colunas 2-3 da Linha 1. O gap vem do `.compact-row` (12px; 8/6px nos
+ * breakpoints). */
+.lkn-debit-compact-layout .compact-row--top,
+.lkn-debit-compact-layout .compact-row--card {
+    display: grid;
+    grid-template-columns: 3fr 1.05fr 1fr;
+    align-items: end;
+}
+
+.lkn-debit-compact-layout .compact-row--top > .compact-field--name {
+    grid-column: 1 / 2;
+}
+
+.lkn-debit-compact-layout .compact-row--top > .compact-field--type {
+    grid-column: 2 / 4;
+}
+
+.lkn-debit-compact-layout .compact-row--name-only > .compact-field--name,
+.lkn-debit-compact-layout .compact-row--type-only > .compact-field--type {
+    grid-column: 1 / -1;
+}
+
+.lkn-debit-compact-layout .compact-row--card > .compact-field--number {
+    grid-column: 1 / 2;
+}
+
+.lkn-debit-compact-layout .compact-row--card > .compact-field--exp {
+    grid-column: 2 / 3;
+}
+
+.lkn-debit-compact-layout .compact-row--card > .compact-field--cvc {
+    grid-column: 3 / 4;
+}
+
 .lkn-debit-compact-layout .compact-label {
     display: block;
     font-weight: 600;
     color: #495057;
     margin-bottom: 6px;
-    font-size: 12px;
+    font-size: 12.6px;
     text-transform: uppercase;
     letter-spacing: 0.4px;
     white-space: nowrap;
@@ -141,13 +177,15 @@
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
+    height: 50px !important;
     /* Sem border-box, o padding (ex.: 118px reservado para as bandeiras) seria
      * SOMADO à largura de 100%, estourando a linha — especialmente no mobile. */
     box-sizing: border-box !important;
     border: 2px solid #e9ecef !important;
     padding: .5em .8em !important;
     border-radius: 8px !important;
-    font-size: 1rem !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
     font-family: inherit;
     background-color: #ffffff;
     color: #495057;
@@ -157,7 +195,7 @@
 }
 
 .lkn-debit-compact-layout .compact-input::placeholder {
-    font-size: 1rem !important;
+    font-size: 14px !important;
     color: #adb5bd;
 }
 
@@ -234,9 +272,39 @@
     padding-right: 118px !important;
 }
 
+/* Faixa de bandeiras no TOPO do formulário (como o layout moderno). */
+.lkn-debit-compact-layout .lkn-cielo-compact-top-brands-container {
+    text-align: center;
+    margin: 12px 0 18px;
+}
+
+.lkn-debit-compact-layout .lkn-cielo-compact-top-brands {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(233, 236, 239, 0.6);
+}
+
+.lkn-debit-compact-layout .lkn-cielo-compact-top-brands .card-brand-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: inline-block;
+    border-radius: 4px;
+    filter: grayscale(30%) opacity(0.85);
+    transition: all 0.3s ease;
+    margin: 0 !important;
+}
+
 /* === SUBMIT SECTION === */
 .lkn-debit-compact-layout .payment-submit-section {
-    margin-top: 20px;
+    /* O espaçamento de 18px fica no próprio botão; o wrapper não adiciona margem. */
+    margin-top: 0;
     text-align: center;
 }
 
@@ -244,12 +312,15 @@
     background-color: #306FC5 !important;
     color: #fff !important;
     width: 100% !important;
+    height: 50px !important;
     box-sizing: border-box !important;
-    border: none !important;
+    /* Mesmo espaçamento (18px) acima do botão de finalizar em todos os templates. */
+    margin-top: 18px !important;
+    border: 1px solid #2557a3 !important;
     transition: background-color 0.3s ease-in-out !important;
-    padding: 14px 20px;
+    padding: 0 20px;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     text-transform: uppercase;
@@ -268,9 +339,9 @@
 .lkn-debit-compact-layout .submit-description {
     margin-top: 12px;
     margin-bottom: 0;
+    text-align: center;
     color: #8e9ba8;
-    font-size: 13px;
-    font-style: italic;
+    font-size: 11.2px;
 }
 
 /* === RESPONSIVE: mantém os campos lado a lado sempre (apenas encolhem) === */
@@ -284,13 +355,13 @@
     }
 
     .lkn-debit-compact-layout .compact-label {
-        font-size: 11px;
+        font-size: 12.6px;
     }
 
     .lkn-debit-compact-layout .compact-input,
     .lkn-debit-compact-layout .compact-select {
         padding: .45em .5em !important;
-        font-size: 0.95rem !important;
+        font-size: 14px !important;
     }
 
     .lkn-debit-compact-layout .compact-card-brands .card-brand-icon {
@@ -312,13 +383,13 @@
     }
 
     .lkn-debit-compact-layout .compact-label {
-        font-size: 10px;
+        font-size: 12.6px;
         letter-spacing: 0;
     }
 
     .lkn-debit-compact-layout .compact-input,
     .lkn-debit-compact-layout .compact-select {
-        font-size: 0.85rem !important;
+        font-size: 14px !important;
         padding: .4em .45em !important;
     }
 
@@ -348,7 +419,7 @@
 
     .lkn-debit-compact-layout .compact-input,
     .lkn-debit-compact-layout .compact-select {
-        font-size: 0.8rem !important;
+        font-size: 14px !important;
         padding: .35em .4em !important;
     }
 
@@ -432,11 +503,12 @@
     border: 1px solid #ccc !important;
     height: 50px !important;
     background-color: #fff !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
     padding: 0 12px !important;
 }
 
@@ -460,7 +532,7 @@
     top: 0 !important;
     left: 0 !important;
     transform: none !important;
-    font-size: 12px !important;
+    font-size: 12.6px !important;
     font-weight: 600 !important;
     line-height: 1.2 !important;
     color: #495057 !important;
@@ -473,7 +545,7 @@
 
 /* Label do seletor (Parcelas/tipo) já vem acima; padroniza o estilo */
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select__label {
-    font-size: 12px !important;
+    font-size: 12.6px !important;
     font-weight: 600 !important;
     color: #495057 !important;
     margin-bottom: 6px !important;
@@ -522,18 +594,25 @@
     padding-right: 36px !important;
 }
 
-/* Botão Finalizar: mesma cor do layout moderno (azul #306FC5, hover #172B85),
+/* Botão Finalizar: mesma cor do layout moderno (azul #306FC5, hover #2557a3),
  * em vez de seguir o tema. */
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder {
     background-color: #306FC5 !important;
     color: #fff !important;
     width: 100% !important;
-    border: none !important;
+    height: 50px !important;
+    box-sizing: border-box !important;
+    /* Mesmo espaçamento (18px) acima do botão de finalizar em todos os templates. */
+    margin-top: 18px !important;
+    border: 1px solid #2557a3 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
     transition: background-color 0.3s ease-in-out !important;
 }
 
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder:hover {
-    background-color: #172B85 !important;
+    background-color: #2557a3 !important;
 }
 
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder .wc-block-components-button__text,
@@ -549,7 +628,7 @@
 
     #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input,
     #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select select {
-        font-size: 15px !important;
+        font-size: 14px !important;
         padding-left: 8px !important;
         padding-right: 8px !important;
     }

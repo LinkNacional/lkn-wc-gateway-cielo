@@ -120,58 +120,13 @@
         })
 
         function changeLayout() {
+          const current = lknWcCieloCreditBlocksSettingsLayoutMenuVar
           tables.forEach((table, index) => {
-            switch (lknWcCieloCreditBlocksSettingsLayoutMenuVar) {
-              case 1:
-                if (index == 0 || index == 1) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 2:
-                if (index == 2) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 3:
-                if (index == 3) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 4:
-                if (index == 4) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 5:
-                if (index == 5) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 6:
-                if (index == 6) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-              case 7:
-                if (index == 7) {
-                  table.style.display = 'table'
-                } else {
-                  table.style.display = 'none'
-                }
-                break
-            }
+            // Seção 1 (Geral) compreende as tabelas 0 e 1; as demais seções são
+            // 1:1 com a tabela de mesmo índice. Genérico para cobrir TODAS as abas
+            // (inclusive a última, "Extras"), sem o limite fixo de cases.
+            const show = (current === 1) ? (index === 0 || index === 1) : (index === current)
+            table.style.display = show ? 'table' : 'none'
           })
         }
 
@@ -192,6 +147,10 @@
         }
 
         document.querySelectorAll('.form-table > tbody > tr').forEach(tr => {
+          // As linhas de campos ocultos da seção "Fields" não passam pelo transform.
+          if (tr.classList.contains('lkn-fields-hidden-row')) {
+            return;
+          }
           const label = tr.querySelector('th label')
           const helpTip = tr.querySelector('.woocommerce-help-tip')
           const forminp = tr.querySelector('.forminp')
@@ -524,16 +483,28 @@
                   if (isProValid) {
                     // PRO ativo: preview único que segue a opção escolhida.
                     preview.className = 'lkn-cielo-layout-preview'
+                    const link = document.createElement('a')
+                    link.className = 'thickbox'
+                    link.rel = 'lkn-cielo-layout-gallery'
+                    link.style.display = 'block'
+                    link.style.cursor = 'zoom-in'
                     const img = document.createElement('img')
+                    img.style.cursor = 'zoom-in'
+                    link.appendChild(img)
                     const updatePreview = () => {
                       const isModern = input.checked
-                      img.src = isModern ? modernImg : standardImg
-                      img.alt = isModern ? lknWcCieloTranslationsInput.modern : lknWcCieloTranslationsInput.standard
+                      const src = isModern ? modernImg : standardImg
+                      const label = isModern ? lknWcCieloTranslationsInput.modern : lknWcCieloTranslationsInput.standard
+                      img.src = src
+                      img.alt = label
+                      // Abre em lightbox (Thickbox do WordPress) para ver a imagem.
+                      link.href = src
+                      link.title = label
                     }
                     radioYesInput.addEventListener('change', updatePreview)
                     radioNoInput.addEventListener('change', updatePreview)
                     updatePreview()
-                    preview.appendChild(img)
+                    preview.appendChild(link)
                   } else {
                     // Sem PRO: exibe os 3 layouts (Padrão, moderno e compacto)
                     // como demonstração, igual ao campo de layout do débito.
@@ -542,13 +513,22 @@
                       if (!src) return null
                       const item = document.createElement('div')
                       item.className = 'lkn-cielo-layout-preview__item'
+                      const link = document.createElement('a')
+                      link.className = 'thickbox'
+                      link.rel = 'lkn-cielo-layout-gallery'
+                      link.href = src
+                      link.title = label
+                      link.style.display = 'block'
+                      link.style.cursor = 'zoom-in'
                       const img = document.createElement('img')
                       img.src = src
                       img.alt = label
+                      img.style.cursor = 'zoom-in'
+                      link.appendChild(img)
                       const cap = document.createElement('p')
                       cap.className = 'lkn-cielo-layout-preview__cap'
                       cap.textContent = label
-                      item.appendChild(img)
+                      item.appendChild(link)
                       item.appendChild(cap)
                       return item
                     }
@@ -570,10 +550,28 @@
             // O checkbox de layout do crédito continua usando o bloco acima.
             const layoutSelect = bodyDiv.querySelector('select[id*="checkout_layout"]')
             if (layoutSelect && typeof lknWcCieloTranslationsInput !== 'undefined') {
-              const layoutImages = {
+              // Tipo de checkout (Blocos/Gutenberg x Shortcode/Clássico): define
+              // qual conjunto de imagens de layout é exibido.
+              const layoutGatewayId = lknWcCieloTranslationsInput.gateway_id || 'lkn_cielo_debit'
+              const modeSelect = document.getElementById('woocommerce_' + layoutGatewayId + '_checkout_type')
+                || document.querySelector('select[id$="_checkout_type"]')
+              const getLayoutMode = () => {
+                const v = modeSelect ? String(modeSelect.value || '') : ''
+                return v === 'classic' ? 'classic' : 'blocks'
+              }
+              // Fallback para os dados antigos (caso o localize não traga layoutVersions
+              // — ex.: gateway de crédito, que mantém as imagens padrão).
+              const legacyLayoutImages = {
                 standard: lknWcCieloTranslationsInput.standardVersion,
                 modern: lknWcCieloTranslationsInput.mordernVersion,
                 compact: lknWcCieloTranslationsInput.compactVersion
+              }
+              const layoutImagesByMode = lknWcCieloTranslationsInput.layoutVersions || null
+              const getLayoutImages = () => {
+                if (layoutImagesByMode) {
+                  return layoutImagesByMode[getLayoutMode()] || layoutImagesByMode.blocks || legacyLayoutImages
+                }
+                return legacyLayoutImages
               }
               const layoutLabels = {
                 standard: lknWcCieloTranslationsInput.standard,
@@ -587,11 +585,23 @@
 
               if (isLayoutProValid) {
                 layoutPreview.className = 'lkn-cielo-layout-preview'
+                const link = document.createElement('a')
+                link.className = 'thickbox'
+                link.rel = 'lkn-cielo-layout-gallery'
+                link.style.display = 'block'
+                link.style.cursor = 'zoom-in'
                 const layoutImg = document.createElement('img')
+                layoutImg.style.cursor = 'zoom-in'
+                link.appendChild(layoutImg)
                 const updateLayoutPreview = () => {
                   const val = layoutSelect.value
-                  layoutImg.src = layoutImages[val] || layoutImages.standard
+                  const imgs = getLayoutImages()
+                  const src = imgs[val] || imgs.standard
+                  layoutImg.src = src
                   layoutImg.alt = layoutLabels[val] || ''
+                  // Abre em lightbox (Thickbox do WordPress) para ver a imagem.
+                  link.href = src
+                  link.title = layoutLabels[val] || ''
                 }
                 // O select é "enhanced select" (select2), que dispara 'change' via
                 // jQuery — o addEventListener nativo nem sempre captura. Bind nos dois.
@@ -599,25 +609,53 @@
                 if (window.jQuery) {
                   window.jQuery(layoutSelect).on('change select2:select', updateLayoutPreview)
                 }
+                // Trocar o tipo de checkout (Block x Shortcode/Clássico) também
+                // atualiza a imagem exibida.
+                if (modeSelect) {
+                  modeSelect.addEventListener('change', updateLayoutPreview)
+                  if (window.jQuery) {
+                    window.jQuery(modeSelect).on('change select2:select', updateLayoutPreview)
+                  }
+                }
                 updateLayoutPreview()
-                layoutPreview.appendChild(layoutImg)
+                layoutPreview.appendChild(link)
               } else {
                 layoutPreview.className = 'lkn-cielo-layout-preview lkn-cielo-layout-preview--both'
-                layoutOrder.forEach((key) => {
-                  const src = layoutImages[key]
-                  if (!src) return
-                  const item = document.createElement('div')
-                  item.className = 'lkn-cielo-layout-preview__item'
-                  const img = document.createElement('img')
-                  img.src = src
-                  img.alt = layoutLabels[key]
-                  const cap = document.createElement('p')
-                  cap.className = 'lkn-cielo-layout-preview__cap'
-                  cap.textContent = layoutLabels[key]
-                  item.appendChild(img)
-                  item.appendChild(cap)
-                  layoutPreview.appendChild(item)
-                })
+                const renderLayoutItems = () => {
+                  layoutPreview.innerHTML = ''
+                  const imgs = getLayoutImages()
+                  layoutOrder.forEach((key) => {
+                    const src = imgs[key]
+                    if (!src) return
+                    const item = document.createElement('div')
+                    item.className = 'lkn-cielo-layout-preview__item'
+                    const link = document.createElement('a')
+                    link.className = 'thickbox'
+                    link.rel = 'lkn-cielo-layout-gallery'
+                    link.href = src
+                    link.title = layoutLabels[key]
+                    link.style.display = 'block'
+                    link.style.cursor = 'zoom-in'
+                    const img = document.createElement('img')
+                    img.src = src
+                    img.alt = layoutLabels[key]
+                    img.style.cursor = 'zoom-in'
+                    link.appendChild(img)
+                    const cap = document.createElement('p')
+                    cap.className = 'lkn-cielo-layout-preview__cap'
+                    cap.textContent = layoutLabels[key]
+                    item.appendChild(link)
+                    item.appendChild(cap)
+                    layoutPreview.appendChild(item)
+                  })
+                }
+                if (modeSelect) {
+                  modeSelect.addEventListener('change', renderLayoutItems)
+                  if (window.jQuery) {
+                    window.jQuery(modeSelect).on('change select2:select', renderLayoutItems)
+                  }
+                }
+                renderLayoutItems()
               }
 
               bodyDiv.appendChild(layoutPreview)
@@ -1136,6 +1174,302 @@
             /* mantém o select nativo em caso de erro */
           }
         })
+      }
+    })()
+
+    // === BIN: teste da consulta ao ATIVAR (confirma se o recurso está ativo na Cielo) ===
+    // Ao clicar em "Ativar" o recurso de validação de BIN, abre um modal pedindo
+    // um número de cartão para um teste rápido. Só habilita de fato se a consulta
+    // responder — evita salvar o recurso ligado e quebrado. Depois do alerta de
+    // resultado, mostra um indicador inline (✓ verde / ✗ vermelho + balão ~5s).
+    ;(function () {
+      if (typeof lknWcCieloTranslationsInput === 'undefined') return
+      const cfg = lknWcCieloTranslationsInput.lknBinTest
+      if (!cfg || !cfg.i18n) return
+
+      // Campo "brand_validation" real (o "fake" de demonstração é ignorado).
+      const prefix = 'woocommerce_lkn_cielo_' + cfg.gateway + '_brand_validation'
+      const cb = document.getElementById(prefix)
+      if (!cb) return
+
+      const base = prefix + '-control'
+      const enableRadio = document.querySelector('input[name="' + base + '"][value="1"]')
+      const disableRadio = document.querySelector('input[name="' + base + '"][value="0"]')
+      if (!enableRadio || !disableRadio) return
+
+      const fieldset = cb.closest('fieldset')
+      const t = cfg.i18n
+      let programmatic = false
+
+      // Máscara do BIN: só dígitos, no máximo 6, no formato "0000 00".
+      function formatBin(raw) {
+        const d = String(raw || '').replace(/\D/g, '').slice(0, 6)
+        return d.length <= 4 ? d : d.slice(0, 4) + ' ' + d.slice(4)
+      }
+
+      // --- Indicador inline (bolinha ✓/✗ + balão) ao lado do título ----------
+      // openBalloon: abre o balão por ~5s; no carregamento (F5) o indicador aparece
+      // já parado (só a bolinha), reabrindo o balão no hover.
+      function showStatus(success, openBalloon) {
+        const header = fieldset ? fieldset.querySelector('.lkn-header-cart') : null
+        const titleEl = header ? header.querySelector('div') : null
+        if (!titleEl) return
+
+        const previous = titleEl.querySelector('.lkn-cielo-bin-status')
+        if (previous) previous.remove()
+
+        const wrap = document.createElement('span')
+        wrap.className = 'lkn-cielo-bin-status lkn-cielo-info-icon'
+        wrap.style.color = success ? '#008a20' : '#d63638'
+
+        const icon = document.createElement('span')
+        icon.className = 'dashicons ' + (success ? 'dashicons-yes-alt' : 'dashicons-dismiss')
+        icon.style.width = '18px'
+        icon.style.height = '18px'
+        icon.style.fontSize = '18px'
+
+        const balloon = document.createElement('span')
+        balloon.className = 'lkn-cielo-info-tooltip'
+        balloon.setAttribute('role', 'tooltip')
+        balloon.textContent = success ? t.statusActive : t.statusFailed
+
+        wrap.appendChild(icon)
+        wrap.appendChild(balloon)
+        titleEl.appendChild(wrap)
+
+        // O balão aparece por ~5s e depois se recolhe, mas o INDICADOR (✓/✗)
+        // permanece no lugar indefinidamente (reabre o balão no hover).
+        if (openBalloon !== false) {
+          wrap.classList.add('is-open')
+          setTimeout(function () {
+            wrap.classList.remove('is-open')
+          }, 5000)
+        }
+      }
+
+      // --- Modal genérico ----------------------------------------------------
+      let overlay = null
+      function closeOverlay() {
+        if (overlay) {
+          overlay.remove()
+          overlay = null
+        }
+      }
+      function buildOverlay() {
+        closeOverlay()
+        overlay = document.createElement('div')
+        overlay.className = 'lkn-cielo-modal-overlay'
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) closeOverlay()
+        })
+        const box = document.createElement('div')
+        box.className = 'lkn-cielo-modal'
+        overlay.appendChild(box)
+        document.body.appendChild(overlay)
+        return box
+      }
+
+      // --- Alerta de resultado (com link, quando falha) ----------------------
+      function showResultAlert(success, message) {
+        const box = buildOverlay()
+
+        const title = document.createElement('h3')
+        title.className = 'lkn-cielo-modal__title'
+        title.style.color = success ? '#008a20' : '#d63638'
+        title.textContent = success ? t.successTitle : t.errorTitle
+        box.appendChild(title)
+
+        if (message) {
+          const text = document.createElement('p')
+          text.className = 'lkn-cielo-modal__text'
+          text.textContent = message
+          box.appendChild(text)
+        }
+
+        if (!success) {
+          const hint = document.createElement('p')
+          hint.className = 'lkn-cielo-modal__text'
+          hint.textContent = t.configHint
+          box.appendChild(hint)
+
+          const link = document.createElement('a')
+          link.className = 'lkn-cielo-modal__link'
+          link.href = cfg.cieloUrl
+          link.target = '_blank'
+          link.rel = 'noopener noreferrer'
+          link.textContent = t.configLink
+          box.appendChild(link)
+        }
+
+        const actions = document.createElement('div')
+        actions.className = 'lkn-cielo-modal__actions'
+
+        const ok = document.createElement('button')
+        ok.type = 'button'
+        ok.className = 'button button-primary'
+        ok.textContent = t.close
+        ok.addEventListener('click', function () {
+          closeOverlay()
+          showStatus(success)
+        })
+        actions.appendChild(ok)
+        box.appendChild(actions)
+      }
+
+      // --- Modal do teste ----------------------------------------------------
+      function openTestModal() {
+        const box = buildOverlay()
+
+        const title = document.createElement('h3')
+        title.className = 'lkn-cielo-modal__title'
+        title.textContent = t.modalTitle
+        box.appendChild(title)
+
+        const intro = document.createElement('p')
+        intro.className = 'lkn-cielo-modal__text'
+        intro.textContent = t.modalIntro
+        box.appendChild(intro)
+
+        const label = document.createElement('label')
+        label.className = 'lkn-cielo-modal__label'
+        label.textContent = t.digitsLabel
+        box.appendChild(label)
+
+        const input = document.createElement('input')
+        input.type = 'text'
+        input.className = 'lkn-cielo-modal__input'
+        input.placeholder = t.digitsPh
+        input.setAttribute('maxlength', '7')
+        input.setAttribute('inputmode', 'numeric')
+        input.setAttribute('autocomplete', 'off')
+        box.appendChild(input)
+
+        // Dica de sandbox (apenas no ambiente de teste) com cartões de teste.
+        if (cfg.isSandbox && Array.isArray(cfg.sandboxCards) && cfg.sandboxCards.length) {
+          const hint = document.createElement('p')
+          hint.className = 'lkn-cielo-modal__text lkn-cielo-modal__sandbox'
+          hint.textContent = t.sandboxHint
+          box.appendChild(hint)
+
+          const list = document.createElement('ul')
+          list.className = 'lkn-cielo-modal__cards'
+          cfg.sandboxCards.forEach(function (card) {
+            const li = document.createElement('li')
+            li.textContent = card.brand + ': ' + card.number
+            li.title = card.number
+            li.addEventListener('click', function () {
+              input.value = formatBin(card.number)
+              input.classList.remove('lkn-cielo-modal__input--error')
+              input.focus()
+            })
+            list.appendChild(li)
+          })
+          box.appendChild(list)
+        }
+
+        const actions = document.createElement('div')
+        actions.className = 'lkn-cielo-modal__actions'
+
+        const cancel = document.createElement('button')
+        cancel.type = 'button'
+        cancel.className = 'button'
+        cancel.textContent = t.cancel
+        cancel.addEventListener('click', closeOverlay)
+
+        const test = document.createElement('button')
+        test.type = 'button'
+        test.className = 'button button-primary'
+        test.textContent = t.test
+        test.addEventListener('click', function () {
+          const digits = (input.value || '').replace(/\D/g, '')
+          if (digits.length < 6) {
+            input.classList.add('lkn-cielo-modal__input--error')
+            input.focus()
+            return
+          }
+
+          test.disabled = true
+          cancel.disabled = true
+          test.textContent = t.testing
+
+          const body = new URLSearchParams()
+          body.append('action', 'lkn_cielo_test_bin')
+          body.append('nonce', cfg.nonce)
+          body.append('gateway', cfg.gateway)
+          body.append('digits', digits)
+
+          fetch(cfg.ajaxUrl, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            body: body.toString()
+          })
+            .then(function (response) { return response.json() })
+            .then(function (res) {
+              const success = !!(res && res.success)
+              const message = (res && res.data && res.data.message) ? res.data.message : ''
+              closeOverlay()
+              showResultAlert(success, message)
+
+              if (success) {
+                // Habilita de fato (sem reabrir o modal).
+                programmatic = true
+                enableRadio.checked = true
+                cb.checked = true
+                enableRadio.dispatchEvent(new Event('change', { bubbles: true }))
+                programmatic = false
+              }
+              // Falha: permanece desabilitado (já revertido ao abrir o modal).
+            })
+            .catch(function () {
+              closeOverlay()
+              showResultAlert(false, '')
+            })
+        })
+
+        actions.appendChild(cancel)
+        actions.appendChild(test)
+        box.appendChild(actions)
+
+        input.addEventListener('input', function () {
+          const atEnd = input.selectionStart === input.value.length
+          const formatted = formatBin(input.value)
+          if (formatted !== input.value) {
+            input.value = formatted
+            if (atEnd) {
+              input.setSelectionRange(formatted.length, formatted.length)
+            }
+          }
+          input.classList.remove('lkn-cielo-modal__input--error')
+        })
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            test.click()
+          }
+        })
+
+        setTimeout(function () { input.focus() }, 50)
+      }
+
+      // Intercepta o "Ativar": reverte e pede o teste antes de habilitar.
+      enableRadio.addEventListener('change', function () {
+        if (programmatic) return
+        if (!enableRadio.checked) return
+
+        disableRadio.checked = true
+        cb.checked = false
+        disableRadio.dispatchEvent(new Event('change', { bubbles: true }))
+
+        openTestModal()
+      })
+
+      // Mostra o indicador já no carregamento (F5) conforme o estado salvo:
+      // 'active' (verde) ou 'failed' (vermelho). Sem balão automático.
+      if (cfg.initialStatus === 'active') {
+        showStatus(true, false)
+      } else if (cfg.initialStatus === 'failed') {
+        showStatus(false, false)
       }
     })()
 

@@ -1,13 +1,13 @@
 #lkn_dcno {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 #lkn_dc_expdate {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 #lkn_dc_cvc {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 .form-row {
@@ -15,24 +15,73 @@
     flex-direction: column;
 }
 
+/* Espaço entre os campos do layout PADRÃO do shortcode (débito). Aplica
+   margin-top a todas as linhas, EXCETO a do nome do titular do cartão. Só o
+   fieldset do formulário do gateway (não afeta billing/shipping do checkout). */
+#wc-lkn_cielo_debit-cc-form .form-row:not(:has(#lkn_dc_cardholder_name)) {
+    margin-top: 8px;
+}
+
 .lkn-wc-gateway-cielo-input{
+    height: 50px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    border-radius: 8px !important;
     padding: .5em .8em !important;
-    line-height: 1.6em;
-    font-size: 1rem !important;
+    line-height: 1 !important;
+    font-size: 14px !important;
     margin: 0px !important;
+    /* Força fundo branco sobre o background do tema. */
+    background-color: #fff !important;
 }
 
 .input-select {
-    font-size: 1rem !important;
+    font-size: 14px !important;
     background-size: .8em !important;
     padding: .5em .8em !important;
+    background-color: #fff !important;
+}
+
+/* Placeholder dos inputs de cartão do débito sempre em CINZA — muitos temas
+   deixam o placeholder escuro (quase preto). Cobre os dois modos de checkout:
+   o shortcode (fieldset #wc-lkn_cielo_debit-cc-form) e os Blocos (container
+   #radio-control-…__content), em todos os templates (padrão/moderno/compacto).
+   Só nos inputs — o select não tem placeholder. */
+#wc-lkn_cielo_debit-cc-form input::placeholder,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content input::placeholder {
+    color: #adb5bd !important;
+    opacity: 1 !important;
 }
 
 .debit-card-description {
     text-align: center;
-    margin-bottom: 20px;
+    font-size: 11.2px;
+    color: #8e9ba8;
+    margin: 12px 0 0;
+}
+
+/* Descrição dos Blocos (débito) — renderizada em TODOS os layouts (basic/modern/
+   compact); a regra fica aqui (arquivo carregado em todos) e não no CSS do
+   moderno, que só carrega nesse layout. */
+.lkn-cielo-credit-debit-description {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 0px 10px !important;
+    margin-top: 12px;
+}
+
+.lkn-cielo-credit-debit-description p {
+    font-size: 11.2px !important;
+    color: #8e9ba8 !important;
+}
+
+/* Descrição no rodapé do layout moderno do débito (0.8rem, cinza).
+   Escopado ao débito para não afetar o gateway de crédito. */
+.lkn-debit-modern-layout .submit-description {
+    text-align: center;
+    color: #8e9ba8;
+    font-size: 11.2px !important;
+    font-style: normal;
 }
 
 .lkn-debit-submit-section {
@@ -40,7 +89,8 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-top: 10px;
+    /* O espaçamento de 18px fica no próprio botão; o wrapper não adiciona margem. */
+    margin-top: 0;
     margin-bottom: 16px;
 }
 
@@ -62,4 +112,62 @@
     border-color: #6c757d !important;
     cursor: not-allowed;
     opacity: 0.65;
+}
+
+/* Padronização: select do formulário clássico com 50px de altura e borda 8px. */
+#wc-lkn_cielo_debit-cc-form .input-select {
+    height: 50px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    line-height: 1 !important;
+    background-color: #fff !important;
+}
+
+/* Label do shortcode clássico (padrão e moderno) — 0.9rem. */
+#wc-lkn_cielo_debit-cc-form label {
+    font-size: 12.6px;
+}
+
+/* Botão finalizar do shortcode padrão (Padrão/Moderno): 50px + borda 8px. */
+#cielo-debit-submit-btn {
+    width: 100% !important;
+    height: 50px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    /* Mesmo espaçamento (18px) acima do botão de finalizar em todos os templates. */
+    margin-top: 18px !important;
+    border: 1px solid #2557a3 !important;
+    background-color: #306FC5 !important;
+    color: #fff !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+#cielo-debit-submit-btn:hover {
+    background-color: #2557a3 !important;
+    color: #fff !important;
+}
+
+/* Botões de finalizar do Cielo (débito) sempre em CAIXA ALTA — vale para o
+   checkout (blocks/classic) e para o preview do admin (mesmo arquivo enfileirado).
+   #sendOrder = blocos; .cielo-submit-button = modern/compact shortcode;
+   #cielo-debit-submit-btn = shortcode padrão. */
+#sendOrder,
+.cielo-submit-button,
+#cielo-debit-submit-btn {
+    text-transform: uppercase !important;
+}
+
+/* #sendOrder (button de finalizar dos Blocos): garante 1rem também no layout
+   Basic, onde esse é o único arquivo do Cielo carregado (além do basic-layout). */
+#sendOrder {
+    font-size: 14px !important;
+}
+
+/* Selects (tipo de cartão / parcelas) no Gutenberg do débito (standard e
+   modern): 1.2rem — só os selects. Escopado ao container do método (blocks). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select__select {
+    font-size: 16.8px !important;
 }

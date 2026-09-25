@@ -73,8 +73,9 @@
 }
 
 .lkn-cielo-layout-preview img {
-    max-width: 220px;
+    /* PRO (imagem única que segue o layout): mesma largura do preview de edição. */
     width: 100%;
+    max-width: 100%;
     border: 1px solid #ddd;
     border-radius: 4px;
     background-color: #fff;
@@ -84,6 +85,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: 16px;
+}
+
+/* Sem PRO: mostra as 3 miniaturas pequenas (por comparação). */
+.lkn-cielo-layout-preview--both img {
+    max-width: 220px;
 }
 
 .lkn-cielo-layout-preview__item {
@@ -289,7 +295,7 @@
     transform: translateY(-50%);
     text-decoration: none;
     color: #FF0D08;
-    font-size: 0.84rem;
+    font-size: 11.76px;
     font-weight: bold;
     font-family: "Inter", sans-serif;
     line-height: normal;
@@ -320,4 +326,133 @@ input[id$="_validate_license_fake"] {
     box-shadow: none !important;
     cursor: not-allowed !important;
     pointer-events: none !important;
+}
+
+/* ============================================================
+ * Teste da consulta de BIN (modal + indicador inline)
+ * ============================================================ */
+
+/* Indicador ✓/✗ ao lado do título do campo. Reaproveita .lkn-cielo-info-icon
+ * (posicionamento + balão). Cursor/click padrão já vêm dele. */
+.lkn-cielo-bin-status {
+    cursor: default;
+}
+.lkn-cielo-bin-status .dashicons {
+    line-height: 18px;
+}
+
+/* Texto do balão do indicador de BIN um pouco maior que o padrão (12px). */
+.lkn-cielo-bin-status .lkn-cielo-info-tooltip {
+    font-size: 14px;
+    width: 240px;
+}
+
+/* Overlay + caixa do modal */
+.lkn-cielo-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.lkn-cielo-modal {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+    width: 460px;
+    max-width: 100%;
+    padding: 24px;
+    box-sizing: border-box;
+    font-size: 13px;
+    color: #1d2327;
+    text-align: left;
+}
+
+.lkn-cielo-modal__title {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.lkn-cielo-modal__text {
+    margin: 0 0 12px;
+    line-height: 1.5;
+    color: #50575e;
+}
+
+.lkn-cielo-modal__label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.lkn-cielo-modal__input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.lkn-cielo-modal__input:focus {
+    outline: none;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.15);
+}
+
+.lkn-cielo-modal__input--error {
+    border-color: #d63638 !important;
+    box-shadow: 0 0 0 2px rgba(214, 54, 56, 0.15) !important;
+}
+
+.lkn-cielo-modal__sandbox {
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.lkn-cielo-modal__cards {
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.lkn-cielo-modal__cards li {
+    padding: 4px 10px;
+    background: #f0f6fc;
+    border: 1px solid #c5d9ed;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: Menlo, Consolas, monospace;
+    cursor: pointer;
+}
+
+.lkn-cielo-modal__cards li:hover {
+    background: #e1eefb;
+    border-color: #2271b1;
+}
+
+.lkn-cielo-modal__link {
+    display: inline-block;
+    margin-bottom: 4px;
+    color: #2271b1;
+    text-decoration: underline;
+}
+
+.lkn-cielo-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
 }

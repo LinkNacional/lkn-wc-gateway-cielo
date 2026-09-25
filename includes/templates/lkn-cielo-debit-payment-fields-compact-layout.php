@@ -34,6 +34,17 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+// Labels/placeholders personalizáveis (seção "Fields" do admin, recurso PRO).
+// Sem licença ativa (ou sem override) caem nos textos padrão do tema.
+$lkn_fields_gtw = $gateway_id;
+$lkn_lbl = function ($field) use ($lkn_fields_gtw) {
+    return \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldLabel($lkn_fields_gtw, 'compact', $field, 'classic');
+};
+$lkn_ph = function ($field, $default) use ($lkn_fields_gtw) {
+    $custom = \Lkn\WCCieloPaymentGateway\Includes\LknWcCieloHelper::getFieldOverride($lkn_fields_gtw, 'compact', $field, 'placeholder', $default, 'classic');
+    return '' !== $custom ? $custom : $default;
+};
 ?>
 <fieldset
     id="wc-<?php echo esc_attr($gateway_id); ?>-cc-form"
@@ -55,7 +66,7 @@ if (!defined('ABSPATH')) {
                 $icon_url = isset($card_brand_icons[$icon_key]) ? $card_brand_icons[$icon_key] : $card_brand_icons['other_card'];
                 $card_digits = isset($card['cardDigits']) ? $card['cardDigits'] : '';
                 $last_four = preg_replace('/.*(\d{4})$/', '•••• $1', $card_digits);
-                $description = isset($card['description']) ? $card['description'] : '';
+                $lkn_card_description = isset($card['description']) ? $card['description'] : '';
                 $exp_date = isset($card['expirationDate']) ? $card['expirationDate'] : '';
                 $is_default = (string) $idx === (string) $default_card;
             ?>
@@ -64,7 +75,7 @@ if (!defined('ABSPATH')) {
                 data-card-index="<?php echo esc_attr($idx); ?>"
                 data-card-brand="<?php echo esc_attr($brand); ?>"
                 data-card-digits="<?php echo esc_attr($card_digits); ?>"
-                data-card-description="<?php echo esc_attr($description); ?>"
+                data-card-description="<?php echo esc_attr($lkn_card_description); ?>"
                 data-card-expiration="<?php echo esc_attr($exp_date); ?>"
                 style="color: #2563eb; font-weight: 500; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; width: 225px; border: none; transition: all 0.2s; outline: <?php echo $is_default ? '2px solid #2563eb' : 'none'; ?>;">
                 <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>" style="height: 40px; margin-right: 8px;">
@@ -82,6 +93,37 @@ if (!defined('ABSPATH')) {
         </div>
         <input type="hidden" id="lkn_selected_saved_card_index" name="lkn_selected_saved_card_index" value="<?php echo esc_attr($default_card !== '' ? $default_card : ''); ?>">
         <?php endif; ?>
+
+        <!-- Card Brand Icons (topo do formulário) -->
+        <?php if ($show_card_brand_icons === 'yes') { ?>
+        <div class="lkn-cielo-compact-top-brands-container">
+            <div class="lkn-cielo-compact-top-brands">
+                <?php
+                $lkn_top_brands = array(
+                    'visa'       => __('Visa', 'lkn-wc-gateway-cielo'),
+                    'mastercard' => __('Mastercard', 'lkn-wc-gateway-cielo'),
+                    'amex'       => __('American Express', 'lkn-wc-gateway-cielo'),
+                    'elo'        => __('Elo', 'lkn-wc-gateway-cielo'),
+                    'other_card' => __('Other Card', 'lkn-wc-gateway-cielo'),
+                );
+                foreach ($lkn_top_brands as $lkn_brand => $lkn_title) {
+                    $lkn_image_url = plugin_dir_url(__FILE__) . '../../resources/img/' . $lkn_brand . '-icon.svg';
+                    if ($lkn_brand === 'other_card') {
+                        $lkn_image_url = plugin_dir_url(__FILE__) . '../../resources/img/other-card.svg';
+                    }
+                    ?>
+                    <img
+                        src="<?php echo esc_url($lkn_image_url); ?>"
+                        alt="<?php echo esc_attr($lkn_title . ' logo'); ?>"
+                        title="<?php echo esc_attr($lkn_title); ?>"
+                        data-brand="<?php echo esc_attr($lkn_brand); ?>"
+                        class="card-brand-icon debit-brand">
+                    <?php
+                }
+                ?>
+            </div>
+        </div>
+        <?php } ?>
 
         <div class="wc-payment-cielo-form-fields compact-form-fields">
 
@@ -161,7 +203,7 @@ if (!defined('ABSPATH')) {
             <?php if ($show_name) : ?>
             <div class="compact-field compact-field--name">
                 <label for="lkn_dc_cardholder_name" class="compact-label">
-                    <?php esc_html_e('Card Holder Name', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('holder_name')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -171,7 +213,7 @@ if (!defined('ABSPATH')) {
                         type="text"
                         autocomplete="cc-name"
                         required
-                        placeholder="Nome impresso no cartão"
+                        placeholder="<?php echo esc_attr($lkn_ph('holder_name', 'John Doe')); ?>"
                         class="compact-input">
                 </div>
             </div>
@@ -183,7 +225,7 @@ if (!defined('ABSPATH')) {
             <?php if ('yes' !== $hide_card_type_selector) : ?>
             <div class="compact-field compact-field--type">
                 <label for="lkn_cc_type" class="compact-label">
-                    <?php esc_html_e('Card Type', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('card_type')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -209,7 +251,7 @@ if (!defined('ABSPATH')) {
         <div class="compact-row compact-row--card">
             <div class="compact-field compact-field--number">
                 <label for="lkn_dcno" class="compact-label">
-                    <?php esc_html_e('Card Number', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('card_number')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -221,7 +263,7 @@ if (!defined('ABSPATH')) {
                         class="compact-input lkn-card-num"
                         maxlength="24"
                         required
-                        placeholder="0000 0000 0000 0000">
+                        placeholder="<?php echo esc_attr($lkn_ph('card_number', '0000 0000 0000 0000')); ?>">
                     <?php
                     // No layout compacto as 3 bandeiras fazem parte do design:
                     // sempre exibe (independente da opção "Show card brand icons").
@@ -251,7 +293,7 @@ if (!defined('ABSPATH')) {
 
             <div class="compact-field compact-field--exp">
                 <label for="lkn_dc_expdate" class="compact-label">
-                    <?php esc_html_e('Expiry Date', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('expiry')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -263,7 +305,7 @@ if (!defined('ABSPATH')) {
                         class="compact-input lkn-card-exp"
                         maxlength="7"
                         required
-                        placeholder="MM/AA">
+                        placeholder="<?php echo esc_attr($lkn_ph('expiry', 'MM/AA')); ?>">
                     <div class="compact-field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/calendar.svg'); ?>" alt="Calendar" />
                     </div>
@@ -272,7 +314,7 @@ if (!defined('ABSPATH')) {
 
             <div class="compact-field compact-field--cvc">
                 <label for="lkn_dc_cvc" class="compact-label">
-                    <?php esc_html_e('Security Code', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('cvc')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -285,7 +327,7 @@ if (!defined('ABSPATH')) {
                         class="compact-input lkn-cvv"
                         maxlength="4"
                         required
-                        placeholder="CVC">
+                        placeholder="<?php echo esc_attr($lkn_ph('cvc', 'CVC')); ?>">
                     <div class="compact-field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/key.svg'); ?>" alt="Security Code" />
                     </div>
@@ -309,7 +351,7 @@ if (!defined('ABSPATH')) {
             <!-- Row 3: Installments -->
             <div id="lkn-cc-dc-installment-row" class="compact-field compact-field--installments" style="display: none;">
                 <label for="lkn_cc_dc_installments" class="compact-label">
-                    <?php esc_html_e('Installments', 'lkn-wc-gateway-cielo'); ?>
+                    <?php echo esc_html($lkn_lbl('installments')); ?>
                     <span class="required">*</span>
                 </label>
                 <div class="compact-field-wrapper">
@@ -342,7 +384,7 @@ if (!defined('ABSPATH')) {
         <?php if ($this->get_option('show_finish_order_button', 'yes') !== 'no') : ?>
         <div class="payment-submit-section">
             <button type="button" id="cielo-debit-submit-btn" class="cielo-submit-button debit-submit">
-                <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
+                <?php echo esc_html($lkn_lbl('button')); ?>
             </button>
             <p class="submit-description">
                 <?php echo esc_html($description); ?>

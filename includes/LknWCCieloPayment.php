@@ -184,6 +184,7 @@ final class LknWCCieloPayment
         
         // AJAX hooks for admin functionality
         $this->loader->add_action('wp_ajax_lkn_cielo_clear_order_logs', $this->lknWcGatewayCieloEndpoint, 'ajax_clear_order_logs');
+        $this->loader->add_action('wp_ajax_lkn_cielo_test_bin', $this->lknWcGatewayCieloEndpoint, 'ajax_test_bin');
         
         // Partial capture hooks centralized
         $this->loader->add_action('woocommerce_order_item_add_action_buttons', $this, 'add_partial_capture_button');
@@ -263,6 +264,15 @@ final class LknWCCieloPayment
         // Remove os campos "fake" (chaves *_fake) para não persistir valores inertes no banco.
         foreach (array_keys($settings) as $key) {
             if ('_fake' === substr($key, -5)) {
+                unset($settings[$key]);
+            }
+        }
+
+        // Seção "Fields" (label/placeholder por layout) é recurso PRO: não persiste
+        // sem licença (evita manter personalizações que não teriam efeito).
+        $settings['fields_template'] = 'standard';
+        foreach (array_keys($settings) as $key) {
+            if (0 === strpos($key, 'field_label_') || 0 === strpos($key, 'field_placeholder_')) {
                 unset($settings[$key]);
             }
         }

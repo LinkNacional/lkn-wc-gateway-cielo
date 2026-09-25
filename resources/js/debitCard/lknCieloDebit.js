@@ -36,7 +36,7 @@ const lknDCClientIp = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.c
 const lknDCUserGuest = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.user_guest)
 const lknDCAuthMethod = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.authentication_method)
 const lknDCClient = window.wp.htmlEntities.decodeEntities(lknDCsettingsCielo.client)
-const lknDCShowFinishOrderButton = lknDCsettingsCielo.showFinishOrderButton || 'yes'
+const lknDCShowFinishOrderButton = lknDCsettingsCielo.showFinishOrderButton || 'no'
 
 // Definir variável global para comunicar com o script 3DS
 window.lknCurrentCardType = lknDCCardTypeMode === 'only_debit' ? 'Debit' : 'Credit'
@@ -217,6 +217,35 @@ const lknDCContentCielo = props => {
   const [focus, setFocus] = window.wp.element.useState('')
   const [finalAmount, setFinalAmount] = window.wp.element.useState(lknDCTotalCartCielo)
 
+  // Placeholders personalizáveis (seção "Fields" do admin): o TextInput do Blocks
+  // não aceita a prop placeholder, então aplicamos direto no input. Cobre todos os
+  // layouts (o React renderiza os campos em todos eles).
+  window.wp.element.useEffect(() => {
+    const ph = lknDCsettingsCielo.fieldPlaceholders || {}
+    const map = {
+      lkn_dc_cardholder_name: ph.holder_name,
+      lkn_dcno: ph.card_number,
+      lkn_dc_expdate: ph.expiry,
+      lkn_dc_cvc: ph.cvc
+    }
+    const applyPlaceholders = () => {
+      Object.keys(map).forEach((id) => {
+        const el = document.getElementById(id)
+        if (!el) return
+        if (map[id]) {
+          el.setAttribute('placeholder', map[id])
+        }
+      })
+    }
+    applyPlaceholders()
+    const t1 = setTimeout(applyPlaceholders, 400)
+    const t2 = setTimeout(applyPlaceholders, 1200)
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [])
+
   // Force disabled on native <select> when SortSelect doesn't pass the prop through
   window.wp.element.useEffect(() => {
     if (lknDCCardTypeSelectDisabled) {
@@ -347,6 +376,23 @@ const lknDCContentCielo = props => {
     const formattedValue = cleanedValue?.replace(/(.{4})/g, '$1 ')?.trim()
     return formattedValue
   }
+  const onlyDigits = value => String(value == null ? '' : value).replace(/\D/g, '')
+  // Validade padronizada: só dígitos, sempre MM/AA (sem espaços). Mês de um dígito
+  // 2-9 vira 0X; mês > 12 é limitado a 12; ano com 4 dígitos é cortado para 2
+  // ("25/2035" -> "25/35").
+  const formatExpiryValue = value => {
+    const digits = onlyDigits(value)
+    let month = digits.slice(0, 2)
+    let year = digits.slice(2)
+    if (month.length === 1 && month >= '2' && month <= '9') {
+      month = '0' + month
+    } else if (month.length === 2 && parseInt(month, 10) > 12) {
+      month = '12'
+    }
+    if (year.length > 2) year = year.slice(-2)
+    return year.length ? month + '/' + year : month
+  }
+  const formatCvcValue = value => onlyDigits(value).slice(0, 4)
   const updatedebitObject = (key, value) => {
     // Atualizar variável global imediatamente quando o tipo de cartão mudar
     if (key === 'lkn_cc_type') {
@@ -362,29 +408,17 @@ const lknDCContentCielo = props => {
         })
         break
       case 'lkn_dc_expdate':
-        if (value.length > 7) return
-
-        // Verifica se o valor é uma data válida (MM/YY)
-        const isValidDate = /^\d{2}\/\d{2}$/.test(value)
-        if (!isValidDate) {
-          // Remove caracteres não numéricos
-          const cleanedValue = value?.replace(/\D/g, '')
-          let formattedValue = cleanedValue?.replace(/^(.{2})(.{2})$/, '$1 / $2')
-
-          // Se o tamanho da string for 6 (MMYYYY), formate para MM / YY
-          if (cleanedValue.length === 6) {
-            formattedValue = cleanedValue?.replace(/^(.{2})(.{2})(.{2})$/, '$1 / $3')
-          }
-
-          // Atualiza o estado
-          setdebitObject({
-            ...debitObject,
-            [key]: formattedValue
-          })
-        }
+        setdebitObject({
+          ...debitObject,
+          [key]: formatExpiryValue(value)
+        })
         return
       case 'lkn_dc_cvc':
-        if (value.length > 8) return
+        setdebitObject({
+          ...debitObject,
+          [key]: formatCvcValue(value)
+        })
+        return
       case 'lkn_dcno':
         if (value.length > 7) {
           const cardBin = value.replace(' ', '').substring(0, 6)
@@ -867,6 +901,7 @@ const lknDCContentCielo = props => {
     value: debitObject.lkn_dcno,
     className: 'lkn-credit-debit-card-field',
     autocomplete: 'cc-number',
+    inputMode: 'numeric',
     onChange: value => {
       updatedebitObject('lkn_dcno', formatDebitCardNumber(value))
     },
@@ -874,6 +909,7 @@ const lknDCContentCielo = props => {
     onFocus: () => setFocus('number')
   }), lknCieloDebitConfig.isProPluginValid && !lknDCHideCardTypeSelector && /* #__PURE__ */React.createElement(wcComponents.SortSelect, {
     id: 'lkn_cc_type',
+    label: lknDCTranslationsCielo.cardType,
     value: debitObject.lkn_cc_type,
     disabled: lknDCCardTypeSelectDisabled,
     className: 'lkn-credit-debit-card-type-select lkn-credit-debit-card-field' + (lknDCCardTypeSelectDisabled ? ' lkn-cc-type-readonly' : ''),
@@ -932,6 +968,7 @@ const lknDCContentCielo = props => {
     value: debitObject.lkn_dc_expdate,
     className: 'lkn-credit-debit-card-field',
     autocomplete: 'cc-exp',
+    inputMode: 'numeric',
     onChange: value => {
       updatedebitObject('lkn_dc_expdate', value)
     },
@@ -943,6 +980,7 @@ const lknDCContentCielo = props => {
     value: debitObject.lkn_dc_cvc,
     className: 'lkn-credit-debit-card-field',
     autocomplete: 'cc-csc',
+    inputMode: 'numeric',
     onChange: value => {
       updatedebitObject('lkn_dc_cvc', value)
     },
@@ -1085,18 +1123,13 @@ const lknDCContentCielo = props => {
     
 ), lknDCShowFinishOrderButton !== 'no' ? /* #__PURE__ */React.createElement(React.Fragment, null, /* #__PURE__ */React.createElement('div', {
     style: {
-      marginBottom: '25px',
-      width: '100%'
-    }
-  }), /* #__PURE__ */React.createElement('div', {
-    style: {
       display: 'flex',
       justifyContent: 'center'
     }
   }, /* #__PURE__ */React.createElement(wcComponents.Button, {
     id: 'sendOrder',
     onClick: handleButtonClick
-  }, /* #__PURE__ */React.createElement('span', null, 'Finalizar pedido'))), /* #__PURE__ */React.createElement('div', {
+  }, /* #__PURE__ */React.createElement('span', null, lknDCTranslationsDebitCielo.completeOrder || 'Place order'))), /* #__PURE__ */React.createElement('div', {
     style: {
       margin: '2px',
       width: '100%'

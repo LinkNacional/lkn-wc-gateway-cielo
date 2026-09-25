@@ -4,6 +4,11 @@
 * Ajuste: validação de BIN (whitelist) decide apenas pela consulta online, com nova tentativa e bloqueio quando a Cielo não responde; sem a opção, usa apenas a consulta offline.
 * Ajuste: endpoint de consulta de bandeira separa os fluxos online e offline e exibe alerta no checkout quando a consulta online falha.
 * Ajuste: mensagens das whitelists passam a informar as bandeiras/tipos permitidos.
+* Novo: layout compacto do cartão (shortcode e Blocos) e opção de estilo padrão/moderno/compacto.
+* Novo: editor visual na seção "Fields" com preview do checkout por tipo (Blocos/Shortcode) e edição de rótulos e placeholders por layout (PRO).
+* Novo: teste da consulta de BIN ao ativar o recurso, confirmando o funcionamento com link de configuração da Cielo.
+* Novo: imagens de layout por tipo de checkout, com ampliação em galeria (lightbox do WordPress).
+* Ajuste: padronização dos campos e do botão de finalizar; placeholder dos inputs em cinza.
 
 # 1.37.2 - 08/09/2026
 * Correção: Tratamento do erro MPI900 (falha de rede/HTTP) no fluxo de autenticação 3DS.

@@ -120,6 +120,15 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 = 1.37.3 =
 ** 11/09/2026 **
 * Fix: Declined payment messages now follow the Cielo/ABECS standard.
+* Added: PRO features replicated as demonstration fields (PRO badge) on the free plan, interactive and without saving to the real options.
+* Adjustment: BIN validation (whitelist) decides only by the online query, with a retry and block when Cielo does not respond; without the option, uses only the offline query.
+* Adjustment: card brand query endpoint separates online and offline flows and shows an alert at checkout when the online query fails.
+* Adjustment: whitelist messages now inform the allowed brands/types.
+* Added: compact card layout (shortcode and Blocks) and standard/modern/compact style option.
+* Added: "Fields" visual editor with checkout preview per type (Blocks/Shortcode) and per-layout label/placeholder editing (PRO).
+* Added: BIN query test when enabling the feature, confirming it works with a Cielo configuration link.
+* Added: layout images per checkout type, with gallery enlargement (WordPress lightbox).
+* Adjustment: standardized fields and finish-order button; gray input placeholders.
 
 = 1.37.2 =
 ** 08/09/2026 **

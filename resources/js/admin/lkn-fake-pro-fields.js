@@ -37,13 +37,22 @@ function injectFakeProNotice () {
 
   var notice = document.createElement('div')
   notice.id = 'lkn-cielo-fake-pro-notice'
-  notice.className = 'notice notice-info inline'
-  notice.setAttribute('style', 'margin: 10px 0; padding: 8px 12px; border-left-color: #2271b1;')
+  notice.className = 'notice notice-error inline'
+  notice.setAttribute('style', 'margin: 10px 0; padding: 8px 12px; border-left-color: #d63638;')
 
   var p = document.createElement('p')
   p.setAttribute('style', 'margin: 4px 0;')
   p.textContent = message
   notice.appendChild(p)
+
+  // Coloca logo ACIMA do botão "Salvar alterações" (fim do formulário), para o
+  // lojista ver o aviso antes de salvar.
+  var submit = document.querySelector('#mainform p.submit') ||
+    document.querySelector('#mainform .woocommerce-save-button')
+  if (submit && submit.parentNode) {
+    submit.parentNode.insertBefore(notice, submit)
+    return
+  }
 
   var header = document.querySelector('.wc-admin-header')
   if (header && header.nextElementSibling) {

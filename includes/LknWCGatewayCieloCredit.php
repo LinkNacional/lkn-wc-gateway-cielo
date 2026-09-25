@@ -133,7 +133,16 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
         $section = isset($_GET['section']) ? sanitize_text_field(wp_unslash($_GET['section'])) : '';
 
         if ('wc-settings' === $page && 'checkout' === $tab && $section == $this->id) {
-            wp_enqueue_script('lknWCGatewayCieloCreditSettingsLayoutScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $this->version, false);
+            $cielo_layout_js_path = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js';
+            $cielo_layout_js_ver  = $this->version . '.' . (file_exists($cielo_layout_js_path) ? filemtime($cielo_layout_js_path) : '0');
+            wp_enqueue_script('lknWCGatewayCieloCreditSettingsLayoutScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $cielo_layout_js_ver, false);
+            // Lightbox nativo do WordPress (Thickbox) para ampliar as imagens do layout.
+            wp_enqueue_script('thickbox');
+            wp_enqueue_style('thickbox');
+            $cielo_tb_css = plugin_dir_path(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css';
+            wp_enqueue_style('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_css) ? filemtime($cielo_tb_css) : '0'));
+            $cielo_tb_js = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js';
+            wp_enqueue_script('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_js) ? filemtime($cielo_tb_js) : '0'), true);
             $gateway_settings = $this->settings;
             wp_localize_script('lknWCGatewayCieloCreditSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
@@ -154,7 +163,9 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                 'version_free' => LKN_WC_CIELO_VERSION,
                 'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A'
             ));
-            wp_enqueue_style('lkn-admin-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css', array(), $this->version, 'all');
+            $cielo_admin_css_path = plugin_dir_path(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css';
+            $cielo_admin_css_ver  = $this->version . '.' . (file_exists($cielo_admin_css_path) ? filemtime($cielo_admin_css_path) : '0');
+            wp_enqueue_style('lkn-admin-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css', array(), $cielo_admin_css_ver, 'all');
             wp_enqueue_script('lknWCGatewayCieloCreditClearButtonScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('lknWCGatewayCieloCreditClearButtonScript', 'lknWcCieloTranslations', array(
                 'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
@@ -815,9 +826,9 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
         wp_enqueue_style('lkn-cc-style', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cc-style.css', array(), $this->version, 'all');
         wp_enqueue_style('lkn-mask', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-mask.css', array(), $this->version, 'all');
         
-        // Enqueue mask and installment scripts
-        wp_enqueue_script('lkn-mask-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/formatter.js', array('jquery'), $this->version, false);
-        wp_enqueue_script('lkn-mask-script-load', plugin_dir_url(__FILE__) . '../resources/js/frontend/define-mask.js', array('lkn-mask-script', 'jquery'), $this->version, false);
+        // Padronização dos campos de cartão (número/validade/CVC): máscara,
+        // filtro de dígitos, inputmode numérico e normalização da validade.
+        wp_enqueue_script('lkn-card-fields', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-card-fields.js', array(), $this->version, true);
         
         // Setup installment args and scripts
         $installmentArgs = apply_filters('lkn_wc_cielo_js_credit_args', array('installment_min' => '5'));

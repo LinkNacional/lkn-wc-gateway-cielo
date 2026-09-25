@@ -22,10 +22,6 @@ if (!defined('ABSPATH')) {
     class="wc-credit-card-form wc-payment-form"
     style="background:transparent;">
 
-    <p class="credit-card-description">
-        <?php echo esc_html($description); ?>
-    </p>
-
     <div class="cielo-credit-fields-wrapper">
         <?php if ('yes' === $show_card_animation) { ?>
         <div class="lkn-cielo-animated-card-container">
@@ -46,7 +42,7 @@ if (!defined('ABSPATH')) {
         <?php if ($gateway_instance->get_option('show_cardholder_name', 'no') !== 'yes') : ?>
         <div class="form-row form-row-wide">
             <label
-                for="lkn_cc_cardholder_name"><?php esc_html_e('Card Holder Name', 'lkn-wc-gateway-cielo'); ?>
+                for="lkn_cc_cardholder_name"><?php esc_html_e('Name on Card', 'lkn-wc-gateway-cielo'); ?>
                 <span class="required">*</span></label>
             <input
                 id="lkn_cc_cardholder_name"
@@ -75,8 +71,8 @@ if (!defined('ABSPATH')) {
                 class="lkn-card-num lkn-wc-gateway-cielo-input wc-credit-card-form-card-number"
                 maxlength="24"
                 required
-                placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>"
-                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>">
+                placeholder="<?php echo $placeholder_enabled ? esc_attr('0000 0000 0000 0000') : ''; ?>"
+                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('0000 0000 0000 0000') : ''; ?>">
         </div>
         <div class="form-row form-row-wide">
             <label
@@ -90,8 +86,8 @@ if (!defined('ABSPATH')) {
                 class="lkn-card-exp lkn-wc-gateway-cielo-input wc-credit-card-form-card-expiry"
                 maxlength="7"
                 required
-                placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>"
-                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>">
+                placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/AA') : ''; ?>"
+                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/AA') : ''; ?>">
         </div>
         <div class="form-row form-row-wide">
             <label
@@ -105,8 +101,8 @@ if (!defined('ABSPATH')) {
                 class="lkn-cvv lkn-wc-gateway-cielo-input wc-credit-card-form-card-cvc"
                 maxlength="8"
                 required
-                placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>"
-                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>">
+                placeholder="<?php echo $placeholder_enabled ? esc_attr('CVC') : ''; ?>"
+                data-placeholder="<?php echo $placeholder_enabled ? esc_attr('CVC') : ''; ?>">
         </div>
 
         <?php
@@ -169,6 +165,11 @@ if (!defined('ABSPATH')) {
         <div class="clear"></div>
             </div>
     </div>
+
+    <!-- Descrição do gateway: no rodapé, abaixo dos campos. -->
+    <p class="credit-card-description">
+        <?php echo esc_html($description); ?>
+    </p>
 
 </fieldset>
 

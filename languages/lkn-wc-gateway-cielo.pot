@@ -74,6 +74,9 @@ msgstr ""
 msgid "Card Number"
 msgstr ""
 
+msgid "Name on Card"
+msgstr ""
+
 msgid "Expiry Date"
 msgstr ""
 
@@ -536,4 +539,25 @@ msgid "Compact Version (PRO)"
 msgstr ""
 
 msgid "Select between Standard, Modern and Compact versions for the checkout layout. Modern and Compact are PRO features."
+msgstr ""
+
+msgid "Fields"
+msgstr ""
+
+msgid "Layout to customize"
+msgstr ""
+
+msgid "Choose which layout the fields below refer to."
+msgstr ""
+
+msgid "Only the selected layout shows its fields below."
+msgstr ""
+
+msgid "Label — %1$s (%2$s)"
+msgstr ""
+
+msgid "Placeholder — %1$s (%2$s)"
+msgstr ""
+
+msgid "Name on card"
 msgstr ""

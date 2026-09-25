@@ -192,6 +192,68 @@ final class LknWCGatewayCieloEndpoint
         return new WP_REST_Response($data, 200);
     }
 
+    /**
+     * AJAX: testa a consulta de BIN (online) ao ativar o recurso "Online Card
+     * Validation". Recebe o número do cartão (ou ao menos o BIN) e confirma se a
+     * funcionalidade está de fato habilitada na conta Cielo. Não devolve o
+     * resultado em si — apenas sucesso/falha, para o admin exibir a notificação.
+     */
+    public function ajax_test_bin()
+    {
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+
+        if (! wp_verify_nonce($nonce, 'lkn_cielo_test_bin_nonce')) {
+            wp_send_json_error(array(
+                'message' => __('Security check failed.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        if (! current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array(
+                'message' => __('You do not have permission to run this test.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        $digits  = isset($_POST['digits']) ? preg_replace('/\D/', '', wp_unslash($_POST['digits'])) : '';
+        $gateway = isset($_POST['gateway']) ? sanitize_text_field(wp_unslash($_POST['gateway'])) : 'debit';
+
+        if (! in_array($gateway, array('debit', 'credit'), true)) {
+            $gateway = 'debit';
+        }
+
+        if (strlen($digits) < 6) {
+            wp_send_json_error(array(
+                'message' => __('Please enter a valid card number (at least the first 6 digits).', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        $optionKey = 'woocommerce_lkn_cielo_' . $gateway . '_settings';
+        $option = get_option($optionKey, array());
+        if (! is_array($option)) {
+            $option = array();
+        }
+
+        $result = self::queryCardBin($digits, $option);
+
+        // Persiste a opção já no teste (o lojista costuma fechar a notificação sem
+        // clicar em "Salvar alterações"). Sucesso liga o recurso; falha desliga.
+        // Guardamos também o resultado do teste para o indicador (✓/✗) reaparecer
+        // no carregamento seguinte (F5).
+        $option['brand_validation'] = $result ? 'yes' : 'no';
+        $option['brand_validation_status'] = $result ? 'active' : 'failed';
+        update_option($optionKey, $option);
+
+        if ($result) {
+            wp_send_json_success(array(
+                'message' => __('The online BIN query is working. The feature is enabled on your Cielo account.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        wp_send_json_error(array(
+            'message' => __('The online BIN query did not respond. Make sure the feature is enabled on your Cielo account and that your credentials are correct.', 'lkn-wc-gateway-cielo'),
+        ));
+    }
+
     public function ajax_clear_order_logs()
     {
         // Verificar se é requisição POST e se nonce existe
