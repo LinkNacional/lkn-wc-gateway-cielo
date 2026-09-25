@@ -1,4 +1,16 @@
 # Invoice Payment for WooCommerce tradução pt_BR
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+
 msgid "CIELO API PIX, credit card, debit payment for WooCommerce"
 msgstr "Gateway de Pagamento com API Cielo para WooCommerce"
 
@@ -281,6 +293,9 @@ msgstr "Seja Pro"
 msgid "Card Holder Name"
 msgstr "Nome do Titular do Cartão"
 
+msgid "Name on Card"
+msgstr "Nome impresso no cartão"
+
 msgid "Card Holder Name is required!"
 msgstr "O nome do titular do cartão é obrigatório!"
 
@@ -407,9 +422,6 @@ msgstr "Habilitar Pagamentos Google Pay"
 msgid "Google Pay"
 msgstr "Google Pay"
 
-msgid "Payment processed by Cielo API 3.0"
-msgstr "Pagamento processado pela Cielo API 3.0"
-
 msgid "Google Merchant Id"
 msgstr "ID do Comerciante Google"
 
@@ -509,12 +521,6 @@ msgstr "Escolha entre modo produção ou desenvolvimento para a API Cielo."
 msgid "Select \"Development\" to test transactions in sandbox mode. Use \"Production\" for real transactions."
 msgstr "Selecione \"Desenvolvimento\" para testar transações em modo sandbox. Use \"Produção\" para transações reais."
 
-msgid "Enable log capture for payments"
-msgstr "Habilitar captura de log para pagamentos"
-
-msgid "View logs"
-msgstr "Ver logs"
-
 msgid "Enable this option to log payment requests and responses for troubleshooting purposes."
 msgstr "Habilite esta opção para registrar requisições e respostas de pagamento para fins de solução de problemas."
 
@@ -541,3 +547,35 @@ msgstr "Use apenas se não precisar mais dos logs de transação Cielo para pedi
 
 msgid "This will permanently remove all stored logs from WooCommerce orders. Ideal after resolving issues or for privacy."
 msgstr "Isto removerá permanentemente todos os logs armazenados dos pedidos WooCommerce. Ideal após resolver problemas ou por privacidade."
+msgid "Standard Version"
+msgstr "Versão Padrão"
+
+msgid "Modern Version (PRO)"
+msgstr "Versão moderna (PRO)"
+
+msgid "Compact Version (PRO)"
+msgstr "Versão compacta (PRO)"
+
+msgid "Select between Standard, Modern and Compact versions for the checkout layout. Modern and Compact are PRO features."
+msgstr "Selecione entre as versões Padrão, Moderna e Compacta para o layout de finalização da compra. Moderna e Compacta são recursos PRO."
+
+msgid "Fields"
+msgstr "Campos"
+
+msgid "Layout to customize"
+msgstr "Layout para personalizar"
+
+msgid "Choose which layout the fields below refer to."
+msgstr "Escolha a qual layout os campos abaixo se referem."
+
+msgid "Only the selected layout shows its fields below."
+msgstr "Apenas o layout selecionado exibe seus campos abaixo."
+
+msgid "Label — %1$s (%2$s)"
+msgstr "Rótulo — %1$s (%2$s)"
+
+msgid "Placeholder — %1$s (%2$s)"
+msgstr "Placeholder — %1$s (%2$s)"
+
+msgid "Name on card"
+msgstr "Nome impresso no cartão"

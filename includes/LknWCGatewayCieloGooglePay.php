@@ -96,6 +96,7 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
             wp_localize_script('lknWCGatewayCieloGooglePaySettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
@@ -104,13 +105,15 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
                 'site_domain' => home_url(),
                 'gateway_id' => $this->id,
                 'version_free' => LKN_WC_CIELO_VERSION,
-                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A'
+                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A',
+                'isProValid' => LknWcCieloHelper::is_pro_license_active()
             ));
             wp_enqueue_style('lkn-admin-layout', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-admin-layout.css', array(), $this->version, 'all');
             wp_enqueue_script('lknWCGatewayCieloGooglePayClearButtonScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('lknWCGatewayCieloGooglePayClearButtonScript', 'lknWcCieloTranslations', array(
                 'clearLogs' => __('Clear Logs', 'lkn-wc-gateway-cielo'),
                 'sendConfigs' => __('Wordpress Support', 'lkn-wc-gateway-cielo'),
+                'sendConfigsPro' => __('Available only in the PRO plan.', 'lkn-wc-gateway-cielo'),
                 'alertText' => __('Do you really want to delete all order logs?', 'lkn-wc-gateway-cielo'),
                 'production' => __('Use this in the live store to charge real payments.', 'lkn-wc-gateway-cielo'),
                 'sandbox' => __('Use this for testing purposes in the Cielo sandbox environment.', 'lkn-wc-gateway-cielo'),
@@ -286,6 +289,20 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
                 'custom_attributes' => array(
                     'data-title-description' => __('Ative para exigir autenticação 3DS em todas as transações do Google Pay para maior segurança.', 'lkn-wc-gateway-cielo')
                 )
+            ),
+            'abecs_norms' => array(
+                'title'       => esc_attr__('ABECS standard messages', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable ABECS-standard return messages', 'lkn-wc-gateway-cielo'),
+                'default'     => LknWcCieloHelper::is_abecs_enabled($this->id) ? 'yes' : 'no',
+                'description' => __('Default: enabled when the PRO license is active.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Use the official Cielo (ABECS) return messages instead of the default messages.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo')
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                )
             )
         );
 
@@ -314,21 +331,24 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
             ),
         );
 
-        // PRO section (send configs)
+        // Support section (send configs). No plano gratuito o botão continua visível,
+        // porém decorativo (cinza/desabilitado, com selo PRO) — recurso do plano PRO.
         $pro_plugin_active = LknWcCieloHelper::is_pro_license_active();
-        if ($pro_plugin_active) {
-            $this->form_fields['send_configs'] = array(
-                'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
-                'type'  => 'button',
-                'id'    => 'sendConfigs',
-                'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
-                'desc_tip' => null,
-                'custom_attributes' => array(
+        $this->form_fields['send_configs'] = array(
+            'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
+            'type'  => 'button',
+            'id'    => 'sendConfigs',
+            'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
+            'desc_tip' => null,
+            'disabled' => ! $pro_plugin_active,
+            'custom_attributes' => array_merge(
+                array(
                     'merge-top' => "woocommerce_{$this->id}_debug",
                     'data-title-description' => __('Send the settings for this payment method to WordPress Support.', 'lkn-wc-gateway-cielo')
-                )
-            );
-        }
+                ),
+                ! $pro_plugin_active ? array('lkn-pro-badge' => 'true') : array()
+            )
+        );
 
         // Logs section (order logs and clear logs)
         $this->form_fields += array(
@@ -416,12 +436,12 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         if (! wp_verify_nonce($nonce, 'nonce_lkn_cielo_google_pay') && 'no' === $nonceInactive) {
             $this->log->log('error', 'Nonce verification failed. Nonce: ' . var_export($nonce, true), array('source' => 'woocommerce-cielo-google-pay'));
             $this->add_notice_once(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'), 'error');
-            throw new Exception(esc_attr(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'));
         }
         // Validate and sanitize google_pay_data
         if (!isset($_POST['google_pay_data']) || empty($_POST['google_pay_data'])) {
             $this->log->log('error', 'Google Pay data is missing', array('source' => 'woocommerce-cielo-google-pay'));
-            throw new Exception(esc_attr(__('Payment data is missing, please try again.', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('Payment data is missing, please try again.', 'lkn-wc-gateway-cielo'));
         }
 
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
@@ -443,7 +463,7 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         // 3. Validação de segurança para evitar os erros de "Attempt to read property on null"
         if (!is_object($data) || !isset($data->paymentMethodData->tokenizationData->token)) {
             $this->log->log('error', 'Google Pay Data structure is invalid or missing token.');
-            throw new Exception(esc_attr(__('Invalid payment data structure.', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('Invalid payment data structure.', 'lkn-wc-gateway-cielo'));
         }
 
         // 4. Pegando o token bruto (que é uma string JSON)
@@ -511,13 +531,13 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
 
             $message = __('Order payment failed. Please review the gateway settings.', 'lkn-wc-gateway-cielo');
 
-            throw new Exception(esc_attr($message));
+            $this->add_error($message);
         }
         $responseDecoded = json_decode($response['body']);
 
         // Verificar erro 212 (Google Pay não configurado na Cielo)
         if (is_array($responseDecoded) && isset($responseDecoded[0]->Code) && $responseDecoded[0]->Code == 212) {
-            throw new Exception(esc_attr(__('Google Pay is not configured in Cielo.', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('Google Pay is not configured in Cielo.', 'lkn-wc-gateway-cielo'));
         }
 
         if ($this->get_option('debug') === 'yes') {
@@ -605,19 +625,39 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         }
         if (isset($responseDecoded->Payment->ReturnCode) && 'GF' == $responseDecoded->Payment->ReturnCode) {
             // Error GF detected, notify site admin
-            $error_message = "Return Code: " . $responseDecoded->Payment->ReturnCode . '. Return Message: ' . $responseDecoded->Payment->ReturnMessage . '.' . __('Please contact Cielo for further assistance.', 'lkn-wc-gateway-cielo');
+            $translatedReturnMessage = LknCieloErrorCodes::resolveForGateway($this->id, $responseDecoded->Payment->ReturnCode, isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '', isset($responseDecoded->Payment->ReturnMessage) ? $responseDecoded->Payment->ReturnMessage : '');
+            $error_message = "Return Code: " . $responseDecoded->Payment->ReturnCode . '. Return Message: ' . $translatedReturnMessage . '.' . __('Please contact Cielo for further assistance.', 'lkn-wc-gateway-cielo');
             //wp_mail(get_option('admin_email'), 'Erro na transação Cielo', $error_message);
 
             // Registrar a mensagem de erro em um arquivo de log
             $this->log->log('error', $error_message, array('source' => 'woocommerce-cielo-credit'));
 
-            throw new Exception(esc_attr($error_message));
+            // Seguir a norma ABECS: devolver a mensagem oficial da Cielo para o
+            // código de retorno, em vez de uma mensagem genérica.
+            // Legado (v1.37.1): mensagem detalhada com o texto cru da Cielo quando
+            // o ABECS está desligado.
+            $message = LknWcCieloHelper::getCieloErrorMessage(
+                $responseDecoded,
+                __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo'),
+                $this->id,
+                $error_message
+            );
+
+            $this->add_error($message);
         }
         if ('yes' === $this->get_option('debug')) {
             $this->log->log('error', var_export($response, true), array('source' => 'woocommerce-cielo-google-pay'));
         }
 
-        throw new Exception(esc_attr(__('Order payment failed, please try again.', 'lkn-wc-gateway-cielo')));
+        // Devolver a mensagem oficial da Cielo (norma ABECS) com base no código de
+        // retorno, mantendo a mensagem genérica apenas como fallback.
+        $message = LknWcCieloHelper::getCieloErrorMessage(
+            $responseDecoded,
+            __('Order payment failed, please try again.', 'lkn-wc-gateway-cielo'),
+            $this->id
+        );
+
+        $this->add_error($message);
     }
 
     /**
@@ -702,6 +742,29 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
     {
         if (! wc_has_notice($message, $type)) {
             wc_add_notice($message, $type);
+        }
+    }
+
+    /**
+     * Throw an error notice prefixed with the gateway title.
+     *
+     * Mirrors the woo-rede behavior: the customer sees the payment method
+     * title (bold) followed by the error message.
+     *
+     * @param string $message
+     * @return void
+     */
+    public function add_error($message): void
+    {
+        global $woocommerce;
+
+        $title = '<strong>' . esc_html($this->title) . ':</strong> ';
+
+        if (function_exists('wc_add_notice')) {
+            $message = wp_kses($message, array());
+            throw new Exception(wp_kses_post("{$title} {$message}"));
+        } else {
+            $woocommerce->add_error($title . $message);
         }
     }
 

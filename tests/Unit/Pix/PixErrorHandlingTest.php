@@ -123,7 +123,7 @@ class PixErrorHandlingTest extends TestCase
 
         // Assert
         $this->assertFalse($result['sucess']);
-        $this->assertEquals('Invalid credential(s).', $result['response']);
+        $this->assertEquals('Affiliation not found', $result['response']);
     }
 
     /**
@@ -180,7 +180,7 @@ class PixErrorHandlingTest extends TestCase
 
         // Assert
         $this->assertFalse($result['sucess']);
-        $this->assertEquals('Invalid credential(s).', $result['response']);
+        $this->assertEquals('MerchantKey is invalid', $result['response']);
     }
 
     /**

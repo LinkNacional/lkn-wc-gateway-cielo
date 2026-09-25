@@ -17,7 +17,8 @@
  * @author Link Nacional
  * 
  * Used with: lkn-cielo-debit-payment-fields-modern-layout.php
- * CSS Support: lkn-cielo-modern-layout.css
+ *            lkn-cielo-debit-payment-fields-compact-layout.php
+ * CSS Support: lkn-cielo-modern-layout.css / lkn-cielo-compact-layout.css
  */
 
 (function() {
@@ -28,9 +29,29 @@
     let brandIcons = null;
     let debounceTimer = null;
     let lastDetectedBrand = null;
+    let lastBinErrorShown = null;
+
+    /**
+     * Mostra o alerta de falha da consulta online (deduplicado por BIN).
+     * @param {string} bin - 6 primeiros dígitos do cartão
+     * @param {string} message - Mensagem vinda do servidor
+     */
+    function showBinErrorAlert(bin, message) {
+        if (bin === lastBinErrorShown) {
+            return;
+        }
+        lastBinErrorShown = bin;
+
+        if (typeof window !== 'undefined' && typeof window.alert === 'function') {
+            window.alert(message || 'Could not validate the card with the card issuer. Please try again or use another card.');
+        }
+    }
     
     /**
-     * Fetch card brand from the REST endpoint (online + offline fallback).
+     * Fetch card brand from the REST endpoint.
+     * Com a validação online habilitada o endpoint consulta APENAS online; em
+     * falha ele devolve um erro, que exibimos como alerta. Com ela desabilitada
+     * o endpoint devolve a bandeira via consulta offline.
      * @param {string} number - Card number
      * @returns {Promise<object|null>}
      */
@@ -61,6 +82,10 @@
             return response.json();
         })
         .then(function(data) {
+            if (data && data.error) {
+                showBinErrorAlert(cleanNumber.substring(0, 6), data.message);
+                return null;
+            }
             if (data.status && data.brand) {
                 return data.brand;
             }
@@ -76,13 +101,13 @@
      * @param {string|null} detectedBrand - Brand name or null
      */
     function updateBrandIcons(detectedBrand) {
-        // Só manipular ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons !== 'yes') {
-            return; // Não manipular os ícones se não estiverem habilitados
-        }
-        
         if (!brandIcons || brandIcons.length === 0) {
             brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        // Só manipular se houver ícones renderizados (o layout moderno só os
+        // renderiza quando habilitado; o compacto sempre os renderiza).
+        if (!brandIcons || brandIcons.length === 0) {
+            return;
         }
         
         brandIcons.forEach(icon => {
@@ -116,11 +141,15 @@
         const cardNumber = cardNumberInput.value;
         const cleanNumber = cardNumber.replace(/\s+/g, '');
         
-        // Só aplicar efeitos nos ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons === 'yes') {
+        // Só aplicar efeitos quando houver ícones de bandeira renderizados.
+        if (!brandIcons || brandIcons.length === 0) {
+            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        if (brandIcons && brandIcons.length > 0) {
             // Apply gray filter when user starts typing (1+ digits)
             if (cleanNumber.length >= 1 && cleanNumber.length < 6) {
                 // Gray out all brands when typing but not enough digits to detect
+                clearTimeout(debounceTimer);
                 applyGrayFilterToAll();
                 return;
             }
@@ -133,6 +162,10 @@
                         updateBrandIcons(detectedBrand);
                     });
                 }, 500);
+            } else if (cleanNumber.length === 0) {
+                // Campo vazio: cancela consulta pendente e volta ao estado colorido
+                clearTimeout(debounceTimer);
+                updateBrandIcons(null);
             }
         }
         
@@ -143,9 +176,12 @@
      * Apply gray filter to all brand icons
      */
     function applyGrayFilterToAll() {
-        // Só manipular ícones se estiverem habilitados
-        if (typeof lknCieloDebitBrandConfig !== 'undefined' && lknCieloDebitBrandConfig.show_card_brand_icons !== 'yes') {
-            return; // Não manipular os ícones se não estiverem habilitados
+        if (!brandIcons || brandIcons.length === 0) {
+            brandIcons = document.querySelectorAll('#cielo-debit-card-brands .card-brand-icon');
+        }
+        // Só manipular se houver ícones renderizados.
+        if (!brandIcons || brandIcons.length === 0) {
+            return;
         }
         
         if (!brandIcons || brandIcons.length === 0) {
@@ -220,17 +256,25 @@
         if (wooSubmitBtn) {
             // Sync custom button with WooCommerce button state
             const syncButtonState = () => {
-                // Don't sync if button is in processing state (custom feedback)
-                if (cieloSubmitBtn.textContent === 'Processing...' && cieloSubmitBtn.style.backgroundColor === 'rgb(108, 117, 125)') {
+                // Durante um fluxo 3DS em andamento o botão é controlado pelo script
+                // de 3DS (lkn-dc-script). Não mexe para não destravá-lo cedo demais.
+                if (window.__lkn3DSInProgress) {
                     return;
                 }
-                
+                // Don't sync if button is in processing state (custom feedback)
+                if (cieloSubmitBtn.disabled && cieloSubmitBtn.textContent === 'Processing...' && cieloSubmitBtn.style.backgroundColor === 'rgb(108, 117, 125)') {
+                    return;
+                }
+
                 if (wooSubmitBtn.disabled) {
                     cieloSubmitBtn.disabled = true;
                     cieloSubmitBtn.textContent = wooSubmitBtn.textContent || 'Processing...';
                 } else {
                     cieloSubmitBtn.disabled = false;
-                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Confirm Payment';
+                    cieloSubmitBtn.style.backgroundColor = '';
+                    cieloSubmitBtn.style.borderColor = '';
+                    cieloSubmitBtn.style.cursor = '';
+                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Place order';
                 }
             };
             
@@ -242,6 +286,9 @@
             // Click handler - trigger WooCommerce submit with delay feedback
             cieloSubmitBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                if (window.__lkn3DSInProgress) {
+                    return;
+                }
                 if (!this.disabled && wooSubmitBtn && !wooSubmitBtn.disabled) {
                     // Immediate visual feedback
                     this.disabled = true;
@@ -256,13 +303,16 @@
                     // If no checkout error occurs, restore after 4 seconds
                     const restoreButton = () => {
                         setTimeout(() => {
-                            if (this.disabled) {
-                                this.disabled = false;
-                                this.style.backgroundColor = '';
-                                this.style.borderColor = '';
-                                this.style.cursor = '';
-                                this.textContent = this.getAttribute('data-original-text') || 'Confirm Payment';
+                            // Se o fluxo 3DS ainda está em andamento, NÃO restaura — o
+                            // script de 3DS cuida disso ao terminar (sucesso/falha).
+                            if (window.__lkn3DSInProgress) {
+                                return;
                             }
+                            this.disabled = false;
+                            this.style.backgroundColor = '';
+                            this.style.borderColor = '';
+                            this.style.cursor = '';
+                            this.textContent = this.getAttribute('data-original-text') || 'Place order';
                         }, 4000);
                     };
                     
@@ -290,7 +340,7 @@
                     cieloSubmitBtn.style.backgroundColor = '';
                     cieloSubmitBtn.style.borderColor = '';
                     cieloSubmitBtn.style.cursor = '';
-                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Confirm Payment';
+                    cieloSubmitBtn.textContent = cieloSubmitBtn.getAttribute('data-original-text') || 'Place order';
                 }
                 syncButtonState();
             });

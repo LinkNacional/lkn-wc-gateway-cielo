@@ -9,6 +9,8 @@ let lkn3DSCompleted = false;
 let lknDetectedCardProvider = '';
 // Tipo do cartão detectado via BIN: 'Debit' | 'Credit' (vazio = indeterminado)
 let lknDetectedCardType = '';
+// Último BIN que já exibiu alerta de falha da consulta online (evita repetição)
+let lknBinErrorShown = '';
 
 // Estado de carregamento do BP.Mpi (3DS). O init (bpmpi_load) é adiado para o
 // clique de finalizar, para que amount e installments enviados ao MPI reflitam
@@ -17,11 +19,57 @@ window.__lknBpmpiReady = false;
 window.__lknBpmpiLoading = false;
 window.__lknPendingAuthenticate = false;
 
+// Feedback visual do botão de envio durante o 3DS (cinza + texto "carregando") para
+// evitar cliques repetidos. Restaurado nas respostas do 3DS (falha/erro) e antes do
+// envio final (sucesso), sincronizando com o botão do WooCommerce.
+var lknSubmitLoadingEl = null;
+function lknLockSubmitButton() {
+  if (lknSubmitLoadingEl) return;
+  var btn = document.getElementById('cielo-debit-submit-btn') || document.getElementById('place_order');
+  if (!btn) return;
+  try {
+    if (btn.getAttribute('data-lkn-prev-html') === null) {
+      btn.setAttribute('data-lkn-prev-html', btn.innerHTML);
+    }
+    btn.disabled = true;
+    btn.classList.add('lkn-btn-loading');
+    btn.textContent = wp.i18n.__('Processing...', 'lkn-wc-gateway-cielo');
+    window.__lkn3DSInProgress = true;
+    lknSubmitLoadingEl = btn;
+  } catch (e) {}
+}
+function lknUnlockSubmitButton() {
+  lknCustomSubmitLockedUntil = 0;
+  window.__lkn3DSInProgress = false;
+  var btn = lknSubmitLoadingEl || document.getElementById('cielo-debit-submit-btn');
+  if (!btn) return;
+  try {
+    btn.disabled = false;
+    btn.classList.remove('lkn-btn-loading');
+    // Limpa os estilos inline de "processing" (aplicados pelo brand detector no
+    // checkout clássico), para o botão não ficar cinza/cursor:not-allowed.
+    btn.style.backgroundColor = '';
+    btn.style.borderColor = '';
+    btn.style.cursor = '';
+    var originalText = btn.getAttribute('data-original-text');
+    var processing = wp.i18n.__('Processing...', 'lkn-wc-gateway-cielo');
+    var prev = btn.getAttribute('data-lkn-prev-html');
+    if (prev !== null && prev !== processing && prev.trim() !== '') {
+      btn.innerHTML = prev;
+    } else if (originalText) {
+      btn.textContent = originalText;
+    }
+    btn.removeAttribute('data-lkn-prev-html');
+  } catch (e) {}
+  lknSubmitLoadingEl = null;
+}
+
 // Função para resetar o status 3DS
 function resetLkn3DSStatus() {
   lkn3DSCompleted = false;
   lknDetectedCardProvider = '';
   lknDetectedCardType = '';
+  lknUnlockSubmitButton();
   
   // Reconfigurar o botão para tipo button (caso tenha sido alterado)
   const btnSubmit = document.getElementById('place_order');
@@ -108,10 +156,6 @@ function setupErrorDetection() {
 
     if (lknWcCieloCcDcNo && lknWcCieloPaymentCCTypeInput) {
       lknWcCieloCcDcNo.onchange = (e) => {
-        // Skip BIN auto-detection when card type is forced by admin config
-        if (typeof lknDCCardTypeMode !== 'undefined' && lknDCCardTypeMode.mode !== 'both') {
-          return
-        }
         const cardBin = e.target.value.replace(/\s+/g, '').substring(0, 6)
         if(!cardBin) {
           return
@@ -136,9 +180,25 @@ function setupErrorDetection() {
             'X-WP-Nonce': nonce
           },
           success: function (response) {
+            // Consulta online falhou (sem fallback offline): alerta e interrompe.
+            if (response && response.error) {
+              if (lknBinErrorShown !== cardBin) {
+                lknBinErrorShown = cardBin;
+                alert((response.message) || wp.i18n.__('Could not validate the card with the card issuer. Please try again or use another card.', 'lkn-wc-gateway-cielo'));
+              }
+              return;
+            }
+
             // Guardar provider detectado para pré-filtro 3DS
             if (response.brand) {
               lknDetectedCardProvider = response.brand.charAt(0).toUpperCase() + response.brand.slice(1);
+            }
+
+            // Só ajusta o select/tipo detectado quando ele é editável (modo 'both').
+            // Com o tipo fixo, a seleção é travada e tanto a requisição quanto o 3DS
+            // seguem o tipo configurado (o gateway devolve o erro se o cartão não servir).
+            if (typeof lknDCCardTypeMode !== 'undefined' && lknDCCardTypeMode.mode !== 'both') {
+              return
             }
 
             // Guardar o tipo real do cartão (Debit/Credit) para o paymentmethod do 3DS
@@ -293,23 +353,20 @@ function bpmpi_config () {
       }
     },
     onSuccess: function (e) {
+      lknUnlockSubmitButton();
       // Card is eligible for authentication, and the bearer successfully authenticated
       submitForm(e)
     },
     onFailure: function (e) {
-      // Card is not eligible for authentication, but the bearer failed payment
+      lknUnlockSubmitButton();
+      // Autenticação FALHOU (ex.: usuário cancelou o desafio 3DS). NUNCA prosseguir
+      // com o pedido: desafio cancelado/recusado é tratado como recusa. A opção
+      // allow_card_ineligible vale apenas para cartões não elegíveis (onUnenrolled).
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
-
-      const lknDebitCCForm = document.getElementById('wc-lkn_cielo_debit-cc-form')
-      if (lknDebitCCForm) {
-        if(lknDCScriptAllowCardIneligible.allow == 'yes'){
-          submitForm(e)
-        }else{
-          alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
-        }
-      }
+      alert(wp.i18n.__('Authentication not completed. Your order was not placed. Please try again.', 'lkn-wc-gateway-cielo'))
     },
     onUnenrolled: function (e) {
+      lknUnlockSubmitButton();
       // Card is not eligible for authentication (unauthenticable)
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
       // UNAVAILABLE: stand-in CAVV válido (issuer indisponível) — submeter direto
@@ -323,6 +380,7 @@ function bpmpi_config () {
       }
     },
     onDisabled: function (e) {
+      lknUnlockSubmitButton();
       // Store don't require bearer authentication (class "bpmpi_auth" false -> disabled authentication).
       console.log('code ' + (e ? e.ReturnCode : 'N/A') + ' ' + ' message ' + (e ? e.ReturnMessage : 'N/A'))
       //aqui
@@ -333,6 +391,7 @@ function bpmpi_config () {
       }
     },
     onError: function (e) {
+      lknUnlockSubmitButton();
       // Error on proccess in authentication
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
 
@@ -360,6 +419,7 @@ function bpmpi_config () {
       }
     },
     onUnsupportedBrand: function (e) {
+      lknUnlockSubmitButton();
       // Provider not supported for authentication — definitive error, always submit
       console.log('code ' + e.ReturnCode + ' ' + ' message ' + e.ReturnMessage)
       submitForm(e)
@@ -462,7 +522,14 @@ function lknLoadBpmpiScript () {
 }
 
 function lknDCProccessButton () {
+  // Reentrância: ignora se já há um fluxo 3DS em andamento (evita múltiplos
+  // enrolls concorrentes, que causam erro cross-origin do 3DS).
+  if (window.__lkn3DSInProgress && !lkn3DSCompleted) {
+    return;
+  }
   try {
+    // Feedback visual imediato e proteção contra duplo clique.
+    lknLockSubmitButton();
     // Sempre executar 3DS, independente do tipo de cartão
     
     // Se 3DS já foi completado, submeter diretamente
@@ -587,7 +654,7 @@ function lknDCProccessButton () {
     lknFinalize3DS()
   } catch (error) {
     resetLkn3DSStatus();
-    alert(wp.i18n.__('Authentication failed check the card information and try again', 'lkn-wc-gateway-cielo'))
+    alert(wp.i18n.__('Authentication not completed. Your order was not placed. Please try again.', 'lkn-wc-gateway-cielo'))
   }
 }
 
@@ -619,11 +686,11 @@ document.addEventListener('click', function (event) {
   lknCustomSubmitLockedUntil = Date.now() + 15000
 
   // Desabilita o botão; o efeito cinza é aplicado via CSS (#cielo-debit-submit-btn:disabled).
-  btn.disabled = true
+  lknLockSubmitButton();
 
-  // Reabilita o botão após o período de trava.
+  // Reabilita o botão após o período de trava (fallback).
   setTimeout(function () {
-    btn.disabled = false
+    lknUnlockSubmitButton();
   }, 15000)
 
   var placeOrder = document.getElementById('place_order')

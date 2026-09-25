@@ -21,11 +21,16 @@
 
 input.masked,
 .shell span {
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 1 !important;
     font-family: monospace;
     padding-right: 10px;
     width: 100%;
     text-transform: uppercase;
+}
+
+input.masked {
+    background-color: #fff !important;
 }
 
 [for="payment_method_lkn_cielo_credit"] img,

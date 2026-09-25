@@ -86,7 +86,7 @@ if (!defined('ABSPATH')) {
         <!-- Card Holder Name Field -->
         <div class="modern-field">
             <label for="lkn_cc_cardholder_name" class="field-label">
-                <?php esc_html_e('Card Holder Name', 'lkn-wc-gateway-cielo'); ?>
+                <?php esc_html_e('Name on Card', 'lkn-wc-gateway-cielo'); ?>
                 <span class="required">*</span>
             </label>
             <div class="field-wrapper">
@@ -120,7 +120,7 @@ if (!defined('ABSPATH')) {
                     class="field-input lkn-card-num"
                     maxlength="24"
                     required
-                    placeholder="<?php echo $placeholder_enabled ? esc_attr('XXXX XXXX XXXX XXXX') : ''; ?>">
+                    placeholder="<?php echo $placeholder_enabled ? esc_attr('0000 0000 0000 0000') : ''; ?>">
                 <div class="field-icon">
                     <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/lock.svg'); ?>" alt="Security" />
                 </div>
@@ -143,7 +143,7 @@ if (!defined('ABSPATH')) {
                         class="field-input lkn-card-exp"
                         maxlength="7"
                         required
-                        placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/YY') : ''; ?>">
+                        placeholder="<?php echo $placeholder_enabled ? esc_attr('MM/AA') : ''; ?>">
                     <div class="field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/calendar.svg'); ?>" alt="Calendar" />
                     </div>
@@ -164,7 +164,7 @@ if (!defined('ABSPATH')) {
                         class="field-input lkn-cvv"
                         maxlength="8"
                         required
-                        placeholder="<?php echo $placeholder_enabled ? esc_attr('CVV') : ''; ?>">
+                        placeholder="<?php echo $placeholder_enabled ? esc_attr('CVC') : ''; ?>">
                     <div class="field-icon">
                         <img src="<?php echo esc_url(plugin_dir_url(__FILE__) . '../../resources/img/key.svg'); ?>" alt="Security Code" />
                     </div>
@@ -228,7 +228,7 @@ if (!defined('ABSPATH')) {
         <!-- Submit Button -->
         <div class="payment-submit-section">
             <button type="button" id="cielo-credit-submit-btn" class="cielo-submit-button credit-submit">
-                <?php esc_html_e('Confirm Payment', 'lkn-wc-gateway-cielo'); ?>
+                <?php esc_html_e('Place order', 'lkn-wc-gateway-cielo'); ?>
             </button>
             <p class="submit-description">
                 <?php echo esc_html($description); ?>

@@ -37,10 +37,14 @@ final class LknWcCieloCreditBlocks extends AbstractPaymentMethodType
         // Enqueue base styles
         wp_enqueue_style('lkn-cc-style', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-cc-style.css', array(), LKN_WC_CIELO_VERSION, 'all');
         wp_enqueue_style('lkn-mask', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-mask.css', array(), LKN_WC_CIELO_VERSION, 'all');
+
+        // Label flutuante (Gutenberg): mantém `is-active` nos campos (o TextInput
+        // de Blocos não o faz de forma confiável). Cobre standard e modern.
+        wp_enqueue_script('lkn-cielo-floating-label', plugin_dir_url(__FILE__) . '../resources/js/debitCard/lkn-cielo-floating-label.js', array(), LKN_WC_CIELO_VERSION, true);
         
-        // Enqueue mask and installment scripts
-        wp_enqueue_script('lkn-mask-script', plugin_dir_url(__FILE__) . '../resources/js/frontend/formatter.js', array('jquery'), LKN_WC_CIELO_VERSION, false);
-        wp_enqueue_script('lkn-mask-script-load', plugin_dir_url(__FILE__) . '../resources/js/frontend/define-mask.js', array('lkn-mask-script', 'jquery'), LKN_WC_CIELO_VERSION, false);
+        // Padronização dos campos de cartão (número/validade/CVC) no checkout em Blocos.
+        wp_enqueue_script('lkn-card-fields', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-card-fields.js', array(), LKN_WC_CIELO_VERSION, true);
+        wp_enqueue_script('lkn-card-fields-blocks', plugin_dir_url(__FILE__) . '../resources/js/frontend/lkn-card-fields-blocks.js', array('lkn-card-fields'), LKN_WC_CIELO_VERSION, true);
         
         // Setup installment args and scripts
         $installmentArgs = apply_filters('lkn_wc_cielo_js_credit_args', array('installment_min' => '5'));
@@ -139,8 +143,11 @@ final class LknWcCieloCreditBlocks extends AbstractPaymentMethodType
             WC()->session->set('lkn_cielo_debit_installment', '1');
             // Não forçar 'Credit' cegamente: respeita o card_type_mode do gateway
             // de débito para não aplicar taxa como crédito quando está em 'only_debit'.
+            // Recurso PRO: sem licença ativa cai para 'both' (ignora valor salvo).
             $debit_settings = get_option('woocommerce_lkn_cielo_debit_settings', array());
-            $debit_card_type_mode = isset($debit_settings['card_type_mode']) ? $debit_settings['card_type_mode'] : 'both';
+            $debit_card_type_mode = (LknWcCieloHelper::is_pro_license_active() && isset($debit_settings['card_type_mode']))
+                ? $debit_settings['card_type_mode']
+                : 'both';
             $debit_default_card_type = 'only_debit' === $debit_card_type_mode ? 'Debit' : 'Credit';
             WC()->session->set('lkn_cielo_debit_card_type', $debit_default_card_type);
         }
@@ -212,7 +219,7 @@ final class LknWcCieloCreditBlocks extends AbstractPaymentMethodType
                 'cardExpiryDate' => __('Expiry Date', 'lkn-wc-gateway-cielo'),
                 'securityCode' => __('Security Code', 'lkn-wc-gateway-cielo'),
                 'installments' => __('Installments', 'lkn-wc-gateway-cielo'),
-                'cardHolder' => __('Card Holder Name', 'lkn-wc-gateway-cielo'),
+                'cardHolder' => __('Name on Card', 'lkn-wc-gateway-cielo'),
                 // translators: %1$d is the number of installments, %2$s is the installment amount
                 'installmentText' => __('%1$dx of %2$s', 'lkn-wc-gateway-cielo'),
                 'cashPayment' => __('(cash payment)', 'lkn-wc-gateway-cielo'),

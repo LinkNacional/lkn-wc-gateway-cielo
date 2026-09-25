@@ -60,7 +60,7 @@ tests/
 ├── TestCase.php              # Classe base para testes
 ├── TestHelpers.php           # Fixtures e helpers
 │
-└── Unit/
+├── Unit/
     ├── Pix/                  # 5 arquivos, 32 subtestes
     │   ├── PixQrCodeGenerationTest.php
     │   ├── PixCronJobTest.php
@@ -81,7 +81,23 @@ tests/
     │
     └── Hooks/                # 1 arquivo, 17 subtestes
         └── HooksExecutionTest.php
+│
+└── js/                       # Testes de JavaScript (Node) — ver tests/js/README.md
 ```
+
+---
+
+## 🧩 Testes de JavaScript (Node)
+
+Além da suíte PHP (PHPUnit), os scripts de front-end têm testes em `tests/js/`
+(Node puro, sem dependências). Veja **`tests/js/README.md`**.
+
+```bash
+node tests/js/lkn-card-fields.autocomplete.test.js
+```
+
+> A pasta `tests/` **não** é empacotada no `.zip` de release — os workflows do
+> GitHub Actions usam whitelist (`mv` de `includes/`, `resources/`, etc.).
 
 ---
 

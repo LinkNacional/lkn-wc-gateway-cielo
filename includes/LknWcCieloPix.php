@@ -107,6 +107,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             wp_localize_script('LknCieloPixSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
+                'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
@@ -115,13 +116,15 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'site_domain' => home_url(),
                 'gateway_id' => $this->id,
                 'version_free' => LKN_WC_CIELO_VERSION,
-                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A'
+                'version_pro' => (is_plugin_active('lkn-cielo-api-pro/lkn-cielo-api-pro.php') && defined('LKN_CIELO_API_PRO_VERSION')) ? LKN_CIELO_API_PRO_VERSION : 'N/A',
+                'isProValid' => LknWcCieloHelper::is_pro_license_active()
             ));
             wp_enqueue_style('lkn-admin-cielo-layout', LKN_WC_GATEWAY_CIELO_URL . 'resources/css/frontend/lkn-admin-layout.css', array(), $this->version, 'all');
             wp_enqueue_script('LknCieloPixClearButtonScript', LKN_WC_GATEWAY_CIELO_URL . '/resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('LknCieloPixClearButtonScript', 'lknWcCieloTranslations', array(
                 'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
                 'sendConfigs' => __('Wordpress Support', 'lkn-wc-gateway-cielo'),
+                'sendConfigsPro' => __('Available only in the PRO plan.', 'lkn-wc-gateway-cielo'),
                 'alertText' => __('Deseja realmente deletar todos logs dos pedidos?', 'lkn-wc-gateway-cielo'),
                 'production' => __('Use this in the live store to charge real payments.', 'lkn-wc-gateway-cielo'),
                 'sandbox' => __('Use this for testing purposes in the Cielo sandbox environment.', 'lkn-wc-gateway-cielo'),
@@ -261,6 +264,20 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 ),
 
             ),
+            'abecs_norms' => array(
+                'title'       => esc_attr__('ABECS standard messages', 'lkn-wc-gateway-cielo'),
+                'type'        => 'checkbox',
+                'label'       => __('Enable ABECS-standard return messages', 'lkn-wc-gateway-cielo'),
+                'default'     => LknWcCieloHelper::is_abecs_enabled($this->id) ? 'yes' : 'no',
+                'description' => __('Default: enabled when the PRO license is active.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Use the official Cielo (ABECS) return messages instead of the default messages.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'data-title-description' => __('Use the official Cielo (ABECS) return messages. Disable to keep the previous default messages.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    ! LknWcCieloHelper::is_pro_license_active() ? array('lkn-is-pro' => 'true') : array()
+                ),
+            ),
         );
 
         // Developer/Debug section
@@ -288,21 +305,24 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             ),
         );
 
-        // PRO section (send configs)
+        // Support section (send configs). No plano gratuito o botão continua visível,
+        // porém decorativo (cinza/desabilitado, com selo PRO) — recurso do plano PRO.
         $pro_plugin_active = LknWcCieloHelper::is_pro_license_active();
-        if ($pro_plugin_active) {
-            $this->form_fields['send_configs'] = array(
-                'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
-                'type'  => 'button',
-                'id'    => 'sendConfigs',
-                'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
-                'desc_tip' => null,
-                'custom_attributes' => array(
+        $this->form_fields['send_configs'] = array(
+            'title' => __('WhatsApp Support', 'lkn-wc-gateway-cielo'),
+            'type'  => 'button',
+            'id'    => 'sendConfigs',
+            'description' => __('Enable Debug Mode and click Save Changes to get quick support via WhatsApp.', 'lkn-wc-gateway-cielo'),
+            'desc_tip' => null,
+            'disabled' => ! $pro_plugin_active,
+            'custom_attributes' => array_merge(
+                array(
                     'merge-top' => "woocommerce_{$this->id}_debug",
                     'data-title-description' => __('Send the settings for this payment method to WordPress Support.', 'lkn-wc-gateway-cielo')
-                )
-            );
-        }
+                ),
+                ! $pro_plugin_active ? array('lkn-pro-badge' => 'true') : array()
+            )
+        );
 
         // Logs section (order logs and clear logs)
         $this->form_fields += array(
@@ -567,7 +587,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             LknWcCieloHelper::saveTransactionMetadata($order, $customErrorResponse, 'N/A', 'N/A', $fullName, 1, $amount, $currency, 'PIX', $merchantId, $merchantSecret, $merchantOrderId, $order_id, 'N/A', null, 'Pix', 'N/A', $this, 'N/A', 'N/A', 'N/A', 'N/A', 'N/A');
             $order->save();
 
-            throw new Exception(esc_attr(__('PIX Payment Failed', 'lkn-wc-gateway-cielo')));
+            $this->add_error(__('PIX Payment Failed', 'lkn-wc-gateway-cielo'));
         }
     }
 

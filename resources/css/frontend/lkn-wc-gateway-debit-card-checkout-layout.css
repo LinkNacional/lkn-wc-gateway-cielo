@@ -18,46 +18,29 @@
     align-items: center;
     justify-content: flex-end;
     gap: 10px;
-    width: 100%;
-    height: 100%;
 }
 
 .lkn-cielo-credit-debit-card-icons img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
     filter: none;
     opacity: 1;
     transition: filter 0.5s ease-in-out, opacity 0.5s ease-in-out;
 }
 
-.lkn-cielo-credit-debit-header-label {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-around !important;
-    gap: 10px !important;
-    position: relative !important;
-    border-top: 2px solid #2f2f2f;
-    border-left: 2px solid #2f2f2f;
-    border-right: 2px solid #2f2f2f;
-    border-bottom: none;
-    box-sizing: border-box !important;
-    border-top-right-radius: 4px !important;
-    border-top-left-radius: 4px !important;
-    padding-top: 1em !important;
-    padding-bottom: 1em;
-    padding-left: 3.5em;
-    padding-right: .75em;
-}
-
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input label {
-    font-size: 16px !important;
+    font-size: 16.8px !important;
 }
 
 .lkn-cielo-credit-debit-custom-input {
     border: 1px solid #ccc !important;
     height: 50px !important;
     background-color: #fff !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     width: 100% !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
     padding-left: .5em !important;
     transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
@@ -86,9 +69,10 @@
     border: 1px solid #ccc !important;
     height: 50px !important;
     background-color: #fff !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
     width: 100% !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
     padding-left: .5em !important;
     transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
@@ -132,32 +116,24 @@
     background-color: #306FC5 !important;
     color: #fff !important;
     width: 100% !important;
-    border: none !important;
+    height: 50px !important;
+    box-sizing: border-box !important;
+    /* Mesmo espaçamento (18px) acima do botão de finalizar em todos os templates. */
+    margin-top: 18px !important;
+    border: 1px solid #2557a3 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
     transition: background-color 0.3s ease-in-out !important;
 }
 
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder:hover {
-    background-color: #172B85 !important;
-}
-
-.lkn-cielo-credit-debit-description {
-    width: 100% !important;
-    text-align: center !important;
-    padding: 0px 10px !important;
-}
-
-.lkn-cielo-credit-debit-description p {
-    font-size: 14px !important;
-    color: #a1a1a1 !important;
-    font-weight: 100 !important;
-    font-style: italic !important;
+    background-color: #2557a3 !important;
 }
 
 @media (max-width: 780px) {
-    .lkn-cielo-credit-debit-header-label {
-        flex-wrap: wrap !important;
-    }
-
+    /* O ícone-label-group fica com flex-wrap (as bandeiras quebram) e alinhado
+       à esquerda. O cabeçalho em si mantém o padrão do WooCommerce Blocks. */
     .lkn-cielo-credit-debit-card-icons {
         justify-content: flex-start !important;
     }
@@ -176,4 +152,59 @@
     .rccs .rccs__card {
         max-width: none !important;
     }
+}
+/* === Label flutuante (padrão único) ========================================
+ * Igual ao layout Basic: repouso centralizado; ao focar (ou com valor) a label
+ * sobe e diminui; volta ao repouso no blur vazio. O `is-active` é aplicado pelo
+ * WooCommerce Blocks; `:focus-within` reforça o disparo já no foco. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input {
+    position: relative;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    /* Alinha o texto com a label flutuante (left: 12px). O WooCommerce Blocks
+       reduz o padding-left para 9px no estado ativo, desalinhando. */
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    /* Força fundo branco sobre o background do tema. */
+    background-color: #fff !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input label {
+    position: absolute;
+    left: 12px;
+    top: 25px !important;
+    transform: translateY(-50%) !important;
+    transform-origin: top left;
+    margin: 0;
+    font-size: 16.8px !important;
+    line-height: 22px;
+    transition: top .18s ease, transform .18s ease;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input.is-active input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:focus-within input {
+    padding-top: 24px !important;
+    padding-bottom: 8px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input.is-active label,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:focus-within label {
+    top: 8px !important;
+    transform: translateY(0) scale(.82) !important;
+}
+
+/* === Fundo branco forçado nos inputs/select do checkout em Blocos ===
+ * O tema (ex.: Woodmart) aplica background via regra de alta especificidade e
+ * `!important`. Estas regras com o ID do container (#radio-control-...) vencem
+ * por conterem um ID. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-credit-debit-custom-input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-select-type select,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-credit-debit-custom-select select,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-credit-debit-card-type-select select {
+    background-color: #fff !important;
 }

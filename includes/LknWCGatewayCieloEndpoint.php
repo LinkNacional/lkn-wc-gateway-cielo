@@ -192,6 +192,68 @@ final class LknWCGatewayCieloEndpoint
         return new WP_REST_Response($data, 200);
     }
 
+    /**
+     * AJAX: testa a consulta de BIN (online) ao ativar o recurso "Online Card
+     * Validation". Recebe o número do cartão (ou ao menos o BIN) e confirma se a
+     * funcionalidade está de fato habilitada na conta Cielo. Não devolve o
+     * resultado em si — apenas sucesso/falha, para o admin exibir a notificação.
+     */
+    public function ajax_test_bin()
+    {
+        $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+
+        if (! wp_verify_nonce($nonce, 'lkn_cielo_test_bin_nonce')) {
+            wp_send_json_error(array(
+                'message' => __('Security check failed.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        if (! current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array(
+                'message' => __('You do not have permission to run this test.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        $digits  = isset($_POST['digits']) ? preg_replace('/\D/', '', wp_unslash($_POST['digits'])) : '';
+        $gateway = isset($_POST['gateway']) ? sanitize_text_field(wp_unslash($_POST['gateway'])) : 'debit';
+
+        if (! in_array($gateway, array('debit', 'credit'), true)) {
+            $gateway = 'debit';
+        }
+
+        if (strlen($digits) < 6) {
+            wp_send_json_error(array(
+                'message' => __('Please enter a valid card number (at least the first 6 digits).', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        $optionKey = 'woocommerce_lkn_cielo_' . $gateway . '_settings';
+        $option = get_option($optionKey, array());
+        if (! is_array($option)) {
+            $option = array();
+        }
+
+        $result = self::queryCardBin($digits, $option);
+
+        // Persiste a opção já no teste (o lojista costuma fechar a notificação sem
+        // clicar em "Salvar alterações"). Sucesso liga o recurso; falha desliga.
+        // Guardamos também o resultado do teste para o indicador (✓/✗) reaparecer
+        // no carregamento seguinte (F5).
+        $option['brand_validation'] = $result ? 'yes' : 'no';
+        $option['brand_validation_status'] = $result ? 'active' : 'failed';
+        update_option($optionKey, $option);
+
+        if ($result) {
+            wp_send_json_success(array(
+                'message' => __('The online BIN query is working. The feature is enabled on your Cielo account.', 'lkn-wc-gateway-cielo'),
+            ));
+        }
+
+        wp_send_json_error(array(
+            'message' => __('The online BIN query did not respond. Make sure the feature is enabled on your Cielo account and that your credentials are correct.', 'lkn-wc-gateway-cielo'),
+        ));
+    }
+
     public function ajax_clear_order_logs()
     {
         // Verificar se é requisição POST e se nonce existe
@@ -275,25 +337,45 @@ final class LknWCGatewayCieloEndpoint
         $number = str_replace(' ', '', trim($request->get_param('number')));
         $gateway = $request->get_param('gateway'); // 'debit' or 'credit'
 
-        // Se brand_validation estiver ativo e gateway informado, tenta online primeiro
+        // Fluxo ONLINE: quando a validação online está habilitada no gateway, roda
+        // APENAS a consulta online (com 1 nova tentativa). Não há fallback offline —
+        // se a consulta falhar, devolve erro para o front exibir o alerta.
         if (in_array($gateway, array('debit', 'credit'), true)) {
             $optionKey = 'woocommerce_lkn_cielo_' . $gateway . '_settings';
             $option = get_option($optionKey, array());
 
             if (isset($option['brand_validation']) && 'yes' === $option['brand_validation']) {
-                $onlineBrand = $this->tryOnlineBin($number, $option);
+                $onlineBrand = self::queryCardBin($number, $option);
+
+                // Segunda tentativa em caso de instabilidade momentânea.
+                if (! $onlineBrand) {
+                    $onlineBrand = self::queryCardBin($number, $option);
+                }
 
                 if ($onlineBrand) {
                     return new WP_REST_Response(array(
-                        'status'   => true,
-                        'brand'    => $onlineBrand['provider'],
-                        'cardType' => $onlineBrand['cardType'],
-                        'source'   => 'online',
+                        'status'        => true,
+                        'brand'         => $onlineBrand['provider'],
+                        'cardType'      => $onlineBrand['cardType'],
+                        'foreignCard'   => $onlineBrand['foreignCard'],
+                        'corporateCard' => $onlineBrand['corporateCard'],
+                        'prepaid'       => $onlineBrand['prepaid'],
+                        'source'        => 'online',
                     ), 200);
                 }
-                // Fallthrough para offline em caso de falha
+
+                // Falhou após a nova tentativa: sinaliza erro (sem consulta offline).
+                return new WP_REST_Response(array(
+                    'status'  => false,
+                    'error'   => 'bin_query_failed',
+                    'message' => __('Could not validate the card with the card issuer. Please try again or use another card.', 'lkn-wc-gateway-cielo'),
+                    'source'  => 'online',
+                ), 200);
             }
         }
+
+        // Fluxo OFFLINE: validação online desabilitada (ou gateway não informado) —
+        // roda APENAS a consulta offline, apenas para identificar a bandeira.
 
         $bin = [
             // visa
@@ -335,6 +417,9 @@ final class LknWCGatewayCieloEndpoint
                     'status' => true,
                     'brand' => $brands[$index],
                     'cardType' => 'Multiplo',
+                    'foreignCard' => null,
+                    'corporateCard' => null,
+                    'prepaid' => null,
                     'source' => 'offline',
                 ], 200);
             }
@@ -388,18 +473,22 @@ final class LknWCGatewayCieloEndpoint
     }
 
     /**
-     * Tenta consulta online do BIN na API Cielo.
-     * Retorna array com provider e cardType, ou false se falhar.
+     * Consulta online do BIN na API Cielo (método reutilizável).
+     * Retorna os dados normalizados da bandeira/tipo + flags extras, ou false.
      *
-     * @param string $cardBin 6 primeiros dígitos do cartão
-     * @param array  $option  Configurações do gateway (debit ou credit)
-     * @return array{provider: string, cardType: string}|false
+     * @param string $cardBin Número do cartão (usa os 6 primeiros dígitos).
+     * @param array  $option  Configurações do gateway (debit ou credit).
+     * @return array{provider: string, brandRaw: string, cardType: string, foreignCard: bool|null, corporateCard: bool|null, prepaid: bool|null}|false
      */
-    private function tryOnlineBin($cardBin, $option)
+    public static function queryCardBin($cardBin, $option)
     {
         $bin = substr(str_replace(' ', '', $cardBin), 0, 6);
 
         if (strlen($bin) < 6) {
+            return false;
+        }
+
+        if (! isset($option['env']) || ! isset($option['merchant_id']) || ! isset($option['merchant_key'])) {
             return false;
         }
 
@@ -437,22 +526,73 @@ final class LknWCGatewayCieloEndpoint
 
         // Resposta com wrapper cardQuery (formato antigo)
         if (isset($data['cardQuery']['Provider'])) {
-            return array(
-                'provider' => $this->mapProviderToBrand($data['cardQuery']['Provider']),
-                'cardType' => $this->mapCardType(isset($data['cardQuery']['CardType']) ? $data['cardQuery']['CardType'] : 'Multiplo'),
-            );
+            return self::normalizeBinData($data['cardQuery']);
         }
 
         // Resposta direta: {Status, Provider, CardType, ...}
-        if (isset($data['Status']) && '00' === $data['Status'] && isset($data['Provider'])) {
-            return array(
-                'provider' => $this->mapProviderToBrand($data['Provider']),
-                'cardType' => $this->mapCardType(isset($data['CardType']) ? $data['CardType'] : 'Multiplo'),
-            );
+        if (isset($data['Provider']) && (! isset($data['Status']) || '00' === $data['Status'])) {
+            return self::normalizeBinData($data);
         }
 
         // Qualquer outra resposta é considerada falha
         return false;
+    }
+
+    /**
+     * Normaliza os dados crus do BIN (Cielo) no formato interno.
+     *
+     * @param array $data Array com Provider, CardType e, quando disponível,
+     *                    ForeignCard, CorporateCard e Prepaid.
+     * @return array{provider: string, brandRaw: string, cardType: string, foreignCard: bool|null, corporateCard: bool|null, prepaid: bool|null}
+     */
+    private static function normalizeBinData($data)
+    {
+        $brandRaw = isset($data['Provider']) ? trim((string) $data['Provider']) : '';
+
+        return array(
+            'provider'      => self::mapProviderToBrand($brandRaw),
+            'brandRaw'      => $brandRaw,
+            'cardType'      => self::mapCardType(isset($data['CardType']) ? $data['CardType'] : 'Multiplo'),
+            'foreignCard'   => self::readBoolFlag($data, 'ForeignCard'),
+            'corporateCard' => self::readBoolFlag($data, 'CorporateCard'),
+            'prepaid'       => self::readBoolFlag($data, 'Prepaid'),
+        );
+    }
+
+    /**
+     * Lê um campo booleano da resposta da Cielo de forma tolerante
+     * (aceita bool, 'true'/'false', 1/0 e variações de nome). Retorna null se ausente.
+     *
+     * @param array  $data
+     * @param string $key
+     * @return bool|null
+     */
+    private static function readBoolFlag($data, $key)
+    {
+        $candidates = array($key, strtolower($key), lcfirst($key));
+        foreach ($candidates as $candidate) {
+            if (! array_key_exists($candidate, $data)) {
+                continue;
+            }
+            $value = $data[$candidate];
+            if (is_bool($value)) {
+                return $value;
+            }
+            if (is_string($value)) {
+                $normalized = strtolower(trim($value));
+                if (in_array($normalized, array('true', '1', 'yes', 'sim'), true)) {
+                    return true;
+                }
+                if (in_array($normalized, array('false', '0', 'no', 'nao', 'não', ''), true)) {
+                    return false;
+                }
+            }
+            if (is_numeric($value)) {
+                return (int) $value === 1;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -462,7 +602,7 @@ final class LknWCGatewayCieloEndpoint
      * @param string $provider Nome do provider (ex: "VISA", "MASTERCARD")
      * @return string Nome da bandeira (ex: "visa", "mastercard")
      */
-    private function mapProviderToBrand($provider)
+    private static function mapProviderToBrand($provider)
     {
         $map = array(
             'VISA'             => 'visa',
@@ -490,7 +630,7 @@ final class LknWCGatewayCieloEndpoint
      * @param string $cardType Valor bruto do CardType da API
      * @return string "Credito", "Debito" ou "Multiplo"
      */
-    private function mapCardType($cardType)
+    private static function mapCardType($cardType)
     {
         // Remove acentos
         $normalized = preg_replace(
