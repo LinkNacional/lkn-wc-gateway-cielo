@@ -245,7 +245,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     'gateway'      => 'debit',
                     'isSandbox'    => ('production' !== $this->get_option('env', 'production')),
                     'initialStatus' => $lkn_bin_initial_status,
-                    'cieloUrl'     => 'https://developercielo.github.io/manual/cielo-ecommerce#consulta-bin',
+                    'cieloUrl'     => 'https://www.linknacional.com.br/blog/merchant-id-cielo/#funcionalidades-ative-microservicos',
                     'sandboxCards' => array(
                         array('brand' => 'Visa', 'number' => '455187'),
                         array('brand' => 'Mastercard', 'number' => '555566'),
