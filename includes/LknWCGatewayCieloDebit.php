@@ -255,7 +255,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     'i18n' => array(
                         'modalTitle'    => __('Brief BIN query test', 'lkn-wc-gateway-cielo'),
                         'modalIntro'    => __('Before enabling, let’s confirm the BIN query is actually active on your Cielo account. Enter the first 6 digits of the card (the BIN) and run the test.', 'lkn-wc-gateway-cielo'),
-                        'digitsLabel'   => __('First 6 digits (BIN)', 'lkn-wc-gateway-cielo'),
+                        'digitsLabel'   => __('First 6 digits of the card (BIN)', 'lkn-wc-gateway-cielo'),
                         'digitsPh'      => __('0000 00', 'lkn-wc-gateway-cielo'),
                         'sandboxHint'   => __('You are in sandbox. You can test with the BIN of one of these cards:', 'lkn-wc-gateway-cielo'),
                         'test'          => __('Test', 'lkn-wc-gateway-cielo'),
