@@ -796,6 +796,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
      * Move os campos da seção "Fields" (select "Checkout" + Layout real
      * checkout_layout / checkout_layout_fake) para logo após o título Fields e
      * remove o select "Template" (fields_preview_template), que era redundante.
+     *
+     * Também move, para LOGO ABAIXO do preview, as configurações que afetam o
+     * formulário (tipo de cartão, ocultar seletor de tipo e campo do titular).
+     * São os MESMOS campos/opções de sempre (mudam de lugar, não de lógica).
      */
     private function move_layout_field_to_fields_section(): void
     {
@@ -812,18 +816,34 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 $section_fields[] = $candidate;
             }
         }
-        if (empty($section_fields)) {
+
+        // Configurações que afetam o formulário: exibidas ABAIXO do preview.
+        $below_preview_fields = array();
+        foreach (array('card_type_mode', 'hide_card_type_selector', 'show_cardholder_name', 'show_cardholder_name_fake') as $candidate) {
+            if (isset($fields[$candidate])) {
+                $below_preview_fields[] = $candidate;
+            }
+        }
+
+        if (empty($section_fields) && empty($below_preview_fields)) {
             return;
         }
 
         $reordered = array();
         foreach ($fields as $key => $value) {
-            if ('fields_preview_template' === $key || in_array($key, $section_fields, true)) {
-                continue; // remove o Template; os campos da seção são reinseridos após o título
+            if ('fields_preview_template' === $key
+                || in_array($key, $section_fields, true)
+                || in_array($key, $below_preview_fields, true)) {
+                continue; // remove o Template; os campos são reinseridos nas posições-alvo
             }
             $reordered[$key] = $value;
             if ('fields_section' === $key) {
                 foreach ($section_fields as $sf) {
+                    $reordered[$sf] = $fields[$sf];
+                }
+            }
+            if ('fields_preview' === $key) {
+                foreach ($below_preview_fields as $sf) {
                     $reordered[$sf] = $fields[$sf];
                 }
             }
