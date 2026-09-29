@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/wordpress/woocommerce/cielo/
 Tags: pagamento, cielo, pix, woocommerce, creditcard
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.37.3
+Stable tag: 1.38.0
 Requires PHP: 8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -117,8 +117,8 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 
 == Changelog ==
 
-= 1.37.3 =
-** 11/09/2026 **
+= 1.38.0 =
+** 29/09/2026 **
 * Fix: Declined payment messages now follow the Cielo/ABECS standard.
 * Added: PRO features replicated as demonstration fields (PRO badge) on the free plan, interactive and without saving to the real options.
 * Adjustment: BIN validation (whitelist) decides only by the online query, with a retry and block when Cielo does not respond; without the option, uses only the offline query.
