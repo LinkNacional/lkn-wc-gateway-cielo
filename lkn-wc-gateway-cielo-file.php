@@ -20,6 +20,14 @@ if (! defined('LKN_WC_CIELO_VERSION')) {
     define('LKN_WC_CIELO_VERSION', '1.37.3');
 }
 
+/**
+ * Versão mínima do plugin PRO compatível com esta versão do free.
+ * Usada para avisar (e forçar atualização) quando o PRO está desatualizado.
+ */
+if (! defined('LKN_WC_CIELO_MIN_PRO_VERSION')) {
+    define('LKN_WC_CIELO_MIN_PRO_VERSION', '1.30.2');
+}
+
 if (! defined('LKN_WC_CIELO_FILE')) {
     define('LKN_WC_CIELO_FILE', __DIR__ . '/lkn-wc-gateway-cielo.php');
 }

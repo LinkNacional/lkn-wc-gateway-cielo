@@ -215,6 +215,22 @@ final class LknWCCieloPayment
         // ('yes' → 'modern', 'no' → 'standard') para o novo campo de 3 opções
         // (standard/modern/compact). Roda apenas com licença PRO ativa.
         $this->loader->add_action('admin_init', $this, 'migrate_cielo_debit_checkout_layout');
+
+        // Aviso + tela de atualização do PRO (padrão woo-better/shipping-simulator).
+        // Aparece quando o PRO está INSTALADO (ativo ou não) e desatualizado, e
+        // atualiza o PRO pelo endpoint de update (json + zip).
+        $pro_update_notice = new LknWCCieloProUpdateNotice();
+        $this->loader->add_action('admin_menu', $pro_update_notice, 'register_screen');
+        $this->loader->add_action('admin_init', $pro_update_notice, 'maybe_redirect');
+        $this->loader->add_action('admin_enqueue_scripts', $pro_update_notice, 'enqueue_assets');
+        $this->loader->add_action('admin_notices', $pro_update_notice, 'maybe_render_notice');
+        $this->loader->add_action('wp_ajax_lkn_cielo_force_update_pro', $pro_update_notice, 'ajax_update_pro');
+        $this->loader->add_action('wp_ajax_lkn_cielo_dismiss_pro_update', $pro_update_notice, 'ajax_dismiss');
+
+        // E-mail para os administradores quando a atualização automática do FREE
+        // está habilitada e o PRO continua instalado e desatualizado.
+        $pro_update_email = new LknWCCieloProUpdateEmail();
+        $this->loader->add_action('admin_init', $pro_update_email, 'maybe_send');
     }
 
     /**
