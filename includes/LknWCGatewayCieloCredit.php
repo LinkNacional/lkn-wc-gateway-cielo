@@ -663,6 +663,7 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                             'step' => '0.01',
                             'max'  => '100',
                             'data-title-description' => sprintf(
+                                // translators: %d is the number of installments (e.g., 2x, 3x, etc.)
                                 __('Discount applied when customer selects to pay in %dx. Leave 0 for no discount.', 'lkn-wc-gateway-cielo'),
                                 $c
                             ),
