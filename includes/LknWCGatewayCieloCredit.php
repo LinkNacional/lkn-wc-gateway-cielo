@@ -139,10 +139,10 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
             // Lightbox nativo do WordPress (Thickbox) para ampliar as imagens do layout.
             wp_enqueue_script('thickbox');
             wp_enqueue_style('thickbox');
-            $cielo_tb_css = plugin_dir_path(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css';
-            wp_enqueue_style('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/css/admin/lkn-cielo-thickbox.css', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_css) ? filemtime($cielo_tb_css) : '0'));
-            $cielo_tb_js = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js';
-            wp_enqueue_script('lkn-cielo-thickbox', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-cielo-thickbox.js', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_js) ? filemtime($cielo_tb_js) : '0'), true);
+            $cielo_tb_css = plugin_dir_path(__FILE__) . '../resources/css/admin/lkn-cielo-lightbox.css';
+            wp_enqueue_style('lkn-cielo-lightbox', plugin_dir_url(__FILE__) . '../resources/css/admin/lkn-cielo-lightbox.css', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_css) ? filemtime($cielo_tb_css) : '0'));
+            $cielo_tb_js = plugin_dir_path(__FILE__) . '../resources/js/admin/lkn-cielo-lightbox.js';
+            wp_enqueue_script('lkn-cielo-lightbox', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-cielo-lightbox.js', array('thickbox'), $this->version . '.' . (file_exists($cielo_tb_js) ? filemtime($cielo_tb_js) : '0'), true);
             $gateway_settings = $this->settings;
             wp_localize_script('lknWCGatewayCieloCreditSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
