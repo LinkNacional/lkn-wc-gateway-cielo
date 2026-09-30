@@ -122,10 +122,10 @@ final class LknWcCieloPix extends WC_Payment_Gateway
             wp_enqueue_style('lkn-admin-cielo-layout', LKN_WC_GATEWAY_CIELO_URL . 'resources/css/frontend/lkn-admin-layout.css', array(), $this->version, 'all');
             wp_enqueue_script('LknCieloPixClearButtonScript', LKN_WC_GATEWAY_CIELO_URL . '/resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('LknCieloPixClearButtonScript', 'lknWcCieloTranslations', array(
-                'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
+                'clearLogs' => __('Clear Logs', 'lkn-wc-gateway-cielo'),
                 'sendConfigs' => __('Wordpress Support', 'lkn-wc-gateway-cielo'),
                 'sendConfigsPro' => __('Available only in the PRO plan.', 'lkn-wc-gateway-cielo'),
-                'alertText' => __('Deseja realmente deletar todos logs dos pedidos?', 'lkn-wc-gateway-cielo'),
+                'alertText' => __('Do you really want to delete all order logs?', 'lkn-wc-gateway-cielo'),
                 'production' => __('Use this in the live store to charge real payments.', 'lkn-wc-gateway-cielo'),
                 'sandbox' => __('Use this for testing purposes in the Cielo sandbox environment.', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
@@ -218,10 +218,10 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                     'completed'  => _x('Completed', 'Order status', 'lkn-wc-gateway-cielo'),
                 ),
                 'default'     => 'processing',
-                'description' => esc_attr__('Opção para definir automaticamente o status do pedido após confirmação do pagamento por este gateway.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => esc_attr__('Escolha o status que será atribuído automaticamente após a confirmação do pagamento.', 'lkn-wc-gateway-cielo'),
+                'description' => esc_attr__('Option to automatically set the order status after payment confirmation through this gateway.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => esc_attr__('Choose the status that will be assigned automatically after payment confirmation.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
-                    'data-title-description' => esc_attr__('Define automaticamente o status do pedido após pagamento.', 'lkn-wc-gateway-cielo'),
+                    'data-title-description' => esc_attr__('Automatically sets the order status after payment.', 'lkn-wc-gateway-cielo'),
                 ),
             ),
             'pix_layout' => array(
@@ -232,10 +232,10 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                     'standard' => __('Standard', 'lkn-wc-gateway-cielo'),
                     'new'      => __('New', 'lkn-wc-gateway-cielo'),
                 ),
-                'description' => __('Selecione o layout do PIX que o cliente verá no checkout.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('Escolha entre o layout padrão ou o novo layout para o PIX.', 'lkn-wc-gateway-cielo'),
+                'description' => __('Select the PIX layout the customer will see at checkout.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Choose between the standard layout or the new layout for PIX.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
-                    'data-title-description' => __('Layout do PIX mostrado para o cliente no checkout.', 'lkn-wc-gateway-cielo'),
+                    'data-title-description' => __('PIX layout shown to the customer at checkout.', 'lkn-wc-gateway-cielo'),
                 ),
             ),
             'layout_location' => array(
@@ -246,20 +246,20 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                     'top'    => __('Top', 'lkn-wc-gateway-cielo'),
                     'bottom' => __('Bottom', 'lkn-wc-gateway-cielo'),
                 ),
-                'description' => __('Selecione a posição onde o layout PIX será exibido na página de checkout.', 'lkn-wc-gateway-cielo'),
-                'desc_tip'    => __('Defina se o layout PIX aparece no topo ou rodapé do checkout.', 'lkn-wc-gateway-cielo'),
+                'description' => __('Select the position where the PIX layout will be displayed on the checkout page.', 'lkn-wc-gateway-cielo'),
+                'desc_tip'    => __('Set whether the PIX layout appears at the top or bottom of the checkout.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
-                    'data-title-description' => __('Posição do layout PIX na página de checkout.', 'lkn-wc-gateway-cielo'),
+                    'data-title-description' => __('Position of the PIX layout on the checkout page.', 'lkn-wc-gateway-cielo'),
                 ),
             ),
             'show_button' => array(
-                'title' => esc_attr__('Botão Gerar PIX', 'lkn-wc-gateway-cielo'),
+                'title' => esc_attr__('Generate PIX Button', 'lkn-wc-gateway-cielo'),
                 'type' => 'checkbox',
-                'desc_tip' => esc_attr__('Exibe o botão "Finalizar e Gerar PIX" no checkout.', 'lkn-wc-gateway-cielo'),
-                'description' => esc_attr__('Exibe o botão "Finalizar e Gerar PIX" no checkout.', 'lkn-wc-gateway-cielo'),
+                'desc_tip' => esc_attr__('Displays the "Finish and Generate PIX" button at checkout.', 'lkn-wc-gateway-cielo'),
+                'description' => esc_attr__('Displays the "Finish and Generate PIX" button at checkout.', 'lkn-wc-gateway-cielo'),
                 'default' => 'no',
                 'custom_attributes' => array(
-                    'data-title-description' => __('Exibe um botão adicional para gerar o PIX', 'lkn-wc-gateway-cielo'),
+                    'data-title-description' => __('Displays an additional button to generate the PIX', 'lkn-wc-gateway-cielo'),
                     'disabled' => 'disabled',
                 ),
 
@@ -327,9 +327,9 @@ final class LknWcCieloPix extends WC_Payment_Gateway
         // Logs section (order logs and clear logs)
         $this->form_fields += array(
             'show_order_logs' => array(
-                'title'   => __('Visualizar Log no Pedido', 'lkn-wc-gateway-cielo'),
+                'title'   => __('View Order Log', 'lkn-wc-gateway-cielo'),
                 'type'    => 'checkbox',
-                'label'   => __('Habilita visualização do log da transação dentro do pedido.', 'lkn-wc-gateway-cielo'),
+                'label'   => __('Enables viewing the transaction log within the order.', 'lkn-wc-gateway-cielo'),
                 'default' => 'no',
                 'description' => __('Displays Cielo transaction logs inside WooCommerce order details.', 'lkn-wc-gateway-cielo'),
                 'desc_tip' => __('Useful for quickly viewing payment log data without accessing the system log files.', 'lkn-wc-gateway-cielo'),
@@ -338,7 +338,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 )
             ),
             'clear_order_records' => array(
-                'title' => __('Limpar logs nos Pedidos', 'lkn-wc-gateway-cielo'),
+                'title' => __('Clear Order Logs', 'lkn-wc-gateway-cielo'),
                 'type'  => 'button',
                 'id'    => 'clearOrderLogs',
                 'class' => 'woocommerce-save-button components-button is-primary',

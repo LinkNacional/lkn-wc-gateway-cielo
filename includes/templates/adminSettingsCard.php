@@ -28,7 +28,7 @@ if (!defined('ABSPATH')) {
                     <b>•</b><?php esc_html_e('WP Plugin', 'lkn-wc-gateway-cielo'); ?>
                 </a>
                 <a target="_blank" href=<?php echo esc_url('https://www.linknacional.com.br/wordpress/suporte/'); ?>>
-                    <b>•</b><?php esc_html_e('Suporte WP', 'lkn-wc-gateway-cielo'); ?>
+                    <b>•</b><?php esc_html_e('WP Support', 'lkn-wc-gateway-cielo'); ?>
                 </a>
             </div>
         </div>

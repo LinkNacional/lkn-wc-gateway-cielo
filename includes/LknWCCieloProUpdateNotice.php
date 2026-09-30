@@ -70,8 +70,8 @@ final class LknWCCieloProUpdateNotice
     {
         add_submenu_page(
             '',
-            __('Atualização do plugin PRO', 'lkn-wc-gateway-cielo'),
-            __('Atualização do plugin PRO', 'lkn-wc-gateway-cielo'),
+            __('PRO plugin update', 'lkn-wc-gateway-cielo'),
+            __('PRO plugin update', 'lkn-wc-gateway-cielo'),
             'update_plugins',
             self::SCREEN_SLUG,
             array($this, 'render_screen')
@@ -145,7 +145,7 @@ final class LknWCCieloProUpdateNotice
     public function render_screen(): void
     {
         if (! current_user_can('update_plugins')) {
-            wp_die(esc_html__('Você não tem permissão para acessar esta página.', 'lkn-wc-gateway-cielo'));
+            wp_die(esc_html__('You do not have permission to access this page.', 'lkn-wc-gateway-cielo'));
         }
 
         // Se o PRO já foi atualizado, não mostra mais a tela.
@@ -157,27 +157,27 @@ final class LknWCCieloProUpdateNotice
         // A tela carregou: marca como exibida para não abrir novamente.
         update_option(self::OPTION_SHOWN, 'yes');
 
-        $free_name = __('CIELO API — Pagamentos com PIX, Cartão de Crédito e Débito', 'lkn-wc-gateway-cielo');
+        $free_name = __('CIELO API PIX, credit card, debit payment for WooCommerce', 'lkn-wc-gateway-cielo');
         $pro_name = __('CIELO API PRO', 'lkn-wc-gateway-cielo');
         $min_version = $this->min_pro_version();
         ?>
         <div class="wrap lkn-pro-update-screen">
             <div class="lkn-pro-update-screen__card">
-                <a href="<?php echo esc_url(admin_url()); ?>" class="lkn-pro-update-screen__close" aria-label="<?php esc_attr_e('Fechar e não mostrar novamente', 'lkn-wc-gateway-cielo'); ?>">
+                <a href="<?php echo esc_url(admin_url()); ?>" class="lkn-pro-update-screen__close" aria-label="<?php esc_attr_e('Close and do not show again', 'lkn-wc-gateway-cielo'); ?>">
                     <span aria-hidden="true">&times;</span>
                 </a>
 
                 <div class="lkn-pro-update-screen__badge" aria-hidden="true">&#9888;&#65039;</div>
 
                 <h1 class="lkn-pro-update-screen__title">
-                    <?php esc_html_e('Atualização importante do plugin PRO', 'lkn-wc-gateway-cielo'); ?>
+                    <?php esc_html_e('Important PRO plugin update', 'lkn-wc-gateway-cielo'); ?>
                 </h1>
 
                 <p class="lkn-pro-update-screen__lead">
                     <?php
                     echo sprintf(
                         /* translators: %1$s: FREE plugin name, %2$s: PRO plugin name, %3$s: minimum PRO version */
-                        esc_html__('O plugin %1$s exige a versão %3$s ou superior do %2$s. Sua versão instalada está desatualizada.', 'lkn-wc-gateway-cielo'),
+                        esc_html__('The plugin %1$s requires version %3$s or higher of %2$s. Your installed version is out of date.', 'lkn-wc-gateway-cielo'),
                         '<strong>' . esc_html($free_name) . '</strong>',
                         '<strong>' . esc_html($pro_name) . '</strong>',
                         '<strong>' . esc_html($min_version) . '</strong>'
@@ -187,20 +187,20 @@ final class LknWCCieloProUpdateNotice
 
                 <div class="lkn-pro-update-screen__body">
                     <p>
-                        <?php esc_html_e('Atualize o plugin PRO para evitar falhas na tela de configurações e no checkout. Seus dados não serão alterados.', 'lkn-wc-gateway-cielo'); ?>
+                        <?php esc_html_e('Update the PRO plugin to avoid failures on the settings screen and at checkout. Your data will not be changed.', 'lkn-wc-gateway-cielo'); ?>
                     </p>
                     <ul class="lkn-pro-update-screen__features">
-                        <li>&#128274; <?php esc_html_e('Mais segurança nas transações', 'lkn-wc-gateway-cielo'); ?></li>
-                        <li>&#9889; <?php esc_html_e('Correções e melhorias críticas', 'lkn-wc-gateway-cielo'); ?></li>
-                        <li>&#128179; <?php esc_html_e('Novos recursos de pagamento', 'lkn-wc-gateway-cielo'); ?></li>
+                        <li>&#128274; <?php esc_html_e('More secure transactions', 'lkn-wc-gateway-cielo'); ?></li>
+                        <li>&#9889; <?php esc_html_e('Critical fixes and improvements', 'lkn-wc-gateway-cielo'); ?></li>
+                        <li>&#128179; <?php esc_html_e('New payment features', 'lkn-wc-gateway-cielo'); ?></li>
                     </ul>
                 </div>
 
                 <div class="lkn-pro-update-screen__actions">
-                    <a href="<?php echo esc_url(admin_url()); ?>" class="button button-secondary button-hero"><?php esc_html_e('Agora não', 'lkn-wc-gateway-cielo'); ?></a>
+                    <a href="<?php echo esc_url(admin_url()); ?>" class="button button-secondary button-hero"><?php esc_html_e('Not now', 'lkn-wc-gateway-cielo'); ?></a>
                     <button type="button" class="button button-primary button-hero lkn-pro-update-button">
                         <span class="lkn-pro-update-button__bar" aria-hidden="true"></span>
-                        <span class="lkn-pro-update-button__text"><?php esc_html_e('Atualizar plugin PRO', 'lkn-wc-gateway-cielo'); ?></span>
+                        <span class="lkn-pro-update-button__text"><?php esc_html_e('Update PRO plugin', 'lkn-wc-gateway-cielo'); ?></span>
                     </button>
                 </div>
             </div>
@@ -242,7 +242,7 @@ final class LknWCCieloProUpdateNotice
         }
 
         $nonce = wp_create_nonce(self::NONCE_DISMISS);
-        $free_name = __('CIELO API — Pagamentos com PIX, Cartão de Crédito e Débito', 'lkn-wc-gateway-cielo');
+        $free_name = __('CIELO API PIX, credit card, debit payment for WooCommerce', 'lkn-wc-gateway-cielo');
         $pro_name = __('CIELO API PRO', 'lkn-wc-gateway-cielo');
         ?>
         <div class="notice notice-warning is-dismissible lkn-pro-notice lkn-pro-notice--update"
@@ -255,13 +255,13 @@ final class LknWCCieloProUpdateNotice
             <div class="lkn-pro-notice__content">
                 <p class="lkn-pro-notice__title">
                     <strong><?php echo esc_html($free_name); ?></strong>
-                    <span class="lkn-pro-notice__badge"><?php esc_html_e('Atualização', 'lkn-wc-gateway-cielo'); ?></span>
+                    <span class="lkn-pro-notice__badge"><?php esc_html_e('Update', 'lkn-wc-gateway-cielo'); ?></span>
                 </p>
                 <p>
                     <?php
                     echo sprintf(
                         /* translators: %1$s: PRO plugin name, %2$s: minimum PRO version */
-                        esc_html__('Uma atualização importante do plugin %1$s está disponível (versão %2$s ou superior). Atualize para evitar falhas na configuração e no checkout.', 'lkn-wc-gateway-cielo'),
+                        esc_html__('An important update for the %1$s plugin is available (version %2$s or higher). Update it to avoid failures in the configuration and at checkout.', 'lkn-wc-gateway-cielo'),
                         '<strong>' . esc_html($pro_name) . '</strong>',
                         '<strong>' . esc_html($this->min_pro_version()) . '</strong>'
                     );
@@ -269,10 +269,10 @@ final class LknWCCieloProUpdateNotice
                 </p>
                 <button type="button" class="button button-primary lkn-pro-update-button">
                     <span class="lkn-pro-update-button__bar" aria-hidden="true"></span>
-                    <span class="lkn-pro-update-button__text"><?php esc_html_e('Atualizar plugin PRO', 'lkn-wc-gateway-cielo'); ?></span>
+                    <span class="lkn-pro-update-button__text"><?php esc_html_e('Update PRO plugin', 'lkn-wc-gateway-cielo'); ?></span>
                 </button>
             </div>
-            <button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php esc_html_e('Dispensar este aviso.', 'lkn-wc-gateway-cielo'); ?></span></button>
+            <button type="button" class="notice-dismiss"><span class="screen-reader-text"><?php esc_html_e('Dismiss this notice.', 'lkn-wc-gateway-cielo'); ?></span></button>
         </div>
         <?php
     }
@@ -290,7 +290,7 @@ final class LknWCCieloProUpdateNotice
         check_ajax_referer(self::NONCE_UPDATE, 'nonce');
 
         if (! current_user_can('update_plugins') && ! current_user_can('install_plugins')) {
-            wp_send_json_error(array('message' => __('Você não tem permissão para atualizar plugins.', 'lkn-wc-gateway-cielo')));
+            wp_send_json_error(array('message' => __('You do not have permission to update plugins.', 'lkn-wc-gateway-cielo')));
         }
 
         require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -322,7 +322,7 @@ final class LknWCCieloProUpdateNotice
         }
 
         if (true !== $result) {
-            $message = __('Nenhuma atualização disponível no momento. Atualize pela tela de Plugins.', 'lkn-wc-gateway-cielo');
+            $message = __('No update available at the moment. Update from the Plugins screen.', 'lkn-wc-gateway-cielo');
             set_transient(self::ERROR_TRANSIENT, $message, 5 * MINUTE_IN_SECONDS);
             wp_send_json_error(array('message' => $message));
         }
@@ -330,7 +330,7 @@ final class LknWCCieloProUpdateNotice
         delete_site_transient('update_plugins');
         set_transient(self::SUCCESS_TRANSIENT, 'updated', 5 * MINUTE_IN_SECONDS);
 
-        wp_send_json_success(array('message' => __('Atualizado com sucesso. Recarregando…', 'lkn-wc-gateway-cielo')));
+        wp_send_json_success(array('message' => __('Updated successfully. Reloading…', 'lkn-wc-gateway-cielo')));
     }
 
     /**
@@ -341,7 +341,7 @@ final class LknWCCieloProUpdateNotice
         check_ajax_referer(self::NONCE_DISMISS, 'nonce');
 
         if (! current_user_can('update_plugins')) {
-            wp_send_json_error(array('message' => __('Permissão insuficiente.', 'lkn-wc-gateway-cielo')), 403);
+            wp_send_json_error(array('message' => __('Insufficient permission.', 'lkn-wc-gateway-cielo')), 403);
         }
 
         update_option(self::OPTION_DISMISSED, 'yes');
@@ -405,7 +405,7 @@ final class LknWCCieloProUpdateNotice
      */
     private function script_data(string $show_on_load = '', string $error_message = ''): array
     {
-        $plugin_name = __('CIELO API — Pagamentos com PIX, Cartão de Crédito e Débito', 'lkn-wc-gateway-cielo');
+        $plugin_name = __('CIELO API PIX, credit card, debit payment for WooCommerce', 'lkn-wc-gateway-cielo');
 
         return array(
             'ajaxurl' => admin_url('admin-ajax.php'),
@@ -413,20 +413,20 @@ final class LknWCCieloProUpdateNotice
             'nonce' => wp_create_nonce(self::NONCE_UPDATE),
             'plugin' => self::PRO_BASENAME,
             'redirectUrl' => admin_url('plugins.php'),
-            'successText' => __('Atualizado!', 'lkn-wc-gateway-cielo'),
+            'successText' => __('Updated!', 'lkn-wc-gateway-cielo'),
             'iconUrl' => LKN_WC_GATEWAY_CIELO_DIR_URL . 'includes/assets/icon.svg',
             'showOnLoad' => $show_on_load,
             'errorMessage' => $error_message,
             'success' => array(
                 'title' => $plugin_name,
-                'badge' => __('Sucesso', 'lkn-wc-gateway-cielo'),
-                'close' => __('Fechar', 'lkn-wc-gateway-cielo'),
-                'message' => __('O plugin PRO foi atualizado com sucesso.', 'lkn-wc-gateway-cielo'),
+                'badge' => __('Success', 'lkn-wc-gateway-cielo'),
+                'close' => __('Close', 'lkn-wc-gateway-cielo'),
+                'message' => __('The PRO plugin was updated successfully.', 'lkn-wc-gateway-cielo'),
             ),
             'error' => array(
                 'title' => $plugin_name,
-                'badge' => __('Erro', 'lkn-wc-gateway-cielo'),
-                'close' => __('Fechar', 'lkn-wc-gateway-cielo'),
+                'badge' => __('Error', 'lkn-wc-gateway-cielo'),
+                'close' => __('Close', 'lkn-wc-gateway-cielo'),
             ),
         );
     }

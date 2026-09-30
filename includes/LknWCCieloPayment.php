@@ -1153,7 +1153,7 @@ final class LknWCCieloPayment
         // Item Cielo Transações
         $cielo_item = array(
             'id'       => 'woocommerce-analytics-cielo-transactions',
-            'title'    => __('Cielo Transações', 'lkn-wc-gateway-cielo'),
+            'title'    => __('Cielo Transactions', 'lkn-wc-gateway-cielo'),
             'parent'   => 'woocommerce-analytics',
             'path'     => '/analytics/cielo-transactions',
             'icon'     => 'dashicons-chart-bar',

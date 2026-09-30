@@ -293,10 +293,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             wp_enqueue_style('lknCieloFieldsPreviewBlocks', $cielo_front_css . 'lkn-wc-gateway-debit-card-checkout-layout.css', array(), $this->version);
             wp_enqueue_script('lknWCGatewayCieloDebitClearButtonScript', plugin_dir_url(__FILE__) . '../resources/js/admin/lkn-clear-logs-button.js', array('jquery'), $this->version, false);
             wp_localize_script('lknWCGatewayCieloDebitClearButtonScript', 'lknWcCieloTranslations', array(
-                'clearLogs' => __('Limpar Logs', 'lkn-wc-gateway-cielo'),
+                'clearLogs' => __('Clear Logs', 'lkn-wc-gateway-cielo'),
                 'sendConfigs' => __('Wordpress Support', 'lkn-wc-gateway-cielo'),
                 'sendConfigsPro' => __('Available only in the PRO plan.', 'lkn-wc-gateway-cielo'),
-                'alertText' => __('Deseja realmente deletar todos logs dos pedidos?', 'lkn-wc-gateway-cielo'),
+                'alertText' => __('Do you really want to delete all order logs?', 'lkn-wc-gateway-cielo'),
                 'production' => __('Use this in the live store to charge real payments.', 'lkn-wc-gateway-cielo'),
                 'sandbox' => __('Use this for testing purposes in the Cielo sandbox environment.', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
@@ -735,9 +735,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
         // Logs section (order logs and clear logs)
         $this->form_fields += array(
             'show_order_logs' => array(
-                'title'   => __('Visualizar Log no Pedido', 'lkn-wc-gateway-cielo'),
+                'title'   => __('View Order Log', 'lkn-wc-gateway-cielo'),
                 'type'    => 'checkbox',
-                'label'   => __('Habilita visualização do log da transação dentro do pedido.', 'lkn-wc-gateway-cielo'),
+                'label'   => __('Enables viewing the transaction log within the order.', 'lkn-wc-gateway-cielo'),
                 'default' => 'no',
                 'description' => __('Displays Cielo transaction logs inside WooCommerce order details.', 'lkn-wc-gateway-cielo'),
                 'desc_tip' => __('Useful for quickly viewing payment log data without accessing the system log files.', 'lkn-wc-gateway-cielo'),
@@ -746,7 +746,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 )
             ),
             'clear_order_records' => array(
-                'title' => __('Limpar logs nos Pedidos', 'lkn-wc-gateway-cielo'),
+                'title' => __('Clear Order Logs', 'lkn-wc-gateway-cielo'),
                 'type'  => 'button',
                 'id'    => 'clearOrderLogs',
                 'class' => 'woocommerce-save-button components-button is-primary',

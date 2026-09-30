@@ -303,7 +303,7 @@ final class LknCieloErrorCodes
             '167'  => __('Antifraud not configured', 'lkn-wc-gateway-cielo'),
             '168'  => __('Recurrent Payment not found', 'lkn-wc-gateway-cielo'),
             '169'  => __('Recurrent Payment is not active', 'lkn-wc-gateway-cielo'),
-            '170'  => __('Cartão Protegido not configured', 'lkn-wc-gateway-cielo'),
+            '170'  => __('Protected Card not configured', 'lkn-wc-gateway-cielo'),
             '171'  => __('Affiliation data not sent', 'lkn-wc-gateway-cielo'),
             '172'  => __('Credential Code is required', 'lkn-wc-gateway-cielo'),
             '173'  => __('Payment method is not enabled', 'lkn-wc-gateway-cielo'),
