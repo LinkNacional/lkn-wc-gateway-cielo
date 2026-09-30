@@ -17,7 +17,15 @@ require_once __DIR__ . '/vendor/autoload.php';
  * Rename this for your plugin and update it as you release new versions.
  */
 if (! defined('LKN_WC_CIELO_VERSION')) {
-    define('LKN_WC_CIELO_VERSION', '1.37.2');
+    define('LKN_WC_CIELO_VERSION', '1.38.0');
+}
+
+/**
+ * Versão mínima do plugin PRO compatível com esta versão do free.
+ * Usada para avisar (e forçar atualização) quando o PRO está desatualizado.
+ */
+if (! defined('LKN_WC_CIELO_MIN_PRO_VERSION')) {
+    define('LKN_WC_CIELO_MIN_PRO_VERSION', '1.31.0');
 }
 
 if (! defined('LKN_WC_CIELO_FILE')) {

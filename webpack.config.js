@@ -6,6 +6,11 @@ module.exports = {
     lknCieloDebit: './resources/js/debitCard/lknCieloDebit.js',
     lknCieloCredit: './resources/js/creditCard/lknCieloCredit.js',
     lknCieloAnalytics: './resources/js/analytics/lknCieloAnalytics.tsx',
+    // JS do layout compacto (checkout de Blocos). Fica no webpack para ser
+    // gerado/minificado pelo `npm run build`.
+    lknCieloDebitCompact: './resources/js/debitCard/lkn-wc-gateway-debit-compact-layout.js',
+    // JS do layout compacto (checkout clássico/shortcode): animação das bandeiras.
+    lknCieloDebitCompactClassic: './resources/js/debitCard/lkn-cielo-debit-compact-classic.js',
   },
   output: {
     filename: (pathData) => {

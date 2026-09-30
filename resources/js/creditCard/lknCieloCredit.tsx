@@ -38,6 +38,26 @@ const lknCCContentCielo = (props) => {
     return formattedValue
   }
 
+  const onlyDigits = value => String(value == null ? '' : value).replace(/\D/g, '')
+
+  // Validade padronizada: só dígitos, sempre MM/AA (sem espaços). Mês de um dígito
+  // 2-9 vira 0X; mês > 12 é limitado a 12; ano com 4 dígitos é cortado para 2
+  // ("25/2035" -> "25/35").
+  const formatExpiryValue = value => {
+    const digits = onlyDigits(value)
+    let month = digits.slice(0, 2)
+    let year = digits.slice(2)
+    if (month.length === 1 && month >= '2' && month <= '9') {
+      month = '0' + month
+    } else if (month.length === 2 && parseInt(month, 10) > 12) {
+      month = '12'
+    }
+    if (year.length > 2) year = year.slice(-2)
+    return year.length ? month + '/' + year : month
+  }
+
+  const formatCvcValue = value => onlyDigits(value).slice(0, 4)
+
   const updateCreditObject = (key, value) => {
     switch (key) {
       case 'lkn_cc_cardholder_name':
@@ -49,30 +69,17 @@ const lknCCContentCielo = (props) => {
 
         break
       case 'lkn_cc_expdate':
-        if (value.length > 7) return
-
-        // Verifica se o valor é uma data válida (MM/YY)
-        const isValidDate = /^\d{2}\/\d{2}$/.test(value)
-        if (!isValidDate) {
-          // Remove caracteres não numéricos
-          const cleanedValue = value?.replace(/\D/g, '')
-          let formattedValue = cleanedValue?.replace(/^(.{2})(.{2})$/, '$1 / $2');
-
-          // Se o tamanho da string for 6 (MMYYYY), formate para MM / YY
-          if (cleanedValue.length === 6) {
-            formattedValue = cleanedValue?.replace(/^(.{2})(.{2})(.{2})$/, '$1 / $3');
-          }
-
-          // Atualiza o estado
-          setCreditObject({
-            ...creditObject,
-            [key]: formattedValue
-          })
-        }
+        setCreditObject({
+          ...creditObject,
+          [key]: formatExpiryValue(value)
+        })
         return
       case 'lkn_cc_cvc':
-        if (value.length > 8) return
-        break
+        setCreditObject({
+          ...creditObject,
+          [key]: formatCvcValue(value)
+        })
+        return
       default:
         break
     }
@@ -260,6 +267,7 @@ const lknCCContentCielo = (props) => {
         label={lknCCTranslationsCielo.cardNumber}
         value={creditObject.lkn_ccno}
         autocomplete="cc-number"
+        inputMode="numeric"
         onChange={(value) => {
           updateCreditObject('lkn_ccno', formatCreditCardNumber(value))
         }}
@@ -272,6 +280,7 @@ const lknCCContentCielo = (props) => {
         label={lknCCTranslationsCielo.cardExpiryDate}
         value={creditObject.lkn_cc_expdate}
         autocomplete="cc-exp"
+        inputMode="numeric"
         onChange={(value) => {
           updateCreditObject('lkn_cc_expdate', value)
         }}
@@ -284,6 +293,7 @@ const lknCCContentCielo = (props) => {
         label={lknCCTranslationsCielo.securityCode}
         value={creditObject.lkn_cc_cvc}
         autocomplete="cc-csc"
+        inputMode="numeric"
         onChange={(value) => {
           updateCreditObject('lkn_cc_cvc', value)
         }}

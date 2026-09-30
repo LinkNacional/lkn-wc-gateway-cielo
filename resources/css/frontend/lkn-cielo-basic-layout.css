@@ -1,0 +1,173 @@
+/**
+ * Cielo Débito/Crédito — layout Basic (padrão) do checkout em Blocos.
+ *
+ * Reordena o "Tipo de cartão" para depois do CVC, igual ao layout Basic do Rede
+ * (Nome → Número → Validade → CVC → Tipo de cartão → Parcelas).
+ *
+ * Enfileirado APENAS quando o layout ativo é o Basic; o Modern e o Compact têm o
+ * posicionamento próprio (JS/CSS dedicados), e não são afetados aqui.
+ *
+ * O componente React renderiza os campos num <div style="display: contents">;
+ * tornamos esse container um flex em coluna e ordenamos os filhos com `order`.
+ *
+ * @package Lkn\WCCieloPaymentGateway
+ */
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Quem não for ordenado explicitamente (parcelas, salvar cartão, espaçadores)
+   permanece no fim da coluna. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > * {
+    order: 90;
+}
+
+/* Cartão animado no topo. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .lkn-cielo-animated-card-container {
+    order: 5;
+    flex: 0 0 auto !important;
+}
+
+/* Campos, na ordem do layout Basic do Rede. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-text-input:has(#lkn_dc_cardholder_name) {
+    order: 10;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-text-input:has(#lkn_dcno) {
+    order: 20;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-text-input:has(#lkn_dc_expdate) {
+    order: 30;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-text-input:has(#lkn_dc_cvc) {
+    order: 40;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-sort-select:has(#lkn_cc_type) {
+    order: 50;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content > div[style*="display: contents"] > .wc-block-components-sort-select:has(#lkn_cc_dc_installments) {
+    order: 60;
+}
+
+/* SortSelect (Tipo de cartão / Parcelas) com largura total e o mesmo espaçamento
+   do bloco do Rede (padding-top + empilhamento label/select). O CSS padrão do
+   bloco aplica width: max-content no select, deixando-o estreito. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-top: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    /* Remove o margin-bottom de 12px do core (WooCommerce Blocks) no Basic. */
+    margin-bottom: 0 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select .wc-block-components-sort-select__select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Remove o margin-top de 12px do select de parcelas (regra do lkn-dc-style.css)
+   no Basic — o espaçamento vem do padding-top do próprio bloco. Só o Basic. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn_cielo_debit_select,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn_cielo_credit_select {
+    margin-top: 0 !important;
+}
+
+/* Padronização dos campos do Basic em Blocos: 50px de altura e borda 8px,
+   iguais ao layout moderno/compacto (o admin já força isso no preview). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input {
+    height: 50px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    /* Força fundo branco sobre o background do tema. */
+    background-color: #fff !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select .wc-block-components-sort-select__select {
+    height: 50px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    font-size: 16.8px !important;
+    line-height: 1 !important;
+    background-color: #fff !important;
+}
+
+/* Botão de finalizar (Blocos) no Basic: mesmo estilo azul do moderno/compacto.
+   O Basic não carrega os CSS desses layouts, então o #sendOrder ficava sem estilo. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder {
+    background-color: #306FC5 !important;
+    color: #fff !important;
+    width: 100% !important;
+    height: 50px !important;
+    box-sizing: border-box !important;
+    margin-top: 18px !important;
+    border: 1px solid #2557a3 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    transition: background-color 0.3s ease-in-out !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder:hover {
+    background-color: #2557a3 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder .wc-block-components-button__text,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content #sendOrder span {
+    color: #fff !important;
+}
+
+/* === Label flutuante (padrão único) ========================================
+ * Repouso: label centralizada dentro do input.
+ * Ativa (foco OU com valor): a label sobe para o topo e diminui o texto.
+ * Blur sem valor: volta ao repouso. O `is-active` é aplicado pelo WooCommerce
+ * Blocks (foco/valor); `:focus-within` reforça o disparo já no foco. */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input {
+    position: relative;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input input {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    /* Alinha o texto com a label flutuante (left: 12px). O WooCommerce Blocks
+       reduz o padding-left para 9px no estado ativo, desalinhando. */
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    font-size: 14px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input label {
+    position: absolute;
+    left: 12px;
+    top: 25px !important;
+    transform: translateY(-50%) !important;
+    transform-origin: top left;
+    margin: 0;
+    font-size: 16.8px !important;
+    line-height: 22px;
+    transition: top .18s ease, transform .18s ease;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input.is-active input,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:focus-within input {
+    padding-top: 24px !important;
+    padding-bottom: 8px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input.is-active label,
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-text-input:focus-within label {
+    top: 8px !important;
+    transform: translateY(0) scale(.82) !important;
+}

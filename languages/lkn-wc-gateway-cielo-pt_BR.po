@@ -1,543 +1,4866 @@
 # Invoice Payment for WooCommerce tradução pt_BR
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lkn-wc-gateway-"
+"cielo\n"
+"POT-Creation-Date: 2026-09-30T14:29:12+00:00\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+
+#. Plugin Name of the plugin
+#: lkn-wc-gateway-cielo.php includes/LknWCCieloProUpdateEmail.php:71
+#: includes/LknWCCieloProUpdateEmail.php:148
+#: includes/LknWCCieloProUpdateNotice.php:160
+#: includes/LknWCCieloProUpdateNotice.php:245
+#: includes/LknWCCieloProUpdateNotice.php:408
 msgid "CIELO API PIX, credit card, debit payment for WooCommerce"
 msgstr "Gateway de Pagamento com API Cielo para WooCommerce"
 
+#. Plugin URI of the plugin
+#: lkn-wc-gateway-cielo.php
+msgid "https://www.linknacional.com.br/wordpress/woocommerce/cielo/"
+msgstr "https://www.linknacional.com.br/wordpress/woocommerce/cielo/"
+
+#. Description of the plugin
+#: lkn-wc-gateway-cielo.php
 msgid "Adds the Cielo API 3.0 Payments gateway to your WooCommerce website."
-msgstr "Adiciona o método de pagamento Cielo API 3.0 para seu site WooCommerce."
+msgstr ""
+"Adiciona o método de pagamento Cielo API 3.0 para seu site WooCommerce."
+
+#. Author of the plugin
+#: lkn-wc-gateway-cielo.php
+msgid "Link Nacional"
+msgstr "Link Nacional"
+
+#. Author URI of the plugin
+#: lkn-wc-gateway-cielo.php
+msgid "https://linknacional.com.br"
+msgstr "https://linknacional.com.br"
+
+#: includes/LknCieloErrorCodes.php:180
+msgid "Unknown error"
+msgstr "Erro desconhecido"
+
+#: includes/LknCieloErrorCodes.php:231
+msgid "Transaction authorized"
+msgstr "Transação autorizada"
+
+#: includes/LknCieloErrorCodes.php:232
+msgid "Transaction authorized (available for capture)"
+msgstr "Transação autorizada (disponível para captura)"
+
+#: includes/LknCieloErrorCodes.php:233
+msgid "Transaction captured successfully"
+msgstr "Transação capturada com sucesso"
+
+#: includes/LknCieloErrorCodes.php:234
+msgid "Transaction voided/refunded successfully"
+msgstr "Transação cancelada/reembolsada com sucesso"
+
+#: includes/LknCieloErrorCodes.php:237
+msgid "Internal error"
+msgstr "Erro interno"
+
+#: includes/LknCieloErrorCodes.php:238
+msgid "RequestId is required"
+msgstr "RequestId é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:239
+msgid "MerchantId is required"
+msgstr "MerchantId é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:240
+msgid "Payment Type is required"
+msgstr "Tipo de pagamento é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:241
+msgid "Payment Type can only contain letters"
+msgstr "Tipo de pagamento pode conter apenas letras"
+
+#: includes/LknCieloErrorCodes.php:242 includes/LknCieloErrorCodes.php:361
+msgid "Customer Identity is required"
+msgstr "Identidade do cliente é obrigatória"
+
+#: includes/LknCieloErrorCodes.php:243
+msgid "Customer Name is required"
+msgstr "Nome do cliente é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:244
+msgid "Transaction ID is required"
+msgstr "ID da transação é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:245
+msgid "OrderId is invalid or does not exist"
+msgstr "OrderId é inválido ou não existe"
+
+#: includes/LknCieloErrorCodes.php:246
+msgid "Amount must be greater or equal to zero"
+msgstr "O valor deve ser maior ou igual a zero"
+
+#: includes/LknCieloErrorCodes.php:247
+msgid "Payment Currency is required"
+msgstr "Moeda de pagamento é obrigatória"
+
+#: includes/LknCieloErrorCodes.php:248
+msgid "Invalid Payment Currency"
+msgstr "Moeda de pagamento inválida"
+
+#: includes/LknCieloErrorCodes.php:249
+msgid "Payment Country is required"
+msgstr "País de pagamento é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:250
+msgid "Invalid Payment Country"
+msgstr "País de pagamento inválido"
+
+#: includes/LknCieloErrorCodes.php:251
+msgid "Invalid Payment Code"
+msgstr "Código de pagamento inválido"
+
+#: includes/LknCieloErrorCodes.php:252
+msgid "The provided MerchantId is not in correct format"
+msgstr "O MerchantId fornecido não está no formato correto"
+
+#: includes/LknCieloErrorCodes.php:253
+msgid "The provided MerchantId was not found"
+msgstr "O MerchantId fornecido não foi encontrado"
+
+#: includes/LknCieloErrorCodes.php:254
+msgid "The provided MerchantId is blocked"
+msgstr "O MerchantId fornecido está bloqueado"
 
-msgid "Cielo - Credit Card Legacy"
-msgstr "Cielo - Cartão de Crédito Legado"
+#: includes/LknCieloErrorCodes.php:255
+msgid "Credit Card Holder is required"
+msgstr "Titular do cartão de crédito é obrigatório"
 
-msgid "Please contact Cielo for further assistance."
-msgstr "Por favor, entre em contato com a Cielo para mais assistência."
+#: includes/LknCieloErrorCodes.php:256
+msgid "Credit Card Number is required"
+msgstr "Número do cartão de crédito é obrigatório"
 
-msgid "To use the 3DS functionality it is necessary to register for 3DS 2.2 (request to eCommerce Support)."
-msgstr "Para utilizar a funcionalidade 3DS é necessário ter o cadastro de 3DS 2.2 (solicitar para o Suporte eCommerce)."
+#: includes/LknCieloErrorCodes.php:257
+msgid "At least one Payment is required"
+msgstr "Pelo menos um pagamento é obrigatório"
 
-msgid "Allows credit card payment with Cielo API 3.0."
-msgstr "Permite pagamentos com cartão de crédito através da Cielo API 3.0"
+#: includes/LknCieloErrorCodes.php:258
+msgid "Request IP not allowed. Check your IP White List"
+msgstr "IP da requisição não permitido. Verifique sua lista de IPs permitidos"
 
-msgid "Enable/Disable"
-msgstr "Habilitar/Desabilitar"
+#: includes/LknCieloErrorCodes.php:259
+msgid "Customer is required"
+msgstr "Cliente é obrigatório"
 
-msgid "Enable Credit Card Payments"
-msgstr "Habilita pagamentos via cartão de crédito"
+#: includes/LknCieloErrorCodes.php:260
+msgid "MerchantOrderId is required"
+msgstr "MerchantOrderId é obrigatório"
 
-msgid "Title"
-msgstr "Título"
+#: includes/LknCieloErrorCodes.php:261
+msgid "Installments must be greater or equal to one"
+msgstr "Parcelas devem ser maiores ou iguais a um"
 
-msgid "This controls the title which the user sees during checkout."
-msgstr "Isso controla o título que o usuário vê durante o pagamento."
+#: includes/LknCieloErrorCodes.php:262
+msgid "Credit Card is Required"
+msgstr "Cartão de crédito é obrigatório"
 
-msgid "Credit card"
-msgstr "Cartão de crédito"
+#: includes/LknCieloErrorCodes.php:263
+msgid "Credit Card Expiration Date is required"
+msgstr "Data de validade do cartão de crédito é obrigatória"
 
-msgid "Description"
-msgstr "Descrição"
+#: includes/LknCieloErrorCodes.php:264
+msgid "Credit Card Expiration Date is invalid"
+msgstr "Data de validade do cartão de crédito é inválida"
 
-msgid "Payment method description that the customer will see on your checkout."
-msgstr "Descrição do método de pagamento que o cliente irá ver durante o pagamento."
+#: includes/LknCieloErrorCodes.php:265
+msgid "You must provide CreditCard Number"
+msgstr "Você deve fornecer o número do cartão de crédito"
 
-msgid "Merchant Id"
-msgstr "Merchant Id"
+#: includes/LknCieloErrorCodes.php:266
+msgid "Card Number length exceeded"
+msgstr "Comprimento do número do cartão excedido"
 
-msgid "Cielo API 3.0 credentials."
-msgstr "Credenciais Cielo API 3.0."
+#: includes/LknCieloErrorCodes.php:267
+msgid "Affiliation not found"
+msgstr "Afiliação não encontrada"
 
-msgid "Merchant Key"
-msgstr "Merchant Key"
+#: includes/LknCieloErrorCodes.php:268
+msgid "Could not get Credit Card"
+msgstr "Não foi possível obter o cartão de crédito"
 
-msgid "Invoice Description"
-msgstr "Descrição da fatura"
+#: includes/LknCieloErrorCodes.php:269
+msgid "MerchantKey is required"
+msgstr "MerchantKey é obrigatório"
 
-msgid "Invoice description that the customer will see on your checkout (special characters are not accepted)."
-msgstr "Descrição da fatura que o cliente irá ver durante o pagamento (não é aceito caracteres especiais)."
+#: includes/LknCieloErrorCodes.php:270
+msgid "MerchantKey is invalid"
+msgstr "MerchantKey é inválido"
 
-msgid "Environment"
-msgstr "Ambiente"
+#: includes/LknCieloErrorCodes.php:271
+msgid "Provider is not supported for this Payment Type"
+msgstr "Provedor não é suportado para este tipo de pagamento"
 
-msgid "Cielo API 3.0 environment."
-msgstr "Ambiente da Cielo API 3.0."
+#: includes/LknCieloErrorCodes.php:272
+msgid "FingerPrint length exceeded"
+msgstr "Comprimento do FingerPrint excedido"
 
-msgid "Production"
-msgstr "Produção"
+#: includes/LknCieloErrorCodes.php:273
+msgid "MerchantDefinedFieldValue length exceeded"
+msgstr "Comprimento de MerchantDefinedFieldValue excedido"
 
-msgid "Sandbox"
-msgstr "Teste"
+#: includes/LknCieloErrorCodes.php:274
+msgid "ItemDataName length exceeded"
+msgstr "Comprimento de ItemDataName excedido"
 
-msgid "Capture"
-msgstr "Captura"
+#: includes/LknCieloErrorCodes.php:275
+msgid "ItemDataSKU length exceeded"
+msgstr "Comprimento de ItemDataSKU excedido"
 
-msgid "Enable automatic capture for payments"
-msgstr "Habilita a captura automática para pagamentos"
+#: includes/LknCieloErrorCodes.php:276
+msgid "PassengerDataName length exceeded"
+msgstr "Comprimento de PassengerDataName excedido"
 
-msgid "Card Number"
-msgstr "Número do cartão"
+#: includes/LknCieloErrorCodes.php:277
+msgid "PassengerDataStatus length exceeded"
+msgstr "Comprimento de PassengerDataStatus excedido"
 
-msgid "Expiry Date"
-msgstr "Data de expiração"
+#: includes/LknCieloErrorCodes.php:278
+msgid "PassengerDataEmail length exceeded"
+msgstr "Comprimento de PassengerDataEmail excedido"
 
-msgid "Card Code"
-msgstr "Código de segurança"
+#: includes/LknCieloErrorCodes.php:279
+msgid "PassengerDataPhone length exceeded"
+msgstr "Comprimento de PassengerDataPhone excedido"
 
-msgid "Security Code"
-msgstr "Cód. de Segurança"
+#: includes/LknCieloErrorCodes.php:280
+msgid "TravelDataRoute length exceeded"
+msgstr "Comprimento de TravelDataRoute excedido"
 
-msgid "Credit Card number is required!"
-msgstr "Número de cartão de crédito é obrigatório!"
+#: includes/LknCieloErrorCodes.php:281
+msgid "TravelDataJourneyType length exceeded"
+msgstr "Comprimento de TravelDataJourneyType excedido"
 
-msgid "Expiration date is required!"
-msgstr "Data de expiração é obrigatória!"
+#: includes/LknCieloErrorCodes.php:282
+msgid "TravelLegDataDestination length exceeded"
+msgstr "Comprimento de TravelLegDataDestination excedido"
 
-msgid "CVV is required!"
-msgstr "CVV é obrigatório!"
+#: includes/LknCieloErrorCodes.php:283
+msgid "TravelLegDataOrigin length exceeded"
+msgstr "Comprimento de TravelLegDataOrigin excedido"
 
-msgid "Order payment failed. Please review the gateway settings."
-msgstr "Pagamento do pedido falhou. Por favor verifique as configurações do método de pagamento."
+#: includes/LknCieloErrorCodes.php:284
+msgid "SecurityCode length exceeded"
+msgstr "Comprimento do SecurityCode excedido"
 
-msgid "Order payment failed. Make sure your credit card is valid."
-msgstr "Pagamento de pedido falhou. Certifique-se que seu cartão de crédito é válido."
+#: includes/LknCieloErrorCodes.php:285
+msgid "Address Street length exceeded"
+msgstr "Comprimento de Address Street excedido"
 
-msgid "Payment completed successfully. Payment id:"
-msgstr "Pagamento de pedido realizado com sucesso. Id de pagamento:"
+#: includes/LknCieloErrorCodes.php:286
+msgid "Address Number length exceeded"
+msgstr "Comprimento de Address Number excedido"
 
-msgid "Order refunded, payment id:"
-msgstr "Pedido reembolsado, id do pagamento:"
+#: includes/LknCieloErrorCodes.php:287
+msgid "Address Complement length exceeded"
+msgstr "Comprimento de Address Complement excedido"
 
-msgid "Cielo - Debit and credit card"
-msgstr "Cielo - Cartão de débito e crédito"
+#: includes/LknCieloErrorCodes.php:288
+msgid "Address ZipCode length exceeded"
+msgstr "Comprimento de Address ZipCode excedido"
 
-msgid "Allows debit and credit card payment with Cielo API 3.0."
-msgstr "Permite pagamentos com cartão de débito e crédito através da Cielo API 3.0."
+#: includes/LknCieloErrorCodes.php:289
+msgid "Address City length exceeded"
+msgstr "Comprimento de Address City excedido"
 
-msgid "Learn more how to configure."
-msgstr "Saiba mais sobre como configurar."
+#: includes/LknCieloErrorCodes.php:290
+msgid "Address State length exceeded"
+msgstr "Comprimento de Address State excedido"
 
-msgid "Cielo 3DS 2.2 registration required (ask for eCommerce support)."
-msgstr "Necessário cadastro de Cielo 3DS 2.2 (solicitar para o suporte ecommerce)"
+#: includes/LknCieloErrorCodes.php:291
+msgid "Address Country length exceeded"
+msgstr "Comprimento de Address Country excedido"
 
-msgid "Client Id"
-msgstr "Client Id"
+#: includes/LknCieloErrorCodes.php:292
+msgid "Address District length exceeded"
+msgstr "Comprimento de Address District excedido"
 
-msgid "Client Secret"
-msgstr "Client Secret"
+#: includes/LknCieloErrorCodes.php:293
+msgid "Customer Name length exceeded"
+msgstr "Comprimento de Customer Name excedido"
 
-msgid "Enable Debit and Credit Card Payments"
-msgstr "Habilita pagamentos via cartão de débito e crédito"
+#: includes/LknCieloErrorCodes.php:294
+msgid "Customer Identity length exceeded"
+msgstr "Comprimento de Customer Identity excedido"
 
-msgid "Debit and credit card"
-msgstr "Cartão de débito e crédito"
+#: includes/LknCieloErrorCodes.php:295
+msgid "Customer IdentityType length exceeded"
+msgstr "Comprimento de Customer IdentityType excedido"
 
-msgid "Establishment Code"
-msgstr "Código de estabelecimento"
+#: includes/LknCieloErrorCodes.php:296
+msgid "Customer Email length exceeded"
+msgstr "Comprimento de Customer Email excedido"
 
-msgid "Establishment code for Cielo 3DS E-Commerce 3.0."
-msgstr "Código de estabelecimento para Cielo 3DS E-Commerce 3.0."
+#: includes/LknCieloErrorCodes.php:297
+msgid "ExtraData Name length exceeded"
+msgstr "Comprimento de ExtraData Name excedido"
 
-msgid "Merchant Name"
-msgstr "Nome do mercador"
-
-msgid "Establishment name registered on Cielo 3DS E-Commerce 3.0."
-msgstr "O nome do estabelecimento registrado no Cielo 3DS E-Commerce 3.0."
-
-msgid "Establishment Category Code"
-msgstr "Código de categoria do estabelecimento"
-
-msgid "Establishment category code for Cielo 3DS E-Commerce 3.0."
-msgstr "Código de categoria do estabelecimento para Cielo 3DS E-Commerce 3.0."
-
-msgid "Auth token generation failed."
-msgstr "Geração de token de autenticação falhou."
-
-msgid "Debit Card number is required!"
-msgstr "Número de cartão de débito é obrigatório!"
-
-msgid "Expiration date is invalid!"
-msgstr "Data de expiração é inválida!"
-
-msgid "Order payment failed. To make a successful payment using debit card, please review the gateway settings."
-msgstr "Pagamento de pedido falhou. Para realizar um pagamento utilizando cartão de débito, por favor revise as configurações do método de pagamento."
-
-msgid "Order payment failed. Make sure your debit card is valid."
-msgstr "Pagamento de pedido falhou. Certifique-se que seu cartão de débito é válido."
-
-msgid "Settings"
-msgstr "Configurações"
-
-msgid "Payment processed by Cielo API 3.0"
-msgstr "Pagamento processado pela Cielo API 3.0"
-
-msgid "order"
-msgstr "pedido"
-
-msgid "Enable log capture for payments"
-msgstr "Habilitar captura de log para pagamentos"
-
-msgid "Debug"
-msgstr "Depuração"
-
-msgid "License"
-msgstr "Licença"
-
-msgid "License for Cielo API 3.0 plugin extensions."
-msgstr "Licença para extensões do plugin Cielo API 3.0."
-
-msgid "Order refund failed"
-msgstr "Falha ao reembolsar pedido, id do pagamento:"
-
-msgid "Activation Error:"
-msgstr "Erro de ativação:"
-
-msgid "You must have"
-msgstr "Você precisa ter"
-
-msgid "version"
-msgstr "versão"
-
-msgid "for the CIELO API PIX, credit card, debit payment for WooCommerce add-on to activate"
-msgstr "para o plugin Gateway de Pagamento com API Cielo para WooCommerce ativar"
-
-msgid "plugin installed and activated for the CIELO API PIX, credit card, debit payment for WooCommerce add-on to activate"
-msgstr "plugin instalado e ativo para o plugin Gateway de Pagamento com API Cielo para WooCommerce ativar"
-
-msgid "Credit Card number is invalid!"
-msgstr "Número de cartão de crédito inválido!"
-
-msgid "Debit Card number is invalid!"
-msgstr "Número de cartão de débito inválido!"
-
-msgid "CVV is invalid!"
-msgstr "CVV inválido!"
-
-msgid "Installments"
-msgstr "Parcelas"
-
-msgid "Installment payments"
-msgstr "Pagamentos parcelados"
-
-msgid "Enables installment payments for amounts greater than 10,00 R$"
-msgstr "Habilita pagamentos parcelados para valores maiores que 10,00 R$"
-
-msgid "Credit card is expired!"
-msgstr "Cartão de crédito está vencido!"
-
-msgid "Debit card is expired!"
-msgstr "Cartão de débito está vencido!"
-
-msgid "Online card validation"
-msgstr "Validação de cartão online"
-
-msgid "Enable online bin validation through Cielo API 3.0 (Needs to activate Cielo BIN functionality)."
-msgstr "Habilita validação online BIN via Cielo API 3.0 (Necessita habilitar funcionalidade BIN da Cielo)."
-
-msgid "This option sets the interest on installment as percentage. Accepts only numbers. Ex.: For 10% interest type 10, blank or zero for no interest tax."
-msgstr "Esta opção define os juros da parcela em percentual. Aceita apenas números. Ex.: Para 10% de juros digite 10, deixe em branco ou digite zero para parcela sem taxa de juros."
-
-msgid "Define a maximum installment quantity.  Only certain brands accepts over 12x installments."
-msgstr "Define uma quantidade máxima de parcelas. Apenas certas bandeiras aceitam parcelamentos maiores que 12x."
-
-msgid "Enable payment with interest on installments. Save to continue configuration."
-msgstr "Possibilita o pagamento com juros nas parcelas. Salve para continuar a configuração."
-
-msgid "Installment interest"
-msgstr "Juros do parcelamento"
-
-msgid "Define installment limit"
-msgstr "Define um limite de parcelas"
-
-msgid "Interest installment"
-msgstr "Juros da parcela"
-
-msgid "Installments quantity"
-msgstr "Quantidade de parcelas"
-
-msgid "Order payment failed. Installment quantity invalid."
-msgstr "Pagamento de pedido falhou. Quantidade de parcelas inválida."
-
-msgid "Invalid Cielo API 3.0 credentials."
-msgstr "Credenciais da Cielo API 3.0 inválidas."
-
-msgid "Invalid Cielo 3DS 2.2 authentication."
-msgstr "Autenticação Cielo 3DS 2.2 inválida."
-
+#: includes/LknCieloErrorCodes.php:298
+msgid "ExtraData Value length exceeded"
+msgstr "Comprimento de ExtraData Value excedido"
+
+#: includes/LknCieloErrorCodes.php:299
+msgid "Boleto Instructions length exceeded"
+msgstr "Comprimento de Boleto Instructions excedido"
+
+#: includes/LknCieloErrorCodes.php:300
+msgid "Boleto Demostrative length exceeded"
+msgstr "Comprimento de Boleto Demostrative excedido"
+
+#: includes/LknCieloErrorCodes.php:301
+msgid "Return Url is required"
+msgstr "Return Url é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:302
+msgid "AuthorizeNow is required"
+msgstr "AuthorizeNow é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:303
+msgid "Antifraud not configured"
+msgstr "Antifraude não configurado"
+
+#: includes/LknCieloErrorCodes.php:304 includes/LknCieloErrorCodes.php:369
+msgid "Recurrent Payment not found"
+msgstr "Pagamento recorrente não encontrado"
+
+#: includes/LknCieloErrorCodes.php:305
+msgid "Recurrent Payment is not active"
+msgstr "Pagamento recorrente não está ativo"
+
+#: includes/LknCieloErrorCodes.php:306
+msgid "Protected Card not configured"
+msgstr "Cartão protegido não configurado"
+
+#: includes/LknCieloErrorCodes.php:307
+msgid "Affiliation data not sent"
+msgstr "Dados de afiliação não enviados"
+
+#: includes/LknCieloErrorCodes.php:308
+msgid "Credential Code is required"
+msgstr "Código de credencial é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:309
+msgid "Payment method is not enabled"
+msgstr "Método de pagamento não está habilitado"
+
+#: includes/LknCieloErrorCodes.php:310
+msgid "Card Number is required"
+msgstr "Número do cartão é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:311
+msgid "EAN is required"
+msgstr "EAN é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:312
+msgid "Payment Currency is not supported"
+msgstr "Moeda de pagamento não é suportada"
+
+#: includes/LknCieloErrorCodes.php:313
+msgid "Card Number is invalid"
+msgstr "Número do cartão é inválido"
+
+#: includes/LknCieloErrorCodes.php:314
+msgid "EAN is invalid"
+msgstr "EAN é inválido"
+
+#: includes/LknCieloErrorCodes.php:315
+msgid "The max number of installments allowed for recurring payment is 1"
+msgstr "O número máximo de parcelas permitido para pagamento recorrente é 1"
+
+#: includes/LknCieloErrorCodes.php:316
+msgid "The provided Card PaymentToken was not found"
+msgstr "O Card PaymentToken fornecido não foi encontrado"
+
+#: includes/LknCieloErrorCodes.php:317
+msgid "The MerchantIdJustClick is not configured"
+msgstr "O MerchantIdJustClick não está configurado"
+
+#: includes/LknCieloErrorCodes.php:318
+msgid "Brand is required"
+msgstr "Bandeira é obrigatória"
+
+#: includes/LknCieloErrorCodes.php:319
+msgid "Invalid customer bithdate"
+msgstr "Data de nascimento do cliente inválida"
+
+#: includes/LknCieloErrorCodes.php:320
+msgid "Request could not be empty"
+msgstr "A requisição não pode estar vazia"
+
+#: includes/LknCieloErrorCodes.php:321
+msgid "Brand is not supported by selected provider"
+msgstr "Bandeira não é suportada pelo provedor selecionado"
+
+#: includes/LknCieloErrorCodes.php:322
+msgid ""
+"The selected provider does not support the options provided (Capture, "
+"Authenticate, Recurrent or Installments)"
+msgstr ""
+"O provedor selecionado não suporta as opções fornecidas (Captura, "
+"Autenticação, Recorrente ou Parcelas)"
+
+#: includes/LknCieloErrorCodes.php:323
+msgid "ExtraData Collection contains one or more duplicated names"
+msgstr "A coleção ExtraData contém um ou mais nomes duplicados"
+
+#: includes/LknCieloErrorCodes.php:324
+msgid "Avs with CPF invalid"
+msgstr "Avs com CPF inválido"
+
+#: includes/LknCieloErrorCodes.php:325
+msgid "Avs with length of street exceeded"
+msgstr "Avs com comprimento de logradouro excedido"
+
+#: includes/LknCieloErrorCodes.php:326
+msgid "Avs with length of number exceeded"
+msgstr "Avs com comprimento de número excedido"
+
+#: includes/LknCieloErrorCodes.php:327
+msgid "Avs with length of district exceeded"
+msgstr "Avs com comprimento de bairro excedido"
+
+#: includes/LknCieloErrorCodes.php:328
+msgid "Avs with zip code invalid"
+msgstr "Avs com CEP inválido"
+
+#: includes/LknCieloErrorCodes.php:329
+msgid "Split Amount must be greater than zero"
+msgstr "O valor da divisão deve ser maior que zero"
+
+#: includes/LknCieloErrorCodes.php:330
+msgid "Split Establishment is Required"
+msgstr "Estabelecimento da divisão é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:331
+msgid "PlatformId is required"
+msgstr "PlatformId é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:332
+msgid "DeliveryAddress is required"
+msgstr "DeliveryAddress é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:333
+msgid "Street is required"
+msgstr "Logradouro é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:334
+msgid "Number is required"
+msgstr "Número é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:335
+msgid "ZipCode is required"
+msgstr "CEP é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:336
+msgid "City is required"
+msgstr "Cidade é obrigatória"
+
+#: includes/LknCieloErrorCodes.php:337
+msgid "State is required"
+msgstr "Estado é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:338
+msgid "District is required"
+msgstr "Bairro é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:339
+msgid "Cart item name is required"
+msgstr "Nome do item do carrinho é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:340
+msgid "Cart item quantity is required"
+msgstr "Quantidade do item do carrinho é obrigatória"
+
+#: includes/LknCieloErrorCodes.php:341
+msgid "Cart item type is required"
+msgstr "Tipo do item do carrinho é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:342
+msgid "Cart item name length exceeded"
+msgstr "Comprimento do nome do item do carrinho excedido"
+
+#: includes/LknCieloErrorCodes.php:343
+msgid "Cart item description length exceeded"
+msgstr "Comprimento da descrição do item do carrinho excedido"
+
+#: includes/LknCieloErrorCodes.php:344
+msgid "Cart item sku length exceeded"
+msgstr "Comprimento do SKU do item do carrinho excedido"
+
+#: includes/LknCieloErrorCodes.php:345
+msgid "Shipping addressee sku length exceeded"
+msgstr "Comprimento do SKU do destinatário do envio excedido"
+
+#: includes/LknCieloErrorCodes.php:346
+msgid "Shipping data cannot be null"
+msgstr "Dados de envio não podem ser nulos"
+
+#: includes/LknCieloErrorCodes.php:347
+msgid "WalletKey is invalid"
+msgstr "WalletKey é inválido"
+
+#: includes/LknCieloErrorCodes.php:348
+msgid "Merchant Wallet Configuration not found"
+msgstr "Configuração da carteira do lojista não encontrada"
+
+#: includes/LknCieloErrorCodes.php:349
+msgid "Credit Card Number is invalid"
+msgstr "Número do cartão de crédito é inválido"
+
+#: includes/LknCieloErrorCodes.php:350
+msgid "Credit Card Holder Must Have Only Letters"
+msgstr "Titular do cartão de crédito deve conter apenas letras"
+
+#: includes/LknCieloErrorCodes.php:351
+msgid "Agency is required in Boleto Credential"
+msgstr "Agência é obrigatória na credencial do Boleto"
+
+#: includes/LknCieloErrorCodes.php:352
+msgid "Customer IP address is invalid"
+msgstr "Endereço IP do cliente é inválido"
+
+#: includes/LknCieloErrorCodes.php:353
+msgid "Service tax can not be sent with 1 installment"
+msgstr "Taxa de serviço não pode ser enviada com 1 parcela"
+
+#: includes/LknCieloErrorCodes.php:354
+msgid "Customer Address Country is required"
+msgstr "País do endereço do cliente é obrigatório"
+
+#: includes/LknCieloErrorCodes.php:355
+msgid "Service tax not supported for the given brand"
+msgstr "Taxa de serviço não é suportada para a bandeira informada"
+
+#: includes/LknCieloErrorCodes.php:356
+msgid "Split payment facilitator data not found"
+msgstr "Dados do facilitador de pagamento da divisão não encontrados"
+
+#: includes/LknCieloErrorCodes.php:357
+msgid "MerchantId was not found"
+msgstr "MerchantId não foi encontrado"
+
+#: includes/LknCieloErrorCodes.php:358
+msgid "Request IP is not allowed"
+msgstr "IP da requisição não é permitido"
+
+#: includes/LknCieloErrorCodes.php:359
+msgid "Sent MerchantOrderId is duplicated"
+msgstr "MerchantOrderId enviado está duplicado"
+
+#: includes/LknCieloErrorCodes.php:360
+msgid "Sent OrderId does not exist"
+msgstr "OrderId enviado não existe"
+
+#: includes/LknCieloErrorCodes.php:362
+msgid "Merchant is blocked"
+msgstr "Estabelecimento está bloqueado"
+
+#: includes/LknCieloErrorCodes.php:363
+msgid "Transaction not found"
+msgstr "Transação não encontrada"
+
+#: includes/LknCieloErrorCodes.php:364
+msgid "Transaction not available to capture"
+msgstr "Transação não disponível para captura"
+
+#: includes/LknCieloErrorCodes.php:365
+msgid "Transaction not available to void"
+msgstr "Transação não disponível para cancelamento"
+
+#: includes/LknCieloErrorCodes.php:366
+msgid "Payment method does not support this operation"
+msgstr "Método de pagamento não suporta esta operação"
+
+#: includes/LknCieloErrorCodes.php:367
+msgid "Refund is not enabled for this merchant"
+msgstr "Reembolso não está habilitado para este estabelecimento"
+
+#: includes/LknCieloErrorCodes.php:368
+msgid "Transaction not available to refund"
+msgstr "Transação não disponível para reembolso"
+
+#: includes/LknCieloErrorCodes.php:370
+msgid "Invalid Integration"
+msgstr "Integração inválida"
+
+#: includes/LknCieloErrorCodes.php:371
+msgid "Cannot change NextRecurrency with pending payment"
+msgstr "Não é possível alterar NextRecurrency com pagamento pendente"
+
+#: includes/LknCieloErrorCodes.php:372
+msgid "Cannot set NextRecurrency to past date"
+msgstr "Não é possível definir NextRecurrency para data passada"
+
+#: includes/LknCieloErrorCodes.php:373
+msgid "Invalid Recurrency Day"
+msgstr "Dia de recorrência inválido"
+
+#: includes/LknCieloErrorCodes.php:374
+msgid "No transaction found"
+msgstr "Nenhuma transação encontrada"
+
+#: includes/LknCieloErrorCodes.php:375
+msgid "Smart Recurrency is not enabled"
+msgstr "Recorrência inteligente não está habilitada"
+
+#: includes/LknCieloErrorCodes.php:376
+msgid ""
+"Cannot Update Affiliation because this recurrency has no affiliation saved"
+msgstr ""
+"Não é possível atualizar a afiliação porque esta recorrência não tem "
+"afiliação salva"
+
+#: includes/LknCieloErrorCodes.php:377
+msgid "Cannot Set EndDate to before next recurrency"
+msgstr "Não é possível definir EndDate antes da próxima recorrência"
+
+#: includes/LknCieloErrorCodes.php:378
+msgid "Zero Dollar Auth is not enabled"
+msgstr "Autenticação de valor zero não está habilitada"
+
+#: includes/LknCieloErrorCodes.php:379
+msgid "Bin Query is not enabled"
+msgstr "Consulta de BIN não está habilitada"
+
+#: includes/LknCieloErrorCodes.php:380
+msgid "Status does not allow capture"
+msgstr "Status não permite captura"
+
+#: includes/LknCieloErrorCodes.php:381
+msgid "Error processing the payment response"
+msgstr "Erro ao processar a resposta do pagamento"
+
+#: includes/LknCieloErrorCodes.php:384
+msgid "Rejected by fraud risk (Velocity)"
+msgstr "Rejeitado por risco de fraude (Velocity)"
+
+#: includes/LknCieloErrorCodes.php:385
+msgid "Transaction aborted during card validation"
+msgstr "Transação abortada durante a validação do cartão"
+
+#: includes/LknCieloErrorCodes.php:386
+msgid "Cancelled due to transactional error in Payment Split"
+msgstr "Cancelado devido a erro transacional no Payment Split"
+
+#: includes/LknCieloErrorCodes.php:387
+msgid "Could not authenticate the transaction (3DS)"
+msgstr "Não foi possível autenticar a transação (3DS)"
+
+#: includes/LknCieloErrorCodes.php:390
+msgid "Error on Merchant Integration"
+msgstr "Erro na integração do estabelecimento"
+
+#: includes/LknCieloErrorCodes.php:391
+msgid "Failure in the Pix operation"
+msgstr "Falha na operação Pix"
+
+#: includes/LknCieloErrorCodes.php:392
+msgid "The provided JSON is not valid"
+msgstr "O JSON fornecido não é válido"
+
+#: includes/LknCieloErrorCodes.php:395
+msgid "General failure"
+msgstr "Falha geral"
+
+#: includes/LknCieloErrorCodes.php:400
+msgid "Invalid merchant"
+msgstr "Estabelecimento inválido"
+
+#: includes/LknCieloErrorCodes.php:401
+msgid "Retry the transaction"
+msgstr "Tentar a transação novamente"
+
+#: includes/LknCieloErrorCodes.php:402
+msgid "Generic decline"
+msgstr "Recusa genérica"
+
+#: includes/LknCieloErrorCodes.php:403 includes/LknCieloErrorCodes.php:405
+msgid "Card error"
+msgstr "Erro no cartão"
+
+#: includes/LknCieloErrorCodes.php:404
+msgid "Confirmed fraud - transaction not allowed on this card"
+msgstr "Fraude confirmada - transação não permitida neste cartão"
+
+#: includes/LknCieloErrorCodes.php:406
+msgid "Invalid transaction amount"
+msgstr "Valor da transação inválido"
+
+#: includes/LknCieloErrorCodes.php:407
+msgid "Card number does not belong to the issuer / invalid card"
+msgstr "Número do cartão não pertence ao emissor / cartão inválido"
+
+#: includes/LknCieloErrorCodes.php:408
+msgid "Issuer not found (incorrect BIN)"
+msgstr "Emissor não encontrado (BIN incorreto)"
+
+#: includes/LknCieloErrorCodes.php:409
+msgid "Acquirer problem - card error"
+msgstr "Problema no adquirente - erro no cartão"
+
+#: includes/LknCieloErrorCodes.php:410
+msgid "Invalid installment amount - invalid installment plan"
+msgstr "Valor da parcela inválido - plano de parcelamento inválido"
+
+#: includes/LknCieloErrorCodes.php:411
+msgid "Format error (messaging) - card error"
+msgstr "Erro de formato (mensageria) - erro no cartão"
+
+#: includes/LknCieloErrorCodes.php:412 includes/LknCieloErrorCodes.php:433
+msgid "Too many PIN attempts"
+msgstr "Muitas tentativas de PIN"
+
+#: includes/LknCieloErrorCodes.php:413 includes/LknCieloErrorCodes.php:452
+msgid "Incorrect function (credit)"
+msgstr "Função incorreta (crédito)"
+
+#: includes/LknCieloErrorCodes.php:414
+msgid "Lost card - transaction not allowed"
+msgstr "Cartão perdido - transação não permitida"
+
+#: includes/LknCieloErrorCodes.php:415
+msgid "Stolen card - transaction not allowed"
+msgstr "Cartão roubado - transação não permitida"
+
+#: includes/LknCieloErrorCodes.php:416
+msgid "Account closed - transaction not allowed on this card"
+msgstr "Conta encerrada - transação não permitida neste cartão"
+
+#: includes/LknCieloErrorCodes.php:417
+msgid "Insufficient funds/limit"
+msgstr "Fundos/limite insuficientes"
+
+#: includes/LknCieloErrorCodes.php:418 includes/LknCieloErrorCodes.php:419
+#: includes/LknCieloErrorCodes.php:451
+msgid "Incorrect function (debit)"
+msgstr "Função incorreta (débito)"
+
+#: includes/LknCieloErrorCodes.php:420
+msgid "Expired card / invalid expiration date"
+msgstr "Cartão expirado / data de validade inválida"
+
+#: includes/LknCieloErrorCodes.php:421 includes/LknCieloErrorCodes.php:442
+msgid "Invalid PIN"
+msgstr "PIN inválido"
+
+#: includes/LknCieloErrorCodes.php:422
+msgid "Invalid card number / does not belong to the issuer"
+msgstr "Número do cartão inválido / não pertence ao emissor"
+
+#: includes/LknCieloErrorCodes.php:423
+msgid "Transaction not allowed on this card"
+msgstr "Transação não permitida neste cartão"
+
+#: includes/LknCieloErrorCodes.php:424
+msgid "Transaction not allowed - terminal capability"
+msgstr "Transação não permitida - capacidade do terminal"
+
+#: includes/LknCieloErrorCodes.php:425
+msgid "Suspected fraud / travel notice"
+msgstr "Suspeita de fraude / aviso de viagem"
+
+#: includes/LknCieloErrorCodes.php:426 includes/LknCieloErrorCodes.php:462
+msgid "Amount exceeded / withdrawal"
+msgstr "Valor excedido / saque"
+
+#: includes/LknCieloErrorCodes.php:427
+msgid "Temporary block"
+msgstr "Bloqueio temporário"
+
+#: includes/LknCieloErrorCodes.php:428 includes/LknCieloErrorCodes.php:463
+msgid "Security violation"
+msgstr "Violação de segurança"
+
+#: includes/LknCieloErrorCodes.php:429
+msgid "Invalid minimum transaction amount"
+msgstr "Valor mínimo da transação inválido"
+
+#: includes/LknCieloErrorCodes.php:430
+msgid "Withdrawal count exceeded"
+msgstr "Contagem de saques excedida"
+
+#: includes/LknCieloErrorCodes.php:431
+msgid "Anti-money-laundering non-compliance"
+msgstr "Descumprimento das regras de prevenção à lavagem de dinheiro"
+
+#: includes/LknCieloErrorCodes.php:432 includes/LknCieloErrorCodes.php:461
+msgid "Withdrawal not available"
+msgstr "Saque não disponível"
+
+#: includes/LknCieloErrorCodes.php:434
+msgid "Invalid or nonexistent destination account"
+msgstr "Conta de destino inválida ou inexistente"
+
+#: includes/LknCieloErrorCodes.php:435
+msgid "Invalid or nonexistent source account"
+msgstr "Conta de origem inválida ou inexistente"
+
+#: includes/LknCieloErrorCodes.php:436
+msgid "New card not activated / blocked card (NFC)"
+msgstr "Cartão novo não ativado / cartão bloqueado (NFC)"
+
+#: includes/LknCieloErrorCodes.php:437
+msgid "Security/fraud - transaction not allowed on this card"
+msgstr "Segurança/fraude - transação não permitida neste cartão"
+
+#: includes/LknCieloErrorCodes.php:438
+msgid "Invalid reversal"
+msgstr "Estorno inválido"
+
+#: includes/LknCieloErrorCodes.php:439
+msgid "Function blocked"
+msgstr "Função bloqueada"
+
+#: includes/LknCieloErrorCodes.php:440
+msgid "Invalid card (cryptogram) - card error"
+msgstr "Cartão inválido (criptograma) - erro no cartão"
+
+#: includes/LknCieloErrorCodes.php:441
+msgid "Expired PIN / PIN encryption error"
+msgstr "PIN expirado / erro de criptografia do PIN"
+
+#: includes/LknCieloErrorCodes.php:443
+msgid "Expired PIN / invalid card (cryptogram)"
+msgstr "PIN expirado / cartão inválido (criptograma)"
+
+#: includes/LknCieloErrorCodes.php:444
+msgid "Issuer unavailable - communication failure"
+msgstr "Emissor indisponível - falha de comunicação"
+
+#: includes/LknCieloErrorCodes.php:445
+msgid "Not found by the router"
+msgstr "Não encontrado pelo roteador"
+
+#: includes/LknCieloErrorCodes.php:446
+msgid "Transaction denied due to a legal restriction"
+msgstr "Transação negada devido a uma restrição legal"
+
+#: includes/LknCieloErrorCodes.php:447
+msgid "Duplicated tracing data value"
+msgstr "Valor de dado de rastreamento duplicado"
+
+#: includes/LknCieloErrorCodes.php:448
+msgid "System failure - communication failure"
+msgstr "Falha no sistema - falha de comunicação"
+
+#: includes/LknCieloErrorCodes.php:453
+msgid "Transaction not supported or blocked by the issuer"
+msgstr "Transação não suportada ou bloqueada pelo emissor"
+
+#: includes/LknCieloErrorCodes.php:454
+msgid "Transaction not authorized"
+msgstr "Transação não autorizada"
+
+#: includes/LknCieloErrorCodes.php:455
+msgid "Surcharge not supported"
+msgstr "Sobretaxa não suportada"
+
+#: includes/LknCieloErrorCodes.php:456
+msgid "Surcharge not supported by the debit network"
+msgstr "Sobretaxa não suportada pela rede de débito"
+
+#: includes/LknCieloErrorCodes.php:457
+msgid "Use the chip"
+msgstr "Use o chip"
+
+#: includes/LknCieloErrorCodes.php:458
+msgid "PIN change / unlock - invalid PIN"
+msgstr "Alteração de PIN / desbloqueio - PIN inválido"
+
+#: includes/LknCieloErrorCodes.php:459
+msgid "New PIN not accepted"
+msgstr "Novo PIN não aceito"
+
+#: includes/LknCieloErrorCodes.php:460
+msgid "Force STIP"
+msgstr "Forçar STIP"
+
+#: includes/LknCieloErrorCodes.php:464
+msgid "Pre-authorization mismatch - amount differs from the authorized one"
+msgstr "Divergência de pré-autorização - valor difere do autorizado"
+
+#: includes/LknCieloErrorCodes.php:465
+msgid "Recurring payment suspended for one service"
+msgstr "Pagamento recorrente suspenso para um serviço"
+
+#: includes/LknCieloErrorCodes.php:466
+msgid "Recurring payment suspended for all services"
+msgstr "Pagamento recorrente suspenso para todos os serviços"
+
+#: includes/LknCieloErrorCodes.php:467
+msgid "Transaction not qualified for Visa PIN"
+msgstr "Transação não qualificada para Visa PIN"
+
+#: includes/LknCieloErrorCodes.php:468
+msgid "All authorization orders suspended"
+msgstr "Todos os pedidos de autorização suspensos"
+
+#: includes/LknCieloErrorCodes.php:488
+msgid "Successful"
+msgstr "Bem-sucedido"
+
+#: includes/LknCieloErrorCodes.php:489
+msgid "AffiliationNotFound"
+msgstr "AffiliationNotFound"
+
+#: includes/LknCieloErrorCodes.php:490
+msgid "IssuficientFunds"
+msgstr "IssuficientFunds"
+
+#: includes/LknCieloErrorCodes.php:491
+msgid "CouldNotGetCreditCard"
+msgstr "CouldNotGetCreditCard"
+
+#: includes/LknCieloErrorCodes.php:492
+msgid "ConnectionWithAcquirerFailed"
+msgstr "ConnectionWithAcquirerFailed"
+
+#: includes/LknCieloErrorCodes.php:493
+msgid "InvalidTransactionType"
+msgstr "InvalidTransactionType"
+
+#: includes/LknCieloErrorCodes.php:494
+msgid "InvalidPaymentPlan"
+msgstr "InvalidPaymentPlan"
+
+#: includes/LknCieloErrorCodes.php:495
+msgid "Denied"
+msgstr "Negado"
+
+#: includes/LknCieloErrorCodes.php:496
+msgid "Scheduled"
+msgstr "Agendado"
+
+#: includes/LknCieloErrorCodes.php:497
+msgid "Waiting"
+msgstr "Aguardando"
+
+#: includes/LknCieloErrorCodes.php:498
+msgid "Authenticated"
+msgstr "Autenticado"
+
+#: includes/LknCieloErrorCodes.php:499
+msgid "NotAuthenticated"
+msgstr "NotAuthenticated"
+
+#: includes/LknCieloErrorCodes.php:500
+msgid "ProblemsWithCreditCard"
+msgstr "ProblemsWithCreditCard"
+
+#: includes/LknCieloErrorCodes.php:501
+msgid "CardCanceled"
+msgstr "CardCanceled"
+
+#: includes/LknCieloErrorCodes.php:502
+msgid "BlockedCreditCard"
+msgstr "BlockedCreditCard"
+
+#: includes/LknCieloErrorCodes.php:503
+msgid "CardExpired"
+msgstr "CardExpired"
+
+#: includes/LknCieloErrorCodes.php:504
+msgid "AbortedByFraud"
+msgstr "AbortedByFraud"
+
+#: includes/LknCieloErrorCodes.php:505
+msgid "CouldNotAntifraud"
+msgstr "CouldNotAntifraud"
+
+#: includes/LknCieloErrorCodes.php:506
+msgid "TryAgain"
+msgstr "TryAgain"
+
+#: includes/LknCieloErrorCodes.php:507
+msgid "InvalidAmount"
+msgstr "InvalidAmount"
+
+#: includes/LknCieloErrorCodes.php:508
+msgid "ProblemsWithIssuer"
+msgstr "ProblemsWithIssuer"
+
+#: includes/LknCieloErrorCodes.php:509
+msgid "InvalidCardNumber"
+msgstr "InvalidCardNumber"
+
+#: includes/LknCieloErrorCodes.php:510
+msgid "TimeOut"
+msgstr "TimeOut"
+
+#: includes/LknCieloErrorCodes.php:511
+msgid "CartaoProtegidoIsNotEnabled"
+msgstr "CartaoProtegidoIsNotEnabled"
+
+#: includes/LknCieloErrorCodes.php:512
+msgid "PaymentMethodIsNotEnabled"
+msgstr "PaymentMethodIsNotEnabled"
+
+#: includes/LknCieloErrorCodes.php:513
+msgid "CouldNotFindPaymentToken"
+msgstr "CouldNotFindPaymentToken"
+
+#: includes/LknCieloErrorCodes.php:514
+msgid "MerchantIdJustClickNotFound"
+msgstr "MerchantIdJustClickNotFound"
+
+#: includes/LknCieloErrorCodes.php:515
+msgid "BrandNotSupported"
+msgstr "BrandNotSupported"
+
+#: includes/LknCieloErrorCodes.php:516
+msgid "CardOptionsNotSupported"
+msgstr "CardOptionsNotSupported"
+
+#: includes/LknCieloErrorCodes.php:517
+msgid "WalletKeyIsInvalid"
+msgstr "WalletKeyIsInvalid"
+
+#: includes/LknCieloErrorCodes.php:518
+msgid "MerchantWalletConfigurationNotFound"
+msgstr "MerchantWalletConfigurationNotFound"
+
+#: includes/LknCieloErrorCodes.php:519
+msgid "BoletoRequiredDataNotSupported"
+msgstr "BoletoRequiredDataNotSupported"
+
+#: includes/LknCieloErrorCodes.php:520
+msgid "ConnectionWithAntifraudFailed"
+msgstr "ConnectionWithAntifraudFailed"
+
+#: includes/LknCieloErrorCodes.php:521
+msgid "AbortedByCardVerification"
+msgstr "AbortedByCardVerification"
+
+#: includes/LknCieloErrorCodes.php:522
+msgid "ProblemsWithAcquirer"
+msgstr "ProblemsWithAcquirer"
+
+#: includes/LknCieloErrorCodes.php:523
+msgid "ValidationError"
+msgstr "ValidationError"
+
+#: includes/LknCieloErrorCodes.php:524
+msgid "AcquirerTransactionNotFound"
+msgstr "AcquirerTransactionNotFound"
+
+#: includes/LknCieloErrorCodes.php:525
+msgid "SplitTransactionalError"
+msgstr "SplitTransactionalError"
+
+#: includes/LknCieloErrorCodes.php:526
+msgid "MerchantSplitConfigurationNotFound"
+msgstr "MerchantSplitConfigurationNotFound"
+
+#: includes/LknCieloErrorCodes.php:527
+msgid "SplitSoftDescriptorIsRequired"
+msgstr "SplitSoftDescriptorIsRequired"
+
+#: includes/LknCieloErrorCodes.php:528
+msgid "SplitFraudAnalysisIsRequired"
+msgstr "SplitFraudAnalysisIsRequired"
+
+#: includes/LknCieloErrorCodes.php:529
+msgid "SplitAntifraudMerchantConfigurationNotFound"
+msgstr "SplitAntifraudMerchantConfigurationNotFound"
+
+#: includes/LknCieloErrorCodes.php:530
+msgid "ProviderNotFound"
+msgstr "ProviderNotFound"
+
+#: includes/LknCieloErrorCodes.php:531
+msgid "PaymentSettingsNotFound"
+msgstr "PaymentSettingsNotFound"
+
+#: includes/LknCieloErrorCodes.php:532
+msgid "SubAcquirerMerchantConfigurationNotFound"
+msgstr "SubAcquirerMerchantConfigurationNotFound"
+
+#: includes/LknCieloErrorCodes.php:533
+msgid "AbortedBySubAcquirer"
+msgstr "AbortedBySubAcquirer"
+
+#: includes/LknCieloErrorCodes.php:534
+msgid "InvalidRequest"
+msgstr "InvalidRequest"
+
+#: includes/LknCieloErrorCodes.php:535
+msgid "InternalError"
+msgstr "Erro interno"
+
+#: includes/LknCieloErrorCodes.php:536
+msgid "CieloPayCardHolderIsNotActive"
+msgstr "Titular do cartão CieloPay não está ativo"
+
+#: includes/LknCieloErrorCodes.php:537
+msgid "CieloPayStrongValidationIsInvalid"
+msgstr "Validação forte do CieloPay é inválida"
+
+#: includes/LknCieloErrorCodes.php:538
+msgid "CieloPayExpireDateDoesNotMatch"
+msgstr "Data de validade do CieloPay não corresponde"
+
+#: includes/LknCieloErrorCodes.php:539
+msgid "CieloPayCardHolderApiError"
+msgstr "Erro de API do titular do cartão CieloPay"
+
+#: includes/LknCieloErrorCodes.php:540
+msgid "SplitPaymentFacilitatorDataNotFound"
+msgstr "Dados do facilitador de pagamento dividido não encontrados"
+
+#: includes/LknCieloErrorCodes.php:560
+msgid "Transaction successful"
+msgstr "Transação bem-sucedida"
+
+#: includes/LknCieloErrorCodes.php:561
+msgid "One or more required fields are missing from the request"
+msgstr "Um ou mais campos obrigatórios estão ausentes na requisição"
+
+#: includes/LknCieloErrorCodes.php:562
+msgid "One or more request fields contain invalid data"
+msgstr "Um ou mais campos da requisição contêm dados inválidos"
+
+#: includes/LknCieloErrorCodes.php:563
+msgid "Error: general system failure"
+msgstr "Erro: falha geral do sistema"
+
+#: includes/LknCieloErrorCodes.php:564
+msgid "Error: the request was received but the server timed out"
+msgstr "Erro: a requisição foi recebida, mas o servidor atingiu o tempo limite"
+
+#: includes/LknCieloErrorCodes.php:565
+msgid "Error: the request was received but the service timed out"
+msgstr "Erro: a requisição foi recebida, mas o serviço atingiu o tempo limite"
+
+#: includes/LknCieloErrorCodes.php:566
+msgid "There is a problem with your merchant configuration"
+msgstr "Há um problema com a configuração do seu estabelecimento"
+
+#: includes/LknCieloErrorCodes.php:567
+msgid "The customer is enrolled in payer authentication"
+msgstr "O cliente está inscrito na autenticação do pagador"
+
+#: includes/LknCieloErrorCodes.php:568
+msgid "The customer could not be authenticated"
+msgstr "O cliente não pôde ser autenticado"
+
+#: includes/LknCieloErrorCodes.php:569
+msgid "Brand does not support authentication"
+msgstr "A bandeira não oferece suporte à autenticação"
+
+#: includes/LknCieloErrorCodes.php:570
+msgid "Challenge skipped"
+msgstr "Desafio ignorado"
+
+#: includes/LknCieloErrorCodes.php:571
+msgid "An error occurred"
+msgstr "Ocorreu um erro"
+
+#: includes/LknCieloErrorCodes.php:572
+msgid "Unexpected error"
+msgstr "Erro inesperado"
+
+#: includes/LknCieloErrorCodes.php:573
+msgid "Unexpected authentication response"
+msgstr "Resposta de autenticação inesperada"
+
+#: includes/LknWcCieloCreditBlocks.php:129
+#: includes/LknWcCieloDebitBlocks.php:241
+#: includes/LknWcCieloDebitBlocks.php:260
+msgid "other card"
+msgstr "outro cartão"
+
+#: includes/LknWcCieloCreditBlocks.php:160
+#: includes/LknWcCieloDebitBlocks.php:323 includes/LknWCCieloPayment.php:697
+msgid "Payment"
+msgstr "Pagamento"
+
+#: includes/LknWcCieloCreditBlocks.php:161
+#: includes/LknWcCieloDebitBlocks.php:324 includes/LknWCCieloPayment.php:700
+#: includes/LknWCCieloPayment.php:1068
 msgid "Installment"
 msgstr "Parcelamento"
 
-msgid "Proof of sale (NSU)"
-msgstr "Comprovante de venda (NSU)"
+#: includes/LknWcCieloCreditBlocks.php:162
+#: includes/LknWcCieloDebitBlocks.php:325
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Loading..."
+msgstr "Carregando..."
 
-msgid "Return code"
-msgstr "Código de retorno"
+#: includes/LknWcCieloCreditBlocks.php:163
+#: includes/LknWcCieloCreditBlocks.php:230
+#: includes/LknWcCieloDebitBlocks.php:326
+#: includes/LknWcCieloDebitBlocks.php:451
+msgid "Calculating installments..."
+msgstr "Calculando parcelas..."
 
-msgid "Development"
-msgstr "Desenvolvimento"
+#: includes/LknWcCieloCreditBlocks.php:164
+#: includes/LknWcCieloCreditBlocks.php:169
+#: includes/LknWcCieloDebitBlocks.php:327
+#: includes/LknWcCieloDebitBlocks.php:332
+msgid "Cash payment"
+msgstr "Pagamento à vista"
 
-msgid "View logs"
-msgstr "Ver logs"
+#: includes/LknWcCieloCreditBlocks.php:165
+#: includes/LknWcCieloCreditBlocks.php:226
+#: includes/LknWcCieloDebitBlocks.php:328
+#: includes/LknWcCieloDebitBlocks.php:447
+msgid "no interest"
+msgstr "sem juros"
 
-msgid "Be pro"
-msgstr "Seja Pro"
+#: includes/LknWcCieloCreditBlocks.php:166
+#: includes/LknWcCieloCreditBlocks.php:227
+#: includes/LknWcCieloDebitBlocks.php:329
+#: includes/LknWcCieloDebitBlocks.php:448
+msgid "no discount"
+msgstr "sem desconto"
 
-msgid "Card Holder Name"
-msgstr "Nome do Titular do Cartão"
+#: includes/LknWcCieloCreditBlocks.php:167
+#: includes/LknWcCieloCreditBlocks.php:228
+#: includes/LknWcCieloDebitBlocks.php:330
+#: includes/LknWcCieloDebitBlocks.php:449
+msgid "% discount"
+msgstr "% de desconto"
 
-msgid "Card Holder Name is required!"
-msgstr "O nome do titular do cartão é obrigatório!"
+#: includes/LknWcCieloCreditBlocks.php:168
+#: includes/LknWcCieloCreditBlocks.php:229
+#: includes/LknWcCieloDebitBlocks.php:331
+#: includes/LknWcCieloDebitBlocks.php:450
+msgid "% interest"
+msgstr "% de juros"
 
-msgid "Card type"
-msgstr "Tipo de cartão"
+#: includes/LknWcCieloCreditBlocks.php:170
+#: includes/LknWcCieloDebitBlocks.php:333
+msgid "Loading price..."
+msgstr "Carregando preço..."
 
-msgid "Validate License"
-msgstr "Validar Licença"
+#: includes/LknWcCieloCreditBlocks.php:218 includes/LknWcCieloHelper.php:212
+#: includes/templates/lkn-cielo-credit-payment-fields-default-layout.php:64
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:111
+msgid "Card Number"
+msgstr "Número do cartão"
 
-msgid "Click the button to validate your license."
-msgstr "Clique no botão para validar sua licença."
+#: includes/LknWcCieloCreditBlocks.php:219
+#: includes/templates/lkn-cielo-credit-payment-fields-default-layout.php:79
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:134
+msgid "Expiry Date"
+msgstr "Data de expiração"
 
-msgid "Invalid or expired license!"
-msgstr "Licença inválida ou expirada!"
+#: includes/LknWcCieloCreditBlocks.php:220 includes/LknWcCieloHelper.php:220
+#: includes/templates/lkn-cielo-credit-payment-fields-default-layout.php:94
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:155
+msgid "Security Code"
+msgstr "Cód. de Segurança"
 
-msgid "License validated successfully!"
-msgstr "Licença validada com sucesso!"
+#: includes/LknWcCieloCreditBlocks.php:221 includes/LknWcCieloHelper.php:228
+#: includes/LknWCGatewayCieloCredit.php:561
+#: includes/LknWCGatewayCieloDebit.php:1131
+#: includes/templates/lkn-cielo-credit-payment-fields-default-layout.php:146
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:215
+msgid "Installments"
+msgstr "Parcelas"
 
-msgid "Interest"
-msgstr "Juros"
+#: includes/LknWcCieloCreditBlocks.php:222 includes/LknWcCieloHelper.php:208
+#: includes/templates/lkn-cielo-credit-payment-fields-default-layout.php:45
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:89
+msgid "Name on Card"
+msgstr "Nome impresso no cartão"
 
-msgid "Payment Complete Status"
-msgstr "Status de Pagamento Completo"
+#. translators: %1$d is the number of installments, %2$s is the installment amount
+#: includes/LknWcCieloCreditBlocks.php:224
+#: includes/LknWcCieloDebitBlocks.php:445 includes/LknWCCieloPayment.php:707
+#, php-format
+msgid "%1$dx of %2$s"
+msgstr "%1$dx de %2$s"
 
-msgid "Option to automatically set the order status after payment confirmation through this gateway."
-msgstr "Opção para definir automaticamente o status do pedido após confirmação de pagamento por esse gateway."
+#: includes/LknWcCieloCreditBlocks.php:225
+#: includes/LknWcCieloDebitBlocks.php:446
+msgid "(cash payment)"
+msgstr "(pagamento à vista)"
 
-msgid "Setting to set the order status after payment confirmation according to the product type. None: follow default settings or full payment status."
-msgstr "Configuração para definir o status do pedido após a confirmação de pagamento de acordo com o tipo do produto. Nenhum: seguir as configurações padrão ou status de pagamento completo."
+#: includes/LknWcCieloDebitBlocks.php:437
+#: includes/LknWCGatewayCieloCredit.php:215
+#: includes/templates/admin/lkn-cielo-fields-preview.php:83
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:236
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:238
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:441
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:443
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:252
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:254
+msgid "Credit card"
+msgstr "Cartão de crédito"
 
-msgid "Please enter a valid CPF or CNPJ."
-msgstr "Por favor, insira um CPF ou CNPJ válido."
-
-msgid "Input placeholders"
-msgstr "Espaços reservados de entrada"
-
-msgid "Enables input placeholders for debit/credit card fields for classic checkout"
-msgstr "Permite espaços reservados de entrada para campos de cartão de débito/crédito para checkout clássico"
-
-msgid "Share with"
-msgstr "Compartilhar com"
-
-msgid "Copied!"
-msgstr "Copiado!"
-
-msgid "Copy"
-msgstr "Copiar"
-
-msgid "Share"
-msgstr "Compartilhar"
-
-msgid "Payment made without 3DS validation"
-msgstr "Pagamento realizado sem validação 3DS"
-
-msgid "Payment made with 3DS validation"
-msgstr "Pagamento realizado com validação 3DS"
-
-msgid "General"
-msgstr "Geral"
-
-msgid "Card"
-msgstr "Cartão"
-
-msgid "Developer"
-msgstr "Desenvolvedor"
-
-msgid "Order captured"
-msgstr "Pedido capturado"
-
-msgid "Order successfully captured!"
-msgstr "Pedido capturado com sucesso!"
-
-msgid "After the purchase is completed, the PIX will be generated and made available for payment!"
-msgstr "Após a finalização da compra o PIX será gerado e disponibilizado para o pagamento!"
-
-msgid "Transaction capture is set to manual. Therefore, after the completion of an authorized order, the administrator needs to capture the payment within the order details by clicking the capture button. Otherwise, the payment will be refunded to the buyer's card after 6 days from the order date. If preferred, change it to"
-msgstr "A captura das transações esta configurada em manual. Portanto após a conclusão do pedido autorizado, o administrador precisa capturar o pagamento dentro dos detalhes do pedido no botão de captura. Caso contrário o pagamento será devolvido para o cartão do comprador após 6 dias da data do pedido. Se preferir altere para"
-
-msgid "Automatic capture."
-msgstr "Captura automática."
-
-msgid "Allows pix payment with Cielo API 3.0."
-msgstr "Permite pagamento via pix com a API 3.0 da Cielo."
-
-msgid "Before using Pix in production, make sure that Pix is enabled in your registration. To confirm, just access the"
-msgstr "Antes de usar o Pix em produção, certifique-se de que o pix está liberado em seu cadastro. Para confirmar basta acessar o"
-
-msgid "portal Cielo"
-msgstr "Cielo portal"
-
-msgid "na área logada em Meu Cadastro > Autorizações > PIX"
-msgstr "in the logged-in area under My Registration > Authorizations > PIX"
-
-msgid "Failed to retrieve card type"
-msgstr "Falha ao recuperar o tipo de cartão"
-
-msgid "Check with Cielo if the PIX payment method is activated."
-msgstr "Verifique na Cielo se o método de pagamento via PIX está ativado."
-
-msgid "Watch the tutorial"
-msgstr "Assista ao tutorial"
-
-msgid "or"
-msgstr "ou"
-
-msgid "check the documentation"
-msgstr "consulte a documentação"
-
-msgid "for more information."
-msgstr "para mais informações."
-
+#: includes/LknWcCieloDebitBlocks.php:438
+#: includes/templates/admin/lkn-cielo-fields-preview.php:83
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:234
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:239
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:439
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:444
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:250
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:255
 msgid "Debit card"
 msgstr "Cartão de débito"
 
-msgid "Cielo - Google Pay"
-msgstr "Cielo - Google Pay"
+#: includes/LknWcCieloDebitBlocks.php:443
+msgid "Save card for safe and fast purchase."
+msgstr "Salve o cartão para uma compra segura e rápida."
 
-msgid "Allows Google Pay payment with Cielo API 3.0."
-msgstr "Permite pagamentos via Google Pay com Cielo API 3.0."
+#: includes/LknWcCieloHelper.php:216
+msgid "Card Expiring Date"
+msgstr "Data de validade do cartão"
 
-msgid "Enable Google Pay Payments"
-msgstr "Habilitar Pagamentos Google Pay"
+#: includes/LknWcCieloHelper.php:224
+msgid "Card Type"
+msgstr "Tipo de cartão"
 
-msgid "Google Pay"
-msgstr "Google Pay"
+#: includes/LknWcCieloHelper.php:232
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:231
+msgid "Place order"
+msgstr "Fazer pedido"
 
-msgid "Payment processed by Cielo API 3.0"
-msgstr "Pagamento processado pela Cielo API 3.0"
+#: includes/LknWcCieloHelper.php:246 includes/LknWcCieloPix.php:232
+msgid "Standard"
+msgstr "Padrão"
 
-msgid "Google Merchant Id"
-msgstr "ID do Comerciante Google"
+#: includes/LknWcCieloHelper.php:247
+msgid "Modern"
+msgstr "Moderno"
 
-msgid "Google Pay production key."
-msgstr "Chave de produção do Google Pay."
+#: includes/LknWcCieloHelper.php:248
+msgid "Compact"
+msgstr "Compacto"
 
-msgid "Enter the Merchant ID provided by Google Pay."
-msgstr "Insira o ID do Comerciante fornecido pelo Google Pay."
+#: includes/LknWcCieloHelper.php:390
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:105
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:108
+msgid "American Express"
+msgstr "American Express"
 
-msgid "Enter the Google Merchant ID for your Google Pay integration."
-msgstr "Insira o ID do Comerciante Google para sua integração Google Pay."
+#: includes/LknWcCieloHelper.php:393
+msgid "Diners Club"
+msgstr "Diners Club"
 
-msgid "Google Merchant Name"
-msgstr "Nome do Comerciante Google"
+#: includes/LknWCCieloPayment.php:574 includes/LknWCGatewayCieloCredit.php:1521
+#: includes/LknWCGatewayCieloCredit.php:1538
+#: includes/LknWCGatewayCieloDebit.php:1569
+#: includes/LknWCGatewayCieloDebit.php:1586
+msgid "Card Discount"
+msgstr "Desconto no cartão"
 
-msgid "Store name in Google Pay."
-msgstr "Nome da loja no Google Pay."
+#: includes/LknWCCieloPayment.php:614 includes/LknWCGatewayCieloCredit.php:1520
+#: includes/LknWCGatewayCieloCredit.php:1537
+#: includes/LknWCGatewayCieloDebit.php:1568
+#: includes/LknWCGatewayCieloDebit.php:1585
+msgid "Card Interest"
+msgstr "Juros no cartão"
 
-msgid "Enter the Merchant Name provided by Google Pay."
-msgstr "Insira o Nome do Comerciante fornecido pelo Google Pay."
+#: includes/LknWCCieloPayment.php:690
+msgid "Credit Card"
+msgstr "Cartão de crédito"
 
-msgid "Enter the Google Merchant Name for your Google Pay integration."
-msgstr "Insira o Nome do Comerciante Google para sua integração Google Pay."
+#: includes/LknWCCieloPayment.php:692
+msgid "Debit Card"
+msgstr "Cartão de débito"
 
-msgid "Google Pay Button Text"
-msgstr "Texto do Botão Google Pay"
+#: includes/LknWCCieloPayment.php:698
+msgid "Cash Payment"
+msgstr "Pagamento à vista"
 
-msgid "Pay"
-msgstr "Pagar"
+#: includes/LknWCCieloPayment.php:819
+msgid ""
+"The features marked with the PRO badge are a preview in the free plan. You "
+"can adjust them freely to explore them, but they only take effect with an "
+"active PRO license."
+msgstr ""
+"Os recursos marcados com o selo PRO são uma prévia no plano gratuito. Você "
+"pode ajustá-los livremente para explorá-los, mas eles só entram em vigor com "
+"uma licença PRO ativa."
 
-msgid "Buy"
-msgstr "Comprar"
+#: includes/LknWCCieloPayment.php:973
+msgid ""
+"CIELO API PIX, credit card, debit payment for WooCommerce requires "
+"WooCommerce to be installed and active."
+msgstr ""
+"O CIELO API PIX, cartão de crédito, pagamento por débito para WooCommerce "
+"requer que o WooCommerce esteja instalado e ativo."
 
-msgid "Checkout"
-msgstr "Finalizar"
+#: includes/LknWCCieloPayment.php:992
+msgid "Settings"
+msgstr "Configurações"
 
-msgid "Donate"
-msgstr "Doar"
+#: includes/LknWCCieloPayment.php:1007
+msgid "Be pro"
+msgstr "Seja Pro"
 
-msgid "Choose the text to display on the Google Pay button."
-msgstr "Escolha o texto a ser exibido no botão Google Pay."
+#: includes/LknWCCieloPayment.php:1062
+msgid "Order ID"
+msgstr "ID do pedido"
 
-msgid "Select the text you want to display on the Google Pay button."
-msgstr "Selecione o texto que deseja exibir no botão Google Pay."
+#: includes/LknWCCieloPayment.php:1073
+msgid "Payment ID"
+msgstr "ID do pagamento"
 
-msgid "Show Order Logs"
-msgstr "Visualizar Logs do Pedido"
+#: includes/LknWCCieloPayment.php:1077
+msgid "Authorization"
+msgstr "Autorização"
 
-msgid "Enable transaction log view within the order."
-msgstr "Habilitar visualização do log da transação dentro do pedido."
+#: includes/LknWCCieloPayment.php:1156
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Cielo Transactions"
+msgstr "Transações Cielo"
 
-msgid "Clear Order Logs"
-msgstr "Limpar Logs dos Pedidos"
+#: includes/LknWCCieloPayment.php:1497
+msgid "Security check failed"
+msgstr "Falha na verificação de segurança"
 
+#: includes/LknWCCieloPayment.php:1503
+#: includes/LknWCGatewayCieloCredit.php:2062
+#: includes/LknWCGatewayCieloDebit.php:3534
+msgid "Insufficient permissions"
+msgstr "Permissões insuficientes"
+
+#: includes/LknWCCieloPayment.php:1512
+msgid "Notice dismissed successfully"
+msgstr "Aviso dispensado com sucesso"
+
+#: includes/LknWCCieloPayment.php:1514
+msgid "Failed to dismiss notice"
+msgstr "Falha ao dispensar o aviso"
+
+#: includes/LknWCCieloPayment.php:1528
+msgid "Order ID is required"
+msgstr "O ID do pedido é obrigatório"
+
+#: includes/LknWCCieloPayment.php:1535
+#: includes/LknWCGatewayCieloCredit.php:2075
+#: includes/LknWCGatewayCieloDebit.php:3547
+msgid "Order not found"
+msgstr "Pedido não encontrado"
+
+#: includes/LknWCCieloPayment.php:1543
+msgid "Invalid payment gateway"
+msgstr "Gateway de pagamento inválido"
+
+#: includes/LknWCCieloPayment.php:1559
+msgid "Gateway method not found"
+msgstr "Método do gateway não encontrado"
+
+#: includes/LknWcCieloPix.php:40
+msgid "Cielo PIX Free"
+msgstr "Cielo PIX Free"
+
+#: includes/LknWcCieloPix.php:42
+msgid "Check with Cielo if the PIX payment method is activated."
+msgstr "Verifique na Cielo se o método de pagamento via PIX está ativado."
+
+#: includes/LknWcCieloPix.php:44
+msgid "Watch the tutorial"
+msgstr "Assista ao tutorial"
+
+#: includes/LknWcCieloPix.php:45
+msgid "or"
+msgstr "ou"
+
+#: includes/LknWcCieloPix.php:47
+msgid "check the documentation"
+msgstr "consulte a documentação"
+
+#: includes/LknWcCieloPix.php:48
+msgid " for more information."
+msgstr " para mais informações."
+
+#: includes/LknWcCieloPix.php:101
+msgid "Available only in PRO"
+msgstr "Disponível apenas no PRO"
+
+#: includes/LknWcCieloPix.php:108 includes/LknWCGatewayCieloCredit.php:148
+#: includes/LknWCGatewayCieloDebit.php:209
+#: includes/LknWCGatewayCieloGooglePay.php:97
+msgid "Modern version"
+msgstr "Versão moderna"
+
+#: includes/LknWcCieloPix.php:109 includes/LknWCGatewayCieloCredit.php:149
+#: includes/LknWCGatewayCieloDebit.php:210
+#: includes/LknWCGatewayCieloGooglePay.php:98
+msgid "Standard version"
+msgstr "Versão padrão"
+
+#: includes/LknWcCieloPix.php:110 includes/LknWCGatewayCieloCredit.php:151
+#: includes/LknWCGatewayCieloDebit.php:212
+#: includes/LknWCGatewayCieloGooglePay.php:99
+msgid "PRO"
+msgstr "PRO"
+
+#: includes/LknWcCieloPix.php:111 includes/LknWcCieloPix.php:131
+#: includes/LknWCGatewayCieloCredit.php:152
+#: includes/LknWCGatewayCieloCredit.php:177
+#: includes/LknWCGatewayCieloDebit.php:213
+#: includes/LknWCGatewayCieloDebit.php:302
+#: includes/LknWCGatewayCieloGooglePay.php:100
+#: includes/LknWCGatewayCieloGooglePay.php:120
+msgid "Enable"
+msgstr "Ativar"
+
+#: includes/LknWcCieloPix.php:112 includes/LknWcCieloPix.php:132
+#: includes/LknWCGatewayCieloCredit.php:153
+#: includes/LknWCGatewayCieloCredit.php:178
+#: includes/LknWCGatewayCieloDebit.php:214
+#: includes/LknWCGatewayCieloDebit.php:303
+#: includes/LknWCGatewayCieloGooglePay.php:101
+#: includes/LknWCGatewayCieloGooglePay.php:121
+msgid "Disable"
+msgstr "Desativar"
+
+#: includes/LknWcCieloPix.php:125 includes/LknWCGatewayCieloCredit.php:171
+#: includes/LknWCGatewayCieloDebit.php:296
+#: includes/LknWCGatewayCieloGooglePay.php:114
 msgid "Clear Logs"
 msgstr "Limpar Logs"
 
+#: includes/LknWcCieloPix.php:126 includes/LknWCGatewayCieloCredit.php:172
+#: includes/LknWCGatewayCieloDebit.php:297
+#: includes/LknWCGatewayCieloGooglePay.php:115
+msgid "Wordpress Support"
+msgstr "Suporte WordPress"
+
+#: includes/LknWcCieloPix.php:127 includes/LknWCGatewayCieloCredit.php:173
+#: includes/LknWCGatewayCieloDebit.php:298
+#: includes/LknWCGatewayCieloGooglePay.php:116
+msgid "Available only in the PRO plan."
+msgstr "Disponível apenas no plano PRO."
+
+#: includes/LknWcCieloPix.php:128 includes/LknWCGatewayCieloCredit.php:174
+#: includes/LknWCGatewayCieloDebit.php:299
+#: includes/LknWCGatewayCieloGooglePay.php:117
 msgid "Do you really want to delete all order logs?"
 msgstr "Deseja realmente deletar todos os logs dos pedidos?"
 
-msgid "Check this box and save to enable Google Pay settings."
-msgstr "Marque esta opção e salve para habilitar as configurações do Google Pay."
+#: includes/LknWcCieloPix.php:129 includes/LknWCGatewayCieloCredit.php:175
+#: includes/LknWCGatewayCieloDebit.php:300
+#: includes/LknWCGatewayCieloGooglePay.php:118
+msgid "Use this in the live store to charge real payments."
+msgstr "Use isto na loja em produção para cobrar pagamentos reais."
 
-msgid "Enable or disable the Google Pay payment method."
-msgstr "Habilitar ou desabilitar o método de pagamento Google Pay."
+#: includes/LknWcCieloPix.php:130 includes/LknWCGatewayCieloCredit.php:176
+#: includes/LknWCGatewayCieloDebit.php:301
+#: includes/LknWCGatewayCieloGooglePay.php:119
+msgid "Use this for testing purposes in the Cielo sandbox environment."
+msgstr "Use isto para fins de teste no ambiente sandbox da Cielo."
 
-msgid "Enable this option to allow customers to pay with Google Pay using Cielo API 3.0."
-msgstr "Habilite esta opção para permitir que clientes paguem com Google Pay usando Cielo API 3.0."
+#: includes/LknWcCieloPix.php:143 includes/LknWCGatewayCieloCredit.php:198
+#: includes/LknWCGatewayCieloDebit.php:324
+#: includes/LknWCGatewayCieloGooglePay.php:190
+msgid "General"
+msgstr "Geral"
 
-msgid "Enter the title that will be shown to customers during the checkout process."
-msgstr "Insira o título que será exibido aos clientes durante o processo de finalização."
+#: includes/LknWcCieloPix.php:147 includes/LknWCGatewayCieloCredit.php:202
+#: includes/LknWCGatewayCieloDebit.php:328
+#: includes/LknWCGatewayCieloGooglePay.php:194
+msgid "Enable/Disable"
+msgstr "Habilitar/Desabilitar"
 
-msgid "This text will appear as the payment method title during checkout. Choose something your customers will easily understand, like \"Pay with Google Pay (Cielo)\"."
-msgstr "Este texto aparecerá como título do método de pagamento durante o checkout. Escolha algo que seus clientes entendam facilmente, como \"Pagar com Google Pay (Cielo)\"."
+#: includes/LknWcCieloPix.php:149
+msgid "Enable Pix Payments"
+msgstr "Ativar pagamentos Pix"
 
-msgid "This description appears below the payment method title at checkout. Use it to inform your customers about the payment processing details."
-msgstr "Esta descrição aparece abaixo do título do método de pagamento no checkout. Use para informar seus clientes sobre os detalhes do processamento do pagamento."
+#: includes/LknWcCieloPix.php:151 includes/LknWcCieloPix.php:154
+msgid "Enable this option to allow Pix payments at checkout."
+msgstr "Ative esta opção para permitir pagamentos Pix na finalização."
 
-msgid "Provide a brief message that informs the customer how the payment will be processed. For example: \"Your payment will be securely processed by Cielo.\""
-msgstr "Forneça uma mensagem breve que informe ao cliente como o pagamento será processado. Por exemplo: \"Seu pagamento será processado com segurança pela Cielo.\""
+#: includes/LknWcCieloPix.php:152
+msgid "Select this option to enable Pix payment method."
+msgstr "Selecione esta opção para ativar o método de pagamento Pix."
 
-msgid "Enter the Merchant ID provided by Cielo for API integration."
-msgstr "Insira o ID do Comerciante fornecido pela Cielo para integração da API."
+#: includes/LknWcCieloPix.php:158 includes/LknWCGatewayCieloCredit.php:213
+#: includes/LknWCGatewayCieloDebit.php:339
+#: includes/LknWCGatewayCieloGooglePay.php:205
+msgid "Title"
+msgstr "Título"
 
-msgid "This is your Cielo Merchant ID used to authenticate API requests. You can find it in your Cielo dashboard."
-msgstr "Este é seu ID de Comerciante Cielo usado para autenticar requisições da API. Você pode encontrá-lo em seu painel Cielo."
+#: includes/LknWcCieloPix.php:160
+msgid "Pix"
+msgstr "Pix"
 
-msgid "Enter the Merchant Key provided by Cielo for secure requests."
-msgstr "Insira a Chave do Comerciante fornecida pela Cielo para requisições seguras."
+#: includes/LknWcCieloPix.php:161 includes/LknWCGatewayCieloCredit.php:216
+#: includes/LknWCGatewayCieloDebit.php:341
+msgid "This controls the title which the user sees during checkout."
+msgstr "Isso controla o título que o usuário vê durante o pagamento."
 
-msgid "This is your secret Merchant Key used to sign transactions with Cielo API. Keep it safe and do not share."
-msgstr "Esta é sua Chave de Comerciante secreta usada para assinar transações com a API Cielo. Mantenha segura e não compartilhe."
+#: includes/LknWcCieloPix.php:162 includes/LknWcCieloPix.php:165
+#: includes/LknWCGatewayCieloDebit.php:346
+msgid "Displayed name for this payment method at checkout."
+msgstr "Nome exibido para este método de pagamento na finalização."
 
-msgid "Choose between production or development mode for Cielo API."
-msgstr "Escolha entre modo produção ou desenvolvimento para a API Cielo."
+#: includes/LknWcCieloPix.php:169 includes/LknWCGatewayCieloCredit.php:224
+#: includes/LknWCGatewayCieloDebit.php:350
+msgid "Description"
+msgstr "Descrição"
 
-msgid "Select \"Development\" to test transactions in sandbox mode. Use \"Production\" for real transactions."
-msgstr "Selecione \"Desenvolvimento\" para testar transações em modo sandbox. Use \"Produção\" para transações reais."
+#: includes/LknWcCieloPix.php:171 includes/LknWcCieloPix.php:370
+#: includes/LknWcCieloPixBlocks.php:45
+msgid ""
+"After the purchase is completed, the PIX will be generated and made "
+"available for payment!"
+msgstr ""
+"Após a finalização da compra o PIX será gerado e disponibilizado para o "
+"pagamento!"
 
+#: includes/LknWcCieloPix.php:172 includes/LknWCGatewayCieloCredit.php:227
+#: includes/LknWCGatewayCieloDebit.php:353
+msgid "Payment method description that the customer will see on your checkout."
+msgstr ""
+"Descrição do método de pagamento que o cliente irá ver durante o pagamento."
+
+#: includes/LknWcCieloPix.php:173 includes/LknWcCieloPix.php:176
+#: includes/LknWCGatewayCieloDebit.php:357
+msgid "Additional info shown next to the payment method."
+msgstr "Informação adicional exibida ao lado do método de pagamento."
+
+#: includes/LknWcCieloPix.php:180 includes/LknWCGatewayCieloCredit.php:255
+#: includes/LknWCGatewayCieloDebit.php:401
+#: includes/LknWCGatewayCieloGooglePay.php:216
+msgid "Environment"
+msgstr "Ambiente"
+
+#: includes/LknWcCieloPix.php:183 includes/LknWCGatewayCieloCredit.php:258
+#: includes/LknWCGatewayCieloDebit.php:404
+#: includes/LknWCGatewayCieloGooglePay.php:219
+msgid "Production"
+msgstr "Produção"
+
+#: includes/LknWcCieloPix.php:184 includes/LknWCGatewayCieloCredit.php:259
+#: includes/LknWCGatewayCieloDebit.php:405
+#: includes/LknWCGatewayCieloGooglePay.php:220
+msgid "Development"
+msgstr "Desenvolvimento"
+
+#: includes/LknWcCieloPix.php:187
+msgid ""
+"Choose \"Production\" for live payments or \"Development\" for sandbox "
+"testing."
+msgstr ""
+"Escolha \"Production\" para pagamentos reais ou \"Development\" para testes "
+"no sandbox."
+
+#: includes/LknWcCieloPix.php:189
+msgid "Select the Cielo API 3.0 environment."
+msgstr "Selecione o ambiente da Cielo API 3.0."
+
+#: includes/LknWcCieloPix.php:193 includes/LknWCGatewayCieloCredit.php:235
+#: includes/LknWCGatewayCieloDebit.php:381
+#: includes/LknWCGatewayCieloGooglePay.php:230
+msgid "Merchant Id"
+msgstr "Merchant Id"
+
+#: includes/LknWcCieloPix.php:195 includes/LknWcCieloPix.php:205
+#: includes/LknWCGatewayCieloCredit.php:237
+#: includes/LknWCGatewayCieloCredit.php:247
+#: includes/LknWCGatewayCieloDebit.php:383
+#: includes/LknWCGatewayCieloDebit.php:393
+#: includes/LknWCGatewayCieloGooglePay.php:233
+#: includes/LknWCGatewayCieloGooglePay.php:243
+msgid "Cielo credentials."
+msgstr "Credenciais da Cielo."
+
+#: includes/LknWcCieloPix.php:196 includes/LknWcCieloPix.php:199
+msgid "Enter your Merchant ID from Cielo API 3.0."
+msgstr "Informe seu Merchant ID da Cielo API 3.0."
+
+#: includes/LknWcCieloPix.php:203 includes/LknWCGatewayCieloCredit.php:245
+#: includes/LknWCGatewayCieloDebit.php:391
+#: includes/LknWCGatewayCieloGooglePay.php:240
+msgid "Merchant Key"
+msgstr "Merchant Key"
+
+#: includes/LknWcCieloPix.php:206 includes/LknWcCieloPix.php:209
+msgid "Enter your Merchant Key from Cielo API 3.0."
+msgstr "Informe sua Merchant Key da Cielo API 3.0."
+
+#: includes/LknWcCieloPix.php:213 includes/LknWCGatewayCieloCredit.php:723
+#: includes/LknWCGatewayCieloDebit.php:1295
+msgid "Payment Complete Status"
+msgstr "Status de Pagamento Completo"
+
+#: includes/LknWcCieloPix.php:216 includes/LknWCGatewayCieloCredit.php:729
+#: includes/LknWCGatewayCieloDebit.php:1301
+msgctxt "Order status"
+msgid "Processing"
+msgstr "Processando"
+
+#: includes/LknWcCieloPix.php:217 includes/LknWCGatewayCieloCredit.php:730
+#: includes/LknWCGatewayCieloDebit.php:1302
+msgctxt "Order status"
+msgid "On hold"
+msgstr "Em espera"
+
+#: includes/LknWcCieloPix.php:218 includes/LknWCGatewayCieloCredit.php:731
+#: includes/LknWCGatewayCieloDebit.php:1303
+msgctxt "Order status"
+msgid "Completed"
+msgstr "Concluído"
+
+#: includes/LknWcCieloPix.php:221 includes/LknWCGatewayCieloCredit.php:727
+#: includes/LknWCGatewayCieloDebit.php:1299
+msgid ""
+"Option to automatically set the order status after payment confirmation "
+"through this gateway."
+msgstr ""
+"Opção para definir automaticamente o status do pedido após confirmação de "
+"pagamento por esse gateway."
+
+#: includes/LknWcCieloPix.php:222
+msgid ""
+"Choose the status that will be assigned automatically after payment "
+"confirmation."
+msgstr ""
+"Escolha o status que será atribuído automaticamente após a confirmação do "
+"pagamento."
+
+#: includes/LknWcCieloPix.php:224
+msgid "Automatically sets the order status after payment."
+msgstr "Define automaticamente o status do pedido após o pagamento."
+
+#: includes/LknWcCieloPix.php:228
+msgid "PIX Layout"
+msgstr "Layout do PIX"
+
+#: includes/LknWcCieloPix.php:233
+msgid "New"
+msgstr "Novo"
+
+#: includes/LknWcCieloPix.php:235
+msgid "Select the PIX layout the customer will see at checkout."
+msgstr "Selecione o layout do PIX que o cliente verá na finalização."
+
+#: includes/LknWcCieloPix.php:236
+msgid "Choose between the standard layout or the new layout for PIX."
+msgstr "Escolha entre o layout padrão ou o novo layout para o PIX."
+
+#: includes/LknWcCieloPix.php:238
+msgid "PIX layout shown to the customer at checkout."
+msgstr "Layout do PIX exibido ao cliente na finalização."
+
+#: includes/LknWcCieloPix.php:242
+msgid "Layout Location"
+msgstr "Local do layout"
+
+#: includes/LknWcCieloPix.php:246
+msgid "Top"
+msgstr "Topo"
+
+#: includes/LknWcCieloPix.php:247
+msgid "Bottom"
+msgstr "Inferior"
+
+#: includes/LknWcCieloPix.php:249
+msgid ""
+"Select the position where the PIX layout will be displayed on the checkout "
+"page."
+msgstr ""
+"Selecione a posição onde o layout do PIX será exibido na página de "
+"finalização."
+
+#: includes/LknWcCieloPix.php:250
+msgid ""
+"Set whether the PIX layout appears at the top or bottom of the checkout."
+msgstr ""
+"Defina se o layout do PIX aparece no topo ou na parte inferior da "
+"finalização."
+
+#: includes/LknWcCieloPix.php:252
+msgid "Position of the PIX layout on the checkout page."
+msgstr "Posição do layout do PIX na página de finalização."
+
+#: includes/LknWcCieloPix.php:256
+msgid "Generate PIX Button"
+msgstr "Botão Gerar PIX"
+
+#: includes/LknWcCieloPix.php:258 includes/LknWcCieloPix.php:259
+msgid "Displays the \"Finish and Generate PIX\" button at checkout."
+msgstr "Exibe o botão \"Finalizar e Gerar PIX\" na finalização."
+
+#: includes/LknWcCieloPix.php:262
+msgid "Displays an additional button to generate the PIX"
+msgstr "Exibe um botão adicional para gerar o PIX"
+
+#: includes/LknWcCieloPix.php:268 includes/LknWCGatewayCieloCredit.php:329
+#: includes/LknWCGatewayCieloDebit.php:527
+#: includes/LknWCGatewayCieloGooglePay.php:294
+msgid "ABECS standard messages"
+msgstr "Mensagens padrão ABECS"
+
+#: includes/LknWcCieloPix.php:270 includes/LknWCGatewayCieloCredit.php:331
+#: includes/LknWCGatewayCieloDebit.php:529
+#: includes/LknWCGatewayCieloGooglePay.php:296
+msgid "Enable ABECS-standard return messages"
+msgstr "Ativar mensagens de retorno padrão ABECS"
+
+#: includes/LknWcCieloPix.php:272 includes/LknWCGatewayCieloCredit.php:333
+#: includes/LknWCGatewayCieloDebit.php:531
+#: includes/LknWCGatewayCieloGooglePay.php:298
+msgid "Default: enabled when the PRO license is active."
+msgstr "Padrão: ativado quando a licença PRO está ativa."
+
+#: includes/LknWcCieloPix.php:273 includes/LknWCGatewayCieloCredit.php:334
+#: includes/LknWCGatewayCieloDebit.php:532
+#: includes/LknWCGatewayCieloGooglePay.php:299
+msgid ""
+"Use the official Cielo (ABECS) return messages instead of the default "
+"messages."
+msgstr ""
+"Use as mensagens de retorno oficiais da Cielo (ABECS) em vez das mensagens "
+"padrão."
+
+#: includes/LknWcCieloPix.php:276 includes/LknWCGatewayCieloCredit.php:337
+#: includes/LknWCGatewayCieloDebit.php:535
+#: includes/LknWCGatewayCieloGooglePay.php:302
+msgid ""
+"Use the official Cielo (ABECS) return messages. Disable to keep the previous "
+"default messages."
+msgstr ""
+"Use as mensagens de retorno oficiais da Cielo (ABECS). Desative para manter "
+"as mensagens padrão anteriores."
+
+#: includes/LknWcCieloPix.php:286 includes/LknWCGatewayCieloCredit.php:346
+#: includes/LknWCGatewayCieloDebit.php:694
+#: includes/LknWCGatewayCieloGooglePay.php:312
+msgid "Developer"
+msgstr "Desenvolvedor"
+
+#: includes/LknWcCieloPix.php:290 includes/LknWCGatewayCieloCredit.php:350
+#: includes/LknWCGatewayCieloDebit.php:698
+#: includes/LknWCGatewayCieloGooglePay.php:316
+msgid "Debug"
+msgstr "Depuração"
+
+#: includes/LknWcCieloPix.php:295 includes/LknWCGatewayCieloCredit.php:355
+#: includes/LknWCGatewayCieloDebit.php:703
+#: includes/LknWCGatewayCieloGooglePay.php:321
 msgid "Enable log capture for payments"
 msgstr "Habilitar captura de log para pagamentos"
 
+#: includes/LknWcCieloPix.php:297 includes/LknWCGatewayCieloCredit.php:357
+#: includes/LknWCGatewayCieloDebit.php:705
+#: includes/LknWCGatewayCieloGooglePay.php:323
 msgid "View logs"
 msgstr "Ver logs"
 
-msgid "Enable this option to log payment requests and responses for troubleshooting purposes."
-msgstr "Habilite esta opção para registrar requisições e respostas de pagamento para fins de solução de problemas."
+#: includes/LknWcCieloPix.php:300 includes/LknWCGatewayCieloCredit.php:360
+#: includes/LknWCGatewayCieloDebit.php:708
+#: includes/LknWCGatewayCieloGooglePay.php:326
+msgid ""
+"Enable this option to log payment requests and responses for troubleshooting "
+"purposes."
+msgstr ""
+"Habilite esta opção para registrar requisições e respostas de pagamento para "
+"fins de solução de problemas."
 
-msgid "Useful for identifying errors in payment requests or responses during development or support."
-msgstr "Útil para identificar erros em requisições ou respostas de pagamento durante desenvolvimento ou suporte."
+#: includes/LknWcCieloPix.php:301 includes/LknWCGatewayCieloCredit.php:361
+#: includes/LknWCGatewayCieloDebit.php:709
+#: includes/LknWCGatewayCieloGooglePay.php:327
+msgid ""
+"Useful for identifying errors in payment requests or responses during "
+"development or support."
+msgstr ""
+"Útil para identificar erros em requisições ou respostas de pagamento durante "
+"desenvolvimento ou suporte."
 
-msgid "When enabled, all Cielo transactions will be logged. You can access logs via WooCommerce > Status > Logs."
-msgstr "Quando habilitado, todas as transações Cielo serão registradas. Você pode acessar logs via WooCommerce > Status > Logs."
+#: includes/LknWcCieloPix.php:303 includes/LknWCGatewayCieloCredit.php:363
+#: includes/LknWCGatewayCieloDebit.php:711
+#: includes/LknWCGatewayCieloGooglePay.php:329
+msgid "Useful for developers to monitor errors and status."
+msgstr "Útil para desenvolvedores monitorarem erros e status."
 
+#: includes/LknWcCieloPix.php:312 includes/LknWCGatewayCieloCredit.php:372
+#: includes/LknWCGatewayCieloDebit.php:720
+#: includes/LknWCGatewayCieloGooglePay.php:338
+msgid "WhatsApp Support"
+msgstr "Suporte por WhatsApp"
+
+#: includes/LknWcCieloPix.php:315 includes/LknWCGatewayCieloCredit.php:375
+#: includes/LknWCGatewayCieloDebit.php:723
+#: includes/LknWCGatewayCieloGooglePay.php:341
+msgid ""
+"Enable Debug Mode and click Save Changes to get quick support via WhatsApp."
+msgstr ""
+"Ative o Modo de Depuração e clique em Salvar alterações para obter suporte "
+"rápido via WhatsApp."
+
+#: includes/LknWcCieloPix.php:321 includes/LknWCGatewayCieloCredit.php:381
+#: includes/LknWCGatewayCieloDebit.php:729
+#: includes/LknWCGatewayCieloGooglePay.php:347
+msgid "Send the settings for this payment method to WordPress Support."
+msgstr ""
+"Envie as configurações deste método de pagamento para o Suporte WordPress."
+
+#: includes/LknWcCieloPix.php:330 includes/LknWCGatewayCieloCredit.php:390
+#: includes/LknWCGatewayCieloDebit.php:738
+#: includes/LknWCGatewayCieloGooglePay.php:356
+msgid "View Order Log"
+msgstr "Ver log do pedido"
+
+#: includes/LknWcCieloPix.php:332 includes/LknWCGatewayCieloCredit.php:392
+#: includes/LknWCGatewayCieloDebit.php:740
+#: includes/LknWCGatewayCieloGooglePay.php:358
+msgid "Enables viewing the transaction log within the order."
+msgstr "Permite visualizar o log da transação dentro do pedido."
+
+#: includes/LknWcCieloPix.php:334 includes/LknWCGatewayCieloCredit.php:394
+#: includes/LknWCGatewayCieloDebit.php:742
+#: includes/LknWCGatewayCieloGooglePay.php:360
 msgid "Displays Cielo transaction logs inside WooCommerce order details."
-msgstr "Exibe logs de transação Cielo dentro dos detalhes do pedido WooCommerce."
+msgstr ""
+"Exibe logs de transação Cielo dentro dos detalhes do pedido WooCommerce."
 
-msgid "Useful for quickly viewing payment log data without accessing the system log files."
-msgstr "Útil para visualizar rapidamente dados de log de pagamento sem acessar os arquivos de log do sistema."
+#: includes/LknWcCieloPix.php:335 includes/LknWCGatewayCieloCredit.php:395
+#: includes/LknWCGatewayCieloDebit.php:743
+#: includes/LknWCGatewayCieloGooglePay.php:361
+msgid ""
+"Useful for quickly viewing payment log data without accessing the system log "
+"files."
+msgstr ""
+"Útil para visualizar rapidamente dados de log de pagamento sem acessar os "
+"arquivos de log do sistema."
 
-msgid "Enable this to show the transaction details for Cielo payments directly in each order's admin panel."
-msgstr "Habilite isto para mostrar os detalhes da transação para pagamentos Cielo diretamente no painel admin de cada pedido."
+#: includes/LknWcCieloPix.php:337 includes/LknWCGatewayCieloCredit.php:397
+#: includes/LknWCGatewayCieloDebit.php:745
+#: includes/LknWCGatewayCieloGooglePay.php:363
+msgid "Allows transaction logs to be viewed directly on the order page."
+msgstr ""
+"Permite que os logs de transação sejam visualizados diretamente na página do "
+"pedido."
 
-msgid "Click this button to delete all Cielo log data stored in orders."
-msgstr "Clique neste botão para deletar todos os dados de log Cielo armazenados nos pedidos."
+#: includes/LknWcCieloPix.php:341 includes/LknWCGatewayCieloCredit.php:401
+#: includes/LknWCGatewayCieloDebit.php:749
+#: includes/LknWCGatewayCieloGooglePay.php:367
+msgid "Clear Order Logs"
+msgstr "Limpar Logs dos Pedidos"
 
-msgid "Use only if you no longer need the Cielo transaction logs for past orders."
-msgstr "Use apenas se não precisar mais dos logs de transação Cielo para pedidos passados."
+#: includes/LknWcCieloPix.php:349 includes/LknWCGatewayCieloCredit.php:409
+#: includes/LknWCGatewayCieloDebit.php:757
+#: includes/LknWCGatewayCieloGooglePay.php:375
+msgid "Button to clear logs stored in orders."
+msgstr "Botão para limpar os logs armazenados nos pedidos."
 
-msgid "This will permanently remove all stored logs from WooCommerce orders. Ideal after resolving issues or for privacy."
-msgstr "Isto removerá permanentemente todos os logs armazenados dos pedidos WooCommerce. Ideal após resolver problemas ou por privacidade."
+#: includes/LknWcCieloPix.php:355 includes/LknWCGatewayCieloCredit.php:415
+#: includes/LknWCGatewayCieloDebit.php:763
+#: includes/LknWCGatewayCieloGooglePay.php:381
+msgid "Transactions"
+msgstr "Transações"
+
+#: includes/LknWcCieloPix.php:506
+msgid "Please enter a valid CPF or CNPJ."
+msgstr "Por favor, insira um CPF ou CNPJ válido."
+
+#: includes/LknWcCieloPix.php:541
+msgid ""
+"Error generating PIX: QR Code information is missing. Please try again or "
+"contact support."
+msgstr ""
+"Erro ao gerar PIX: as informações do QR Code estão faltando. Tente novamente "
+"ou entre em contato com o suporte."
+
+#: includes/LknWcCieloPix.php:580 includes/LknWcCieloPix.php:590
+msgid "PIX Payment Failed"
+msgstr "Falha no pagamento PIX"
+
+#: includes/LknWcCieloPix.php:728
+msgid "Copied!"
+msgstr "Copiado!"
+
+#: includes/LknWcCieloPix.php:763
+msgid "You are not allowed to modify this field (Description)."
+msgstr "Você não tem permissão para modificar este campo (Descrição)."
+
+#: includes/LknWcCieloPix.php:777
+msgid "You are not allowed to modify this field (Payment Complete Status)."
+msgstr ""
+"Você não tem permissão para modificar este campo (Status de pagamento "
+"concluído)."
+
+#: includes/LknWcCieloPix.php:791
+msgid "You are not allowed to modify this field (Pix Layout)."
+msgstr "Você não tem permissão para modificar este campo (Layout do Pix)."
+
+#: includes/LknWcCieloPix.php:806
+msgid "You are not allowed to modify this field (Layout Location)."
+msgstr "Você não tem permissão para modificar este campo (Local do layout)."
+
+#: includes/LknWCCieloProUpdateEmail.php:72
+msgid "Notice: important PRO plugin update"
+msgstr "Aviso: atualização importante do plugin PRO"
+
+#: includes/LknWCCieloProUpdateEmail.php:149
+#: includes/LknWCCieloProUpdateNotice.php:161
+#: includes/LknWCCieloProUpdateNotice.php:246
+msgid "CIELO API PRO"
+msgstr "CIELO API PRO"
+
+#: includes/LknWCCieloProUpdateEmail.php:169
+msgid "Notice"
+msgstr "Aviso"
+
+#: includes/LknWCCieloProUpdateEmail.php:176
+msgid "Hello!"
+msgstr "Olá!"
+
+#. translators: %1$s: PRO plugin name
+#: includes/LknWCCieloProUpdateEmail.php:180
+#, php-format
+msgid ""
+"An important update for the %1$s plugin is available and needs to be applied."
+msgstr ""
+"Uma atualização importante para o plugin %1$s está disponível e precisa ser "
+"aplicada."
+
+#. translators: %1$s: minimum PRO version
+#: includes/LknWCCieloProUpdateEmail.php:187
+#, php-format
+msgid ""
+"This version of the free plugin requires PRO version %1$s or higher to avoid "
+"failures on the settings screen and at checkout."
+msgstr ""
+"Esta versão do plugin gratuito requer a versão PRO %1$s ou superior para "
+"evitar falhas na tela de configurações e na finalização."
+
+#: includes/LknWCCieloProUpdateEmail.php:191
+msgid "How to update:"
+msgstr "Como atualizar:"
+
+#: includes/LknWCCieloProUpdateEmail.php:193
+msgid "Open the WordPress admin dashboard."
+msgstr "Abra o painel de administração do WordPress."
+
+#: includes/LknWCCieloProUpdateEmail.php:194
+msgid "Go to the \"Plugins\" page."
+msgstr "Vá para a página \"Plugins\"."
+
+#: includes/LknWCCieloProUpdateEmail.php:195
+msgid "Update the PRO plugin using the update notification shown in the admin."
+msgstr ""
+"Atualize o plugin PRO usando a notificação de atualização exibida no painel."
+
+#: includes/LknWCCieloProUpdateEmail.php:198
+msgid "Go to Plugins"
+msgstr "Ir para Plugins"
+
+#: includes/LknWCCieloProUpdateEmail.php:200
+msgid ""
+"We recommend performing the update as soon as possible. Your data will not "
+"be changed."
+msgstr ""
+"Recomendamos realizar a atualização o mais rápido possível. Seus dados não "
+"serão alterados."
+
+#: includes/LknWCCieloProUpdateEmail.php:205
+msgid "Sincerely, the Link Nacional team"
+msgstr "Atenciosamente, equipe Link Nacional"
+
+#: includes/LknWCCieloProUpdateNotice.php:73
+#: includes/LknWCCieloProUpdateNotice.php:74
+msgid "PRO plugin update"
+msgstr "Atualização do plugin PRO"
+
+#: includes/LknWCCieloProUpdateNotice.php:148
+msgid "You do not have permission to access this page."
+msgstr "Você não tem permissão para acessar esta página."
+
+#: includes/LknWCCieloProUpdateNotice.php:166
+msgid "Close and do not show again"
+msgstr "Fechar e não mostrar novamente"
+
+#: includes/LknWCCieloProUpdateNotice.php:173
+msgid "Important PRO plugin update"
+msgstr "Atualização importante do plugin PRO"
+
+#. translators: %1$s: FREE plugin name, %2$s: PRO plugin name, %3$s: minimum PRO version
+#: includes/LknWCCieloProUpdateNotice.php:180
+#, php-format
+msgid ""
+"The plugin %1$s requires version %3$s or higher of %2$s. Your installed "
+"version is out of date."
+msgstr ""
+"O plugin %1$s requer a versão %3$s ou superior do %2$s. Sua versão instalada "
+"está desatualizada."
+
+#: includes/LknWCCieloProUpdateNotice.php:190
+msgid ""
+"Update the PRO plugin to avoid failures on the settings screen and at "
+"checkout. Your data will not be changed."
+msgstr ""
+"Atualize o plugin PRO para evitar falhas na tela de configurações e na "
+"finalização. Seus dados não serão alterados."
+
+#: includes/LknWCCieloProUpdateNotice.php:193
+msgid "More secure transactions"
+msgstr "Transações mais seguras"
+
+#: includes/LknWCCieloProUpdateNotice.php:194
+msgid "Critical fixes and improvements"
+msgstr "Correções críticas e melhorias"
+
+#: includes/LknWCCieloProUpdateNotice.php:195
+msgid "New payment features"
+msgstr "Novos recursos de pagamento"
+
+#: includes/LknWCCieloProUpdateNotice.php:200
+msgid "Not now"
+msgstr "Agora não"
+
+#: includes/LknWCCieloProUpdateNotice.php:203
+#: includes/LknWCCieloProUpdateNotice.php:272
+msgid "Update PRO plugin"
+msgstr "Atualizar plugin PRO"
+
+#: includes/LknWCCieloProUpdateNotice.php:258
+msgid "Update"
+msgstr "Atualizar"
+
+#. translators: %1$s: PRO plugin name, %2$s: minimum PRO version
+#: includes/LknWCCieloProUpdateNotice.php:264
+#, php-format
+msgid ""
+"An important update for the %1$s plugin is available (version %2$s or "
+"higher). Update it to avoid failures in the configuration and at checkout."
+msgstr ""
+"Uma atualização importante para o plugin %1$s está disponível (versão %2$s "
+"ou superior). Atualize-o para evitar falhas na configuração e na finalização."
+
+#: includes/LknWCCieloProUpdateNotice.php:275
+msgid "Dismiss this notice."
+msgstr "Dispensar este aviso."
+
+#: includes/LknWCCieloProUpdateNotice.php:293
+msgid "You do not have permission to update plugins."
+msgstr "Você não tem permissão para atualizar plugins."
+
+#: includes/LknWCCieloProUpdateNotice.php:325
+msgid "No update available at the moment. Update from the Plugins screen."
+msgstr ""
+"Nenhuma atualização disponível no momento. Atualize pela tela de Plugins."
+
+#: includes/LknWCCieloProUpdateNotice.php:333
+msgid "Updated successfully. Reloading…"
+msgstr "Atualizado com sucesso. Recarregando…"
+
+#: includes/LknWCCieloProUpdateNotice.php:344
+msgid "Insufficient permission."
+msgstr "Permissão insuficiente."
+
+#: includes/LknWCCieloProUpdateNotice.php:416
+msgid "Updated!"
+msgstr "Atualizado!"
+
+#: includes/LknWCCieloProUpdateNotice.php:422
+msgid "Success"
+msgstr "Sucesso"
+
+#: includes/LknWCCieloProUpdateNotice.php:423
+#: includes/LknWCCieloProUpdateNotice.php:429
+#: includes/LknWCGatewayCieloDebit.php:264
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Close"
+msgstr "Fechar"
+
+#: includes/LknWCCieloProUpdateNotice.php:424
+msgid "The PRO plugin was updated successfully."
+msgstr "O plugin PRO foi atualizado com sucesso."
+
+#: includes/LknWCCieloProUpdateNotice.php:428
+msgid "Error"
+msgstr "Erro"
+
+#: includes/LknWcCieloRequest.php:249
+msgid "PIX payment confirmed automatically."
+msgstr "Pagamento PIX confirmado automaticamente."
+
+#: includes/LknWcCieloRequest.php:251
+msgid "Payment ID:"
+msgstr "ID do pagamento:"
+
+#: includes/LknWcCieloRequest.php:255 includes/LknWCGatewayCieloCredit.php:1311
+#: includes/LknWCGatewayCieloDebit.php:3023
+#: includes/LknWCGatewayCieloGooglePay.php:602
+msgid "Proof of sale (NSU)"
+msgstr "Comprovante de venda (NSU)"
+
+#: includes/LknWcCieloRequest.php:259 includes/LknWCGatewayCieloCredit.php:1328
+#: includes/LknWCGatewayCieloDebit.php:3035
+#: includes/LknWCGatewayCieloGooglePay.php:610
+msgid "Return code"
+msgstr "Código de retorno"
+
+#: includes/LknWCGatewayCieloCredit.php:77
+msgid "Cielo - Credit Card"
+msgstr "Cielo - Cartão de Crédito"
+
+#: includes/LknWCGatewayCieloCredit.php:79
+msgid "Allows credit card payment with Cielo API 3.0."
+msgstr "Permite pagamentos com cartão de crédito através da Cielo API 3.0"
+
+#: includes/LknWCGatewayCieloCredit.php:150
+#: includes/LknWCGatewayCieloDebit.php:211
+msgid "Compact version"
+msgstr "Versão compacta"
+
+#: includes/LknWCGatewayCieloCredit.php:204
+msgid "Enable Credit Card Payments"
+msgstr "Habilita pagamentos via cartão de crédito"
+
+#: includes/LknWCGatewayCieloCredit.php:206
+msgid "Enable or disable the credit card payment method."
+msgstr "Ative ou desative o método de pagamento com cartão de crédito."
+
+#: includes/LknWCGatewayCieloCredit.php:207
+msgid "Check this box and save to enable credit card settings."
+msgstr ""
+"Marque esta caixa e salve para habilitar as configurações de cartão de "
+"crédito."
+
+#: includes/LknWCGatewayCieloCredit.php:209
+msgid ""
+"Enable this option to allow customers to pay with credit cards using Cielo "
+"API 3.0."
+msgstr ""
+"Habilite esta opção para permitir que os clientes paguem com cartão de "
+"crédito usando a Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloCredit.php:217
+#: includes/LknWCGatewayCieloGooglePay.php:209
+msgid ""
+"Enter the title that will be shown to customers during the checkout process."
+msgstr ""
+"Insira o título que será exibido aos clientes durante o processo de "
+"finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:220
+msgid ""
+"This text will appear as the payment method title during checkout. Choose "
+"something your customers will easily understand, like “Pay with credit card "
+"(Cielo)”."
+msgstr ""
+"Este texto aparecerá como o título do método de pagamento durante a "
+"finalização. Escolha algo que seus clientes entendam facilmente, como “Pague "
+"com cartão de crédito (Cielo)”."
+
+#: includes/LknWCGatewayCieloCredit.php:226
+#: includes/LknWCGatewayCieloDebit.php:352
+msgid "Payment processed by Cielo API 3.0"
+msgstr "Pagamento processado pela Cielo API 3.0"
+
+#: includes/LknWCGatewayCieloCredit.php:228
+msgid ""
+"This description appears below the payment method title at checkout. Use it "
+"to inform your customers about the payment processing details."
+msgstr ""
+"Esta descrição aparece abaixo do título do método de pagamento no checkout. "
+"Use para informar seus clientes sobre os detalhes do processamento do "
+"pagamento."
+
+#: includes/LknWCGatewayCieloCredit.php:231
+msgid ""
+"Provide a brief message that informs the customer how the payment will be "
+"processed. For example: “Your payment will be securely processed by Cielo.”"
+msgstr ""
+"Forneça uma breve mensagem que informe ao cliente como o pagamento será "
+"processado. Por exemplo: “Seu pagamento será processado com segurança pela "
+"Cielo.”"
+
+#: includes/LknWCGatewayCieloCredit.php:238
+msgid "Enter the Merchant ID provided by Cielo for API integration."
+msgstr ""
+"Insira o ID do Comerciante fornecido pela Cielo para integração da API."
+
+#: includes/LknWCGatewayCieloCredit.php:241
+#: includes/LknWCGatewayCieloGooglePay.php:236
+msgid ""
+"This is your Cielo Merchant ID used to authenticate API requests. You can "
+"find it in your Cielo dashboard."
+msgstr ""
+"Este é seu ID de Comerciante Cielo usado para autenticar requisições da API. "
+"Você pode encontrá-lo em seu painel Cielo."
+
+#: includes/LknWCGatewayCieloCredit.php:248
+msgid "Enter the Merchant Key provided by Cielo for secure requests."
+msgstr ""
+"Insira a Chave do Comerciante fornecida pela Cielo para requisições seguras."
+
+#: includes/LknWCGatewayCieloCredit.php:251
+msgid ""
+"This is your secret Merchant Key used to sign transactions with Cielo API. "
+"Keep it safe and do not share."
+msgstr ""
+"Esta é sua Chave de Comerciante secreta usada para assinar transações com a "
+"API Cielo. Mantenha segura e não compartilhe."
+
+#: includes/LknWCGatewayCieloCredit.php:262
+msgid "Choose between production or development mode for Cielo API."
+msgstr "Escolha entre modo produção ou desenvolvimento para a API Cielo."
+
+#: includes/LknWCGatewayCieloCredit.php:264
+msgid ""
+"Select \"Development\" to test transactions in sandbox mode. Use "
+"\"Production\" for real transactions."
+msgstr ""
+"Selecione \"Desenvolvimento\" para testar transações em modo sandbox. Use "
+"\"Produção\" para transações reais."
+
+#: includes/LknWCGatewayCieloCredit.php:268
+#: includes/LknWCGatewayCieloDebit.php:444
+msgid "Invoice Description"
+msgstr "Descrição da fatura"
+
+#: includes/LknWCGatewayCieloCredit.php:270
+#: includes/LknWCGatewayCieloDebit.php:446
+msgid "order"
+msgstr "pedido"
+
+#: includes/LknWCGatewayCieloCredit.php:271
+#: includes/LknWCGatewayCieloDebit.php:447
+msgid ""
+"Invoice description that the customer will see on your checkout (special "
+"characters are not accepted)."
+msgstr ""
+"Descrição da fatura que o cliente irá ver durante o pagamento (não é aceito "
+"caracteres especiais)."
+
+#: includes/LknWCGatewayCieloCredit.php:272
+msgid "Enter a brief description that will appear on the customer invoice."
+msgstr "Insira uma breve descrição que aparecerá na fatura do cliente."
+
+#: includes/LknWCGatewayCieloCredit.php:277
+msgid ""
+"This description will be used on the transaction invoice. It should be "
+"readable and not contain special characters or numbers."
+msgstr ""
+"Esta descrição será usada na fatura da transação. Ela deve ser legível e não "
+"conter caracteres especiais ou números."
+
+#: includes/LknWCGatewayCieloCredit.php:281
+#: includes/LknWCGatewayCieloDebit.php:457
+msgid "Card"
+msgstr "Cartão"
+
+#: includes/LknWCGatewayCieloCredit.php:285
+#: includes/LknWCGatewayCieloDebit.php:461
+msgid "Installment payments"
+msgstr "Pagamentos parcelados"
+
+#: includes/LknWCGatewayCieloCredit.php:287
+#: includes/LknWCGatewayCieloDebit.php:463
+msgid "Enables installment payments for amounts greater than 10,00 R$"
+msgstr "Habilita pagamentos parcelados para valores maiores que 10,00 R$"
+
+#: includes/LknWCGatewayCieloCredit.php:289
+#: includes/LknWCGatewayCieloDebit.php:465
+msgid ""
+"When enabled and using the PRO version of the plugin, an additional tab will "
+"appear for advanced installment configuration."
+msgstr ""
+"Quando habilitado e usando a versão PRO do plugin, uma aba adicional "
+"aparecerá para configuração avançada de parcelas."
+
+#: includes/LknWCGatewayCieloCredit.php:290
+msgid "Enable this to allow payment in installments."
+msgstr "Habilite isto para permitir pagamento em parcelas."
+
+#: includes/LknWCGatewayCieloCredit.php:292
+msgid ""
+"When enabled, customers can split payments in installments for orders above "
+"R$10. Useful for improving conversion."
+msgstr ""
+"Quando habilitado, os clientes podem dividir o pagamento em parcelas para "
+"pedidos acima de R$10. Útil para melhorar a conversão."
+
+#: includes/LknWCGatewayCieloCredit.php:296
+#: includes/LknWCGatewayCieloDebit.php:472
+msgid "Input placeholders"
+msgstr "Espaços reservados de entrada"
+
+#: includes/LknWCGatewayCieloCredit.php:298
+#: includes/LknWCGatewayCieloDebit.php:474
+msgid ""
+"Enables input placeholders for debit/credit card fields for classic checkout"
+msgstr ""
+"Permite espaços reservados de entrada para campos de cartão de débito/"
+"crédito para checkout clássico"
+
+#: includes/LknWCGatewayCieloCredit.php:300
+msgid ""
+"Displays placeholder text in card input fields to guide users during "
+"checkout."
+msgstr ""
+"Exibe texto de exemplo nos campos de entrada do cartão para orientar os "
+"usuários durante a finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:301
+msgid "Enable to show example placeholders in credit/debit card fields."
+msgstr ""
+"Habilite para mostrar textos de exemplo nos campos de cartão de crédito/"
+"débito."
+
+#: includes/LknWCGatewayCieloCredit.php:303
+msgid ""
+"Adds sample text in the card fields to help users understand what "
+"information is expected."
+msgstr ""
+"Adiciona texto de exemplo nos campos do cartão para ajudar os usuários a "
+"entender quais informações são esperadas."
+
+#: includes/LknWCGatewayCieloCredit.php:307
+#: includes/LknWCGatewayCieloDebit.php:483
+msgid "Nonce verification compatibility mode"
+msgstr "Modo de compatibilidade de verificação de nonce"
+
+#: includes/LknWCGatewayCieloCredit.php:308
+msgid "Enable only if your checkout page is facing nonce verification issue"
+msgstr ""
+"Habilite apenas se sua página de finalização estiver enfrentando problemas "
+"de verificação de nonce"
+
+#: includes/LknWCGatewayCieloCredit.php:309
+#: includes/LknWCGatewayCieloDebit.php:485
+msgid "Enable for checkout page validation compatibility"
+msgstr "Habilite para compatibilidade de validação da página de finalização"
+
+#: includes/LknWCGatewayCieloCredit.php:312
+msgid "Only enable if your site has issues validating nonce during checkout."
+msgstr ""
+"Habilite apenas se seu site tiver problemas para validar o nonce durante a "
+"finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:314
+msgid ""
+"Use this option if your checkout process fails due to nonce validation "
+"errors. Only enable if you know what you are doing."
+msgstr ""
+"Use esta opção se seu processo de finalização falhar devido a erros de "
+"validação de nonce. Habilite apenas se você souber o que está fazendo."
+
+#: includes/LknWCGatewayCieloCredit.php:318
+#: includes/LknWCGatewayCieloDebit.php:505
+msgid "Show animated card"
+msgstr "Mostrar cartão animado"
+
+#: includes/LknWCGatewayCieloCredit.php:320
+#: includes/LknWCGatewayCieloDebit.php:507
+msgid "Show animated card during checkout"
+msgstr "Mostrar cartão animado durante a finalização"
+
+#: includes/LknWCGatewayCieloCredit.php:321
+msgid "Displays a card with animations during the order payment checkout."
+msgstr ""
+"Exibe um cartão com animações durante a finalização do pagamento do pedido."
+
+#: includes/LknWCGatewayCieloCredit.php:323
+msgid "Displays an animated credit card in the checkout form."
+msgstr "Exibe um cartão de crédito animado no formulário de finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:325
+msgid ""
+"Enhance user experience by showing a dynamic card preview while filling out "
+"card details."
+msgstr ""
+"Melhore a experiência do usuário exibindo uma pré-visualização dinâmica do "
+"cartão enquanto preenche os dados do cartão."
+
+#: includes/LknWCGatewayCieloCredit.php:458
+#: includes/LknWCGatewayCieloDebit.php:1040
+msgid "General PRO"
+msgstr "Geral PRO"
+
+#: includes/LknWCGatewayCieloCredit.php:470
+#: includes/LknWCGatewayCieloDebit.php:1052
+msgid "License"
+msgstr "Licença"
+
+#: includes/LknWCGatewayCieloCredit.php:472
+#: includes/LknWCGatewayCieloDebit.php:1054
+msgid "License for Cielo API 3.0 plugin extensions."
+msgstr "Licença para extensões do plugin Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloCredit.php:473
+#: includes/LknWCGatewayCieloDebit.php:1055
+msgid "Enter your Link nacional license key to activate PRO features."
+msgstr "Insira sua chave de licença Link Nacional para ativar os recursos PRO."
+
+#: includes/LknWCGatewayCieloCredit.php:475
+#: includes/LknWCGatewayCieloCredit.php:490
+#: includes/LknWCGatewayCieloDebit.php:1057
+#: includes/LknWCGatewayCieloDebit.php:1072
+msgid "Save to enable other options."
+msgstr "Salve para habilitar outras opções."
+
+#: includes/LknWCGatewayCieloCredit.php:481
+#: includes/LknWCGatewayCieloCredit.php:487
+#: includes/LknWCGatewayCieloDebit.php:1063
+#: includes/LknWCGatewayCieloDebit.php:1069
+msgid "Validate License"
+msgstr "Validar Licença"
+
+#: includes/LknWCGatewayCieloCredit.php:489
+#: includes/LknWCGatewayCieloDebit.php:1071
+msgid "Click the button to validate your license."
+msgstr "Clique no botão para validar sua licença."
+
+#: includes/LknWCGatewayCieloCredit.php:492
+#: includes/LknWCGatewayCieloDebit.php:1074
+msgid "Validates your license key to unlock all PRO features."
+msgstr "Valida sua chave de licença para desbloquear todos os recursos PRO."
+
+#: includes/LknWCGatewayCieloCredit.php:499
+#: includes/LknWCGatewayCieloDebit.php:1081
+msgid "Cardholder Name Field"
+msgstr "Campo Nome do Titular do Cartão"
+
+#: includes/LknWCGatewayCieloCredit.php:501
+#: includes/LknWCGatewayCieloDebit.php:1083
+msgid "Disable the cardholder name field"
+msgstr "Desativar o campo nome do titular do cartão"
+
+#: includes/LknWCGatewayCieloCredit.php:502
+#: includes/LknWCGatewayCieloDebit.php:1084
+msgid ""
+"Hide the cardholder name field and query the field from billing details."
+msgstr ""
+"Oculta o campo nome do titular do cartão e obtém o campo dos dados de "
+"cobrança."
+
+#: includes/LknWCGatewayCieloCredit.php:503
+#: includes/LknWCGatewayCieloDebit.php:1085
+msgid ""
+"Enable this option if you want to use the billing name instead of collecting "
+"the cardholder name separately."
+msgstr ""
+"Habilite esta opção se quiser usar o nome de cobrança em vez de coletar o "
+"nome do titular do cartão separadamente."
+
+#: includes/LknWCGatewayCieloCredit.php:506
+#: includes/LknWCGatewayCieloDebit.php:1088
+msgid "Disables the name input and uses the billing name instead."
+msgstr "Desativa a entrada de nome e usa o nome de cobrança em vez disso."
+
+#: includes/LknWCGatewayCieloCredit.php:512
+#: includes/LknWCGatewayCieloDebit.php:1094
+msgid "Validation Compatibility Mode"
+msgstr "Modo de Compatibilidade de Validação"
+
+#: includes/LknWCGatewayCieloCredit.php:514
+#: includes/LknWCGatewayCieloDebit.php:1096
+msgid "Compatibility mode that prevents duplicate validation messages"
+msgstr "Modo de compatibilidade que evita mensagens de validação duplicadas"
+
+#: includes/LknWCGatewayCieloCredit.php:515
+#: includes/LknWCGatewayCieloDebit.php:1097
+msgid "Enable only if you experience duplicate messages on the payment page."
+msgstr ""
+"Habilite apenas se você encontrar mensagens duplicadas na página de "
+"pagamento."
+
+#: includes/LknWCGatewayCieloCredit.php:516
+#: includes/LknWCGatewayCieloDebit.php:1098
+msgid ""
+"Use this setting if your theme or plugins interfere with WooCommerce form "
+"validation."
+msgstr ""
+"Use esta configuração se seu tema ou plugins interferirem na validação de "
+"formulário do WooCommerce."
+
+#: includes/LknWCGatewayCieloCredit.php:519
+#: includes/LknWCGatewayCieloDebit.php:1101
+msgid "Avoids duplicated validation warnings during checkout."
+msgstr "Evita avisos de validação duplicados durante a finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:525
+#: includes/LknWCGatewayCieloCredit.php:2022
+#: includes/LknWCGatewayCieloCredit.php:2039
+#: includes/LknWCGatewayCieloDebit.php:1107
+#: includes/LknWCGatewayCieloDebit.php:3492
+#: includes/LknWCGatewayCieloDebit.php:3509
+msgid "Capture"
+msgstr "Captura"
+
+#: includes/LknWCGatewayCieloCredit.php:527
+#: includes/LknWCGatewayCieloDebit.php:1109
+msgid "Enable automatic capture for payments"
+msgstr "Habilita a captura automática para pagamentos"
+
+#: includes/LknWCGatewayCieloCredit.php:528
+#: includes/LknWCGatewayCieloDebit.php:1110
+msgid ""
+"If disabled, payments will only be authorized and must be captured manually."
+msgstr ""
+"Se desativado, os pagamentos serão apenas autorizados e deverão ser "
+"capturados manualmente."
+
+#: includes/LknWCGatewayCieloCredit.php:529
+#: includes/LknWCGatewayCieloDebit.php:1111
+msgid ""
+"Enable to automatically capture the amount upon transaction authorization."
+msgstr ""
+"Habilite para capturar automaticamente o valor após a autorização da "
+"transação."
+
+#: includes/LknWCGatewayCieloCredit.php:532
+#: includes/LknWCGatewayCieloDebit.php:1114
+msgid "Automatically captures the payment once authorized by Cielo."
+msgstr "Captura automaticamente o pagamento assim que autorizado pela Cielo."
+
+#: includes/LknWCGatewayCieloCredit.php:538
+#: includes/LknWCGatewayCieloDebit.php:578
+msgid "Online Card Validation"
+msgstr "Validação Online do Cartão"
+
+#: includes/LknWCGatewayCieloCredit.php:540
+#: includes/LknWCGatewayCieloDebit.php:581
+msgid ""
+"Enables online BIN validation via Cielo API 3.0 (Requires Cielo BIN "
+"functionality enabled)."
+msgstr ""
+"Habilita validação online de BIN via Cielo API 3.0 (Requer a funcionalidade "
+"de BIN da Cielo habilitada)."
+
+#: includes/LknWCGatewayCieloCredit.php:541
+#: includes/LknWCGatewayCieloDebit.php:582
+msgid ""
+"Check this if your Cielo account supports online brand validation (BIN "
+"lookup)."
+msgstr ""
+"Marque isto se sua conta Cielo oferece suporte à validação online de "
+"bandeira (consulta de BIN)."
+
+#: includes/LknWCGatewayCieloCredit.php:544
+#: includes/LknWCGatewayCieloDebit.php:586
+msgid "Performs card brand validation using Cielo’s BIN database."
+msgstr ""
+"Realiza a validação da bandeira do cartão usando o banco de dados de BIN da "
+"Cielo."
+
+#: includes/LknWCGatewayCieloCredit.php:566
+#: includes/LknWCGatewayCieloDebit.php:1136
+msgid "Minimum Installment Value"
+msgstr "Valor Mínimo da Parcela"
+
+#: includes/LknWCGatewayCieloCredit.php:568
+#: includes/LknWCGatewayCieloDebit.php:1138
+msgid ""
+"Sets the minimum accepted installment value. Cielo does not accept "
+"installments lower than R$ 5.00. Use a comma (,) to separate cents."
+msgstr ""
+"Define o valor mínimo aceito por parcela. A Cielo não aceita parcelas "
+"inferiores a R$ 5,00. Use vírgula (,) para separar os centavos."
+
+#: includes/LknWCGatewayCieloCredit.php:569
+#: includes/LknWCGatewayCieloDebit.php:1139
+msgid ""
+"Recommended minimum is R$ 5.00. Enter the value in Brazilian format (e.g., "
+"5,00)."
+msgstr ""
+"O mínimo recomendado é R$ 5,00. Insira o valor no formato brasileiro (ex.: "
+"5,00)."
+
+#: includes/LknWCGatewayCieloCredit.php:572
+#: includes/LknWCGatewayCieloDebit.php:1142
+msgid ""
+"Defines the lowest possible value for each installment. Required by Cielo."
+msgstr "Define o menor valor possível para cada parcela. Exigido pela Cielo."
+
+#: includes/LknWCGatewayCieloCredit.php:578
+#: includes/LknWCGatewayCieloDebit.php:1165
+msgid "Set Installment Limit"
+msgstr "Definir Limite de Parcelas"
+
+#: includes/LknWCGatewayCieloCredit.php:580
+#: includes/LknWCGatewayCieloDebit.php:1167
+msgid ""
+"Sets a maximum number of installments. Only certain brands accept more than "
+"12x."
+msgstr ""
+"Define um número máximo de parcelas. Apenas certas bandeiras aceitam mais de "
+"12x."
+
+#: includes/LknWCGatewayCieloCredit.php:581
+#: includes/LknWCGatewayCieloDebit.php:1168
+msgid "Choose the highest number of installments allowed for card payments."
+msgstr ""
+"Escolha o maior número de parcelas permitido para pagamentos com cartão."
+
+#: includes/LknWCGatewayCieloCredit.php:585
+#: includes/LknWCGatewayCieloDebit.php:1172
+msgid "Maximum number of times the purchase can be split into installments."
+msgstr "Número máximo de vezes que a compra pode ser dividida em parcelas."
+
+#: includes/LknWCGatewayCieloCredit.php:591
+#: includes/LknWCGatewayCieloDebit.php:1148
+msgid "Installment Settings"
+msgstr "Configurações de Parcelamento"
+
+#: includes/LknWCGatewayCieloCredit.php:594
+#: includes/LknWCGatewayCieloDebit.php:1151
+msgid "Select the option interest or discount. Save to continue configuration."
+msgstr ""
+"Selecione a opção juros ou desconto. Salve para continuar a configuração."
+
+#: includes/LknWCGatewayCieloCredit.php:595
+#: includes/LknWCGatewayCieloDebit.php:1152
+msgid ""
+"Allows the user to select discount or interest on credit card installments."
+msgstr ""
+"Permite ao usuário selecionar desconto ou juros nas parcelas do cartão de "
+"crédito."
+
+#: includes/LknWCGatewayCieloCredit.php:597
+#: includes/LknWCGatewayCieloDebit.php:1154
+msgid "Interest"
+msgstr "Juros"
+
+#: includes/LknWCGatewayCieloCredit.php:598
+#: includes/LknWCGatewayCieloDebit.php:1155
+msgid "Discount"
+msgstr "Desconto"
+
+#: includes/LknWCGatewayCieloCredit.php:602
+#: includes/LknWCGatewayCieloDebit.php:1159
+msgid ""
+"Defines whether the installment will apply interest or offer a discount. "
+"Save to load more settings."
+msgstr ""
+"Define se a parcela aplicará juros ou oferecerá desconto. Salve para "
+"carregar mais configurações."
+
+#: includes/LknWCGatewayCieloCredit.php:608
+#: includes/LknWCGatewayCieloCredit.php:635
+#: includes/LknWCGatewayCieloDebit.php:1178
+#: includes/LknWCGatewayCieloDebit.php:1205
+msgid "Installment Interest"
+msgstr "Juros de Parcelamento"
+
+#: includes/LknWCGatewayCieloCredit.php:610
+#: includes/LknWCGatewayCieloDebit.php:1180
+msgid ""
+"Allows payment with interest in installments. Save to continue configuration."
+msgstr ""
+"Permite pagamento com juros em parcelas. Salve para continuar a configuração."
+
+#: includes/LknWCGatewayCieloCredit.php:611
+#: includes/LknWCGatewayCieloDebit.php:1181
+msgid "Enable to allow interest to be charged on installment payments."
+msgstr "Habilite para permitir a cobrança de juros nos pagamentos parcelados."
+
+#: includes/LknWCGatewayCieloCredit.php:614
+#: includes/LknWCGatewayCieloDebit.php:1184
+msgid ""
+"Applies an interest rate to each installment. Use this if you want to charge "
+"extra per installment."
+msgstr ""
+"Aplica uma taxa de juros a cada parcela. Use isto se quiser cobrar um "
+"acréscimo por parcela."
+
+#: includes/LknWCGatewayCieloCredit.php:620
+#: includes/LknWCGatewayCieloDebit.php:1190
+msgid "Discount on Installments"
+msgstr "Desconto nas Parcelas"
+
+#: includes/LknWCGatewayCieloCredit.php:622
+#: includes/LknWCGatewayCieloDebit.php:1192
+msgid "Enables payment with discount on installments."
+msgstr "Habilita pagamento com desconto nas parcelas."
+
+#: includes/LknWCGatewayCieloCredit.php:623
+#: includes/LknWCGatewayCieloDebit.php:1193
+msgid ""
+"Enable to give a discount when the customer chooses to pay in installments."
+msgstr ""
+"Habilite para dar um desconto quando o cliente escolher pagar em parcelas."
+
+#: includes/LknWCGatewayCieloCredit.php:626
+#: includes/LknWCGatewayCieloDebit.php:1196
+msgid ""
+"Applies a discount per installment when selected. Useful to encourage multi-"
+"payment options."
+msgstr ""
+"Aplica um desconto por parcela quando selecionado. Útil para incentivar "
+"opções de pagamento múltiplo."
+
+#: includes/LknWCGatewayCieloCredit.php:637
+#: includes/LknWCGatewayCieloDebit.php:1207
+msgid ""
+"Defines the interest rate per installment in percentage. Only numbers are "
+"accepted. E.g., enter 10 for 10% interest, leave blank or enter zero for no "
+"interest."
+msgstr ""
+"Define a taxa de juros por parcela em porcentagem. Apenas números são "
+"aceitos. Ex.: insira 10 para 10% de juros, deixe em branco ou insira zero "
+"para sem juros."
+
+#: includes/LknWCGatewayCieloCredit.php:639
+#: includes/LknWCGatewayCieloDebit.php:1209
+msgid "Interest applied to each installment."
+msgstr "Juros aplicados a cada parcela."
+
+#. translators: %d is the number of installments (e.g., 2x, 3x, etc.)
+#: includes/LknWCGatewayCieloCredit.php:646
+#: includes/LknWCGatewayCieloDebit.php:1216
+#, php-format
+msgid ""
+"Interest applied when customer selects to pay in %dx. Leave 0 for no "
+"interest."
+msgstr ""
+"Juros aplicados quando o cliente escolhe pagar em %dx. Deixe 0 para sem "
+"juros."
+
+#: includes/LknWCGatewayCieloCredit.php:655
+#: includes/LknWCGatewayCieloDebit.php:1225
+msgid "Installment Discount"
+msgstr "Desconto de Parcelamento"
+
+#: includes/LknWCGatewayCieloCredit.php:657
+#: includes/LknWCGatewayCieloDebit.php:1227
+msgid ""
+"Defines the discount rate per installment in percentage. Only numbers are "
+"accepted. E.g., enter 10 for 10% discount, leave blank or enter zero for no "
+"discount."
+msgstr ""
+"Define a taxa de desconto por parcela em porcentagem. Apenas números são "
+"aceitos. Ex.: insira 10 para 10% de desconto, deixe em branco ou insira zero "
+"para sem desconto."
+
+#: includes/LknWCGatewayCieloCredit.php:659
+#: includes/LknWCGatewayCieloDebit.php:1229
+msgid "Discount applied to each installment."
+msgstr "Desconto aplicado a cada parcela."
+
+#. translators: %d is the number of installments (e.g., 2x, 3x, etc.)
+#: includes/LknWCGatewayCieloCredit.php:667
+#: includes/LknWCGatewayCieloDebit.php:1237
+#, php-format
+msgid ""
+"Discount applied when customer selects to pay in %dx. Leave 0 for no "
+"discount."
+msgstr ""
+"Desconto aplicado quando o cliente escolhe pagar em %dx. Deixe 0 para sem "
+"desconto."
+
+#: includes/LknWCGatewayCieloCredit.php:678
+#: includes/LknWCGatewayCieloDebit.php:1248
+msgid "Extras"
+msgstr "Extras"
+
+#: includes/LknWCGatewayCieloCredit.php:683
+#: includes/LknWCGatewayCieloDebit.php:1253
+msgid "Layout"
+msgstr "Layout"
+
+#: includes/LknWCGatewayCieloCredit.php:685
+#: includes/LknWCGatewayCieloCredit.php:693
+#: includes/LknWCGatewayCieloDebit.php:1256
+#: includes/LknWCGatewayCieloDebit.php:1265
+msgid "Choose the layout style for the checkout page."
+msgstr "Escolha o estilo de layout para a página de finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:686
+msgid ""
+"Select between Modern Version and Standard Version for the checkout layout."
+msgstr ""
+"Selecione entre Versão Moderna e Versão Padrão para o layout da finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:688
+msgid "Modern Version"
+msgstr "Versão Moderna"
+
+#: includes/LknWCGatewayCieloCredit.php:689
+#: includes/LknWCGatewayCieloDebit.php:1259
+msgid "Standard Version"
+msgstr "Versão Padrão"
+
+#: includes/LknWCGatewayCieloCredit.php:699
+#: includes/LknWCGatewayCieloDebit.php:1271
+msgid "Show card brand icons"
+msgstr "Mostrar ícones das bandeiras dos cartões"
+
+#: includes/LknWCGatewayCieloCredit.php:701
+#: includes/LknWCGatewayCieloDebit.php:1273
+msgid "Enable display of card brand icons"
+msgstr "Habilitar exibição dos ícones das bandeiras dos cartões"
+
+#: includes/LknWCGatewayCieloCredit.php:702
+#: includes/LknWCGatewayCieloDebit.php:1274
+msgid "Show or hide card brand icons on the checkout page."
+msgstr ""
+"Mostrar ou ocultar os ícones das bandeiras dos cartões na página de "
+"finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:703
+#: includes/LknWCGatewayCieloDebit.php:1275
+msgid "Enable to display card brand icons on the checkout page."
+msgstr ""
+"Habilite para exibir os ícones das bandeiras dos cartões na página de "
+"finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:706
+#: includes/LknWCGatewayCieloDebit.php:1278
+msgid "Allows you to show or hide card brand icons on the checkout."
+msgstr ""
+"Permite mostrar ou ocultar os ícones das bandeiras dos cartões na "
+"finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:712
+#: includes/LknWCGatewayCieloDebit.php:1284
+msgid "Additional CSS"
+msgstr "CSS Adicional"
+
+#: includes/LknWCGatewayCieloCredit.php:714
+#: includes/LknWCGatewayCieloDebit.php:1286
+msgid ""
+"Add custom CSS to style credit and debit card fields on the checkout page."
+msgstr ""
+"Adicione CSS personalizado para estilizar os campos de cartão de crédito e "
+"débito na página de finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:715
+#: includes/LknWCGatewayCieloDebit.php:1287
+msgid ""
+"This setting allows you to inject custom CSS to style the credit and debit "
+"card fields in the checkout."
+msgstr ""
+"Esta configuração permite injetar CSS personalizado para estilizar os campos "
+"de cartão de crédito e débito na finalização."
+
+#: includes/LknWCGatewayCieloCredit.php:717
+#: includes/LknWCGatewayCieloDebit.php:1289
+msgid ""
+"Customize visual appearance of card input fields using your own CSS rules."
+msgstr ""
+"Personalize a aparência visual dos campos de entrada do cartão usando suas "
+"próprias regras CSS."
+
+#: includes/LknWCGatewayCieloCredit.php:726
+#: includes/LknWCGatewayCieloDebit.php:1298
+msgid ""
+"Select what status should be set for the order once the payment is confirmed."
+msgstr ""
+"Selecione qual status deve ser definido para o pedido assim que o pagamento "
+"for confirmado."
+
+#: includes/LknWCGatewayCieloCredit.php:735
+#: includes/LknWCGatewayCieloDebit.php:1307
+msgid ""
+"Choose the status WooCommerce should apply after a successful payment "
+"confirmation."
+msgstr ""
+"Escolha o status que o WooCommerce deve aplicar após uma confirmação de "
+"pagamento bem-sucedida."
+
+#: includes/LknWCGatewayCieloCredit.php:741
+#: includes/LknWCGatewayCieloDebit.php:1313
+msgid "Autocomplete Orders"
+msgstr "Concluir Pedidos Automaticamente"
+
+#: includes/LknWCGatewayCieloCredit.php:743
+#: includes/LknWCGatewayCieloDebit.php:1315
+msgid ""
+"Defines if the order should be completed automatically based on product type."
+msgstr ""
+"Define se o pedido deve ser concluído automaticamente com base no tipo de "
+"produto."
+
+#: includes/LknWCGatewayCieloCredit.php:744
+#: includes/LknWCGatewayCieloDebit.php:1316
+msgid ""
+"Setting to set the order status after payment confirmation according to the "
+"product type. None: follow default settings or full payment status."
+msgstr ""
+"Configuração para definir o status do pedido após a confirmação de pagamento "
+"de acordo com o tipo do produto. Nenhum: seguir as configurações padrão ou "
+"status de pagamento completo."
+
+#: includes/LknWCGatewayCieloCredit.php:747
+#: includes/LknWCGatewayCieloDebit.php:1319
+msgid "None"
+msgstr "Nenhum"
+
+#: includes/LknWCGatewayCieloCredit.php:748
+#: includes/LknWCGatewayCieloDebit.php:1320
+msgid "Virtual Orders"
+msgstr "Pedidos Virtuais"
+
+#: includes/LknWCGatewayCieloCredit.php:749
+#: includes/LknWCGatewayCieloDebit.php:1321
+msgid "Virtual & Downloadable Orders"
+msgstr "Pedidos Virtuais e para Download"
+
+#: includes/LknWCGatewayCieloCredit.php:752
+#: includes/LknWCGatewayCieloDebit.php:1324
+msgid ""
+"Allows automatic completion of orders based on the type of products being "
+"sold."
+msgstr ""
+"Permite a conclusão automática de pedidos com base no tipo de produtos "
+"vendidos."
+
+#: includes/LknWCGatewayCieloCredit.php:758
+#: includes/LknWCGatewayCieloDebit.php:1330
+msgid "Elementor Checkout Compatibility Mode"
+msgstr "Modo de Compatibilidade do Checkout do Elementor"
+
+#: includes/LknWCGatewayCieloCredit.php:760
+#: includes/LknWCGatewayCieloDebit.php:1332
+msgid "Compatibility mode for WooCommerce checkout using Elementor"
+msgstr ""
+"Modo de compatibilidade para a finalização do WooCommerce usando o Elementor"
+
+#: includes/LknWCGatewayCieloCredit.php:761
+#: includes/LknWCGatewayCieloDebit.php:1333
+msgid ""
+"Enable only if you use Elementor checkout. This setting is crucial for "
+"plugin functionality in this context."
+msgstr ""
+"Habilite apenas se você usar a finalização do Elementor. Esta configuração é "
+"crucial para o funcionamento do plugin neste contexto."
+
+#: includes/LknWCGatewayCieloCredit.php:762
+#: includes/LknWCGatewayCieloDebit.php:1334
+msgid "Compatibility with Elementor’s custom checkout layout."
+msgstr ""
+"Compatibilidade com o layout de finalização personalizado do Elementor."
+
+#: includes/LknWCGatewayCieloCredit.php:765
+#: includes/LknWCGatewayCieloDebit.php:1337
+msgid ""
+"Activate this only when your checkout is built with Elementor to avoid "
+"layout or JS issues."
+msgstr ""
+"Ative isto apenas quando sua finalização for criada com o Elementor para "
+"evitar problemas de layout ou JS."
+
+#: includes/LknWCGatewayCieloCredit.php:771
+msgid "Zero Auth Validation"
+msgstr "Validação Zero Auth"
+
+#: includes/LknWCGatewayCieloCredit.php:773
+msgid ""
+"Enables Zero Auth validation (Requires enabling the Zero Auth feature on "
+"Cielo)."
+msgstr ""
+"Habilita a validação Zero Auth (Requer habilitar o recurso Zero Auth na "
+"Cielo)."
+
+#: includes/LknWCGatewayCieloCredit.php:774
+msgid "Zero Auth allows validation of a card without charging the user."
+msgstr "O Zero Auth permite validar um cartão sem cobrar o usuário."
+
+#: includes/LknWCGatewayCieloCredit.php:777
+msgid ""
+"Use this if your business process needs to verify card validity before an "
+"actual charge."
+msgstr ""
+"Use isto se o seu processo de negócio precisar verificar a validade do "
+"cartão antes de uma cobrança real."
+
+#: includes/LknWCGatewayCieloCredit.php:784
+msgid "Retry payments on subscriptions"
+msgstr "Repetir pagamentos em assinaturas"
+
+#: includes/LknWCGatewayCieloCredit.php:788
+msgid "Enables retry for subscription payments in case of"
+msgstr "Habilita a repetição para pagamentos de assinaturas em caso de"
+
+#: includes/LknWCGatewayCieloCredit.php:790
+msgid "reversible errors of type."
+msgstr "erros reversíveis do tipo."
+
+#: includes/LknWCGatewayCieloCredit.php:792
+msgid ""
+"Automatically attempts to charge again when Cielo returns a reversible error "
+"on subscriptions."
+msgstr ""
+"Tenta cobrar novamente automaticamente quando a Cielo retorna um erro "
+"reversível em assinaturas."
+
+#: includes/LknWCGatewayCieloCredit.php:795
+msgid ""
+"Useful to reduce failed subscription payments due to temporary issues like "
+"insufficient funds or communication problems."
+msgstr ""
+"Útil para reduzir falhas em pagamentos de assinaturas devido a problemas "
+"temporários como saldo insuficiente ou problemas de comunicação."
+
+#: includes/LknWCGatewayCieloCredit.php:801
+msgid "Retry interval"
+msgstr "Intervalo de repetição"
+
+#: includes/LknWCGatewayCieloCredit.php:803
+msgid ""
+"Set the time in hours until the second payment attempt. If it fails again, a "
+"third attempt will not be made."
+msgstr ""
+"Defina o tempo em horas até a segunda tentativa de pagamento. Se falhar "
+"novamente, uma terceira tentativa não será feita."
+
+#: includes/LknWCGatewayCieloCredit.php:804
+msgid ""
+"Defines the waiting time between the first and second attempt when a "
+"reversible error occurs during subscription renewal."
+msgstr ""
+"Define o tempo de espera entre a primeira e a segunda tentativa quando "
+"ocorre um erro reversível durante a renovação da assinatura."
+
+#: includes/LknWCGatewayCieloCredit.php:810
+msgid ""
+"Enter the number of hours to wait before retrying a failed payment due to "
+"reversible error."
+msgstr ""
+"Informe o número de horas a esperar antes de repetir um pagamento com falha "
+"devido a erro reversível."
+
+#: includes/LknWCGatewayCieloCredit.php:1003
+#: includes/LknWCGatewayCieloCredit.php:1039
+#: includes/LknWCGatewayCieloCredit.php:1040
+#: includes/LknWCGatewayCieloDebit.php:2077
+#: includes/LknWCGatewayCieloDebit.php:2331
+#: includes/LknWCGatewayCieloDebit.php:2332
+#: includes/LknWCGatewayCieloGooglePay.php:438
+#: includes/LknWCGatewayCieloGooglePay.php:439
+msgid "Nonce verification failed, try reloading the page"
+msgstr "Falha na verificação de nonce, tente recarregar a página"
+
+#: includes/LknWCGatewayCieloCredit.php:1091
+#: includes/LknWCGatewayCieloCredit.php:1756
+#: includes/LknWCGatewayCieloDebit.php:2440
+#: includes/LknWCGatewayCieloDebit.php:3099
+msgid "Card Holder Name is required!"
+msgstr "O nome do titular do cartão é obrigatório!"
+
+#: includes/LknWCGatewayCieloCredit.php:1107
+#: includes/LknWCGatewayCieloCredit.php:1729
+#: includes/LknWCGatewayCieloDebit.php:2456
+#: includes/LknWCGatewayCieloDebit.php:3242
+msgid "Cards starting with 0 are not accepted"
+msgstr "Cartões que começam com 0 não são aceitos"
+
+#: includes/LknWCGatewayCieloCredit.php:1121
+#: includes/LknWCGatewayCieloCredit.php:1743
+msgid "Credit Card number is invalid!"
+msgstr "Número de cartão de crédito inválido!"
+
+#: includes/LknWCGatewayCieloCredit.php:1135
+#: includes/LknWCGatewayCieloCredit.php:1788
+#: includes/LknWCGatewayCieloCredit.php:1800
+#: includes/LknWCGatewayCieloCredit.php:1809
+#: includes/LknWCGatewayCieloCredit.php:1818
+#: includes/LknWCGatewayCieloCredit.php:1839
+#: includes/LknWCGatewayCieloDebit.php:2484
+#: includes/LknWCGatewayCieloDebit.php:3294
+msgid "Expiration date is invalid!"
+msgstr "Data de expiração é inválida!"
+
+#: includes/LknWCGatewayCieloCredit.php:1149
+#: includes/LknWCGatewayCieloCredit.php:1867
+#: includes/LknWCGatewayCieloDebit.php:2498
+#: includes/LknWCGatewayCieloDebit.php:3318
+msgid "CVV is invalid!"
+msgstr "CVV inválido!"
+
+#: includes/LknWCGatewayCieloCredit.php:1163
+#: includes/LknWCGatewayCieloCredit.php:1177
+#: includes/LknWCGatewayCieloDebit.php:2512
+#: includes/LknWCGatewayCieloDebit.php:2526
+msgid "Invalid Cielo API 3.0 credentials."
+msgstr "Credenciais da Cielo API 3.0 inválidas."
+
+#: includes/LknWCGatewayCieloCredit.php:1266
+#: includes/LknWCGatewayCieloDebit.php:2925
+#: includes/LknWCGatewayCieloGooglePay.php:532
+msgid "Order payment failed. Please review the gateway settings."
+msgstr ""
+"Pagamento do pedido falhou. Por favor verifique as configurações do método "
+"de pagamento."
+
+#: includes/LknWCGatewayCieloCredit.php:1307
+#: includes/LknWCGatewayCieloDebit.php:3019
+#: includes/LknWCGatewayCieloGooglePay.php:598
+msgid "Payment completed successfully. Payment id:"
+msgstr "Pagamento de pedido realizado com sucesso. Id de pagamento:"
+
+#: includes/LknWCGatewayCieloCredit.php:1323
+#: includes/LknWCGatewayCieloDebit.php:2588
+msgid "Installments quantity"
+msgstr "Quantidade de parcelas"
+
+#: includes/LknWCGatewayCieloCredit.php:1418
+#: includes/LknWCGatewayCieloDebit.php:3056
+#: includes/LknWCGatewayCieloGooglePay.php:629
+msgid "Please contact Cielo for further assistance."
+msgstr "Por favor, entre em contato com a Cielo para mais assistência."
+
+#: includes/LknWCGatewayCieloCredit.php:1428
+#: includes/LknWCGatewayCieloCredit.php:1448
+#: includes/LknWCGatewayCieloDebit.php:3066
+#: includes/LknWCGatewayCieloDebit.php:3083
+msgid "Order payment failed. Make sure your credit card is valid."
+msgstr ""
+"Pagamento de pedido falhou. Certifique-se que seu cartão de crédito é válido."
+
+#: includes/LknWCGatewayCieloCredit.php:1613
+#: includes/LknWCGatewayCieloDebit.php:3124
+#: includes/LknWCGatewayCieloGooglePay.php:679
+msgid "You do not have permission to process refunds."
+msgstr "Você não tem permissão para processar reembolsos."
+
+#: includes/LknWCGatewayCieloCredit.php:1637
+#: includes/LknWCGatewayCieloDebit.php:3149
+msgid "Failed to query transaction status"
+msgstr "Falha ao consultar o status da transação"
+
+#: includes/LknWCGatewayCieloCredit.php:1638
+#: includes/LknWCGatewayCieloDebit.php:3150
+msgid "Failed to query transaction status. Please try again."
+msgstr "Falha ao consultar o status da transação. Tente novamente."
+
+#: includes/LknWCGatewayCieloCredit.php:1656
+#: includes/LknWCGatewayCieloCredit.php:1657
+#: includes/LknWCGatewayCieloDebit.php:3169
+#: includes/LknWCGatewayCieloDebit.php:3170
+msgid "Partial refund not allowed for non-captured transactions"
+msgstr "Reembolso parcial não permitido para transações não capturadas"
+
+#: includes/LknWCGatewayCieloCredit.php:1670
+#: includes/LknWCGatewayCieloDebit.php:3183
+#: includes/LknWCGatewayCieloGooglePay.php:699
+msgid "Order refund blocked: insufficient permissions"
+msgstr "Reembolso do pedido bloqueado: permissões insuficientes"
+
+#: includes/LknWCGatewayCieloCredit.php:1685
+#: includes/LknWCGatewayCieloCredit.php:1700
+#: includes/LknWCGatewayCieloDebit.php:3198
+#: includes/LknWCGatewayCieloDebit.php:3213
+#: includes/LknWCGatewayCieloGooglePay.php:714
+#: includes/LknWCGatewayCieloGooglePay.php:729
+msgid "Order refund failed, payment id:"
+msgstr "Falha no reembolso do pedido, id do pagamento:"
+
+#: includes/LknWCGatewayCieloCredit.php:1687
+#: includes/LknWCGatewayCieloDebit.php:3200
+msgid "Refund failed. Please try again later."
+msgstr "Falha no reembolso. Tente novamente mais tarde."
+
+#: includes/LknWCGatewayCieloCredit.php:1692
+#: includes/LknWCGatewayCieloDebit.php:3205
+#: includes/LknWCGatewayCieloGooglePay.php:721
+msgid "Order refunded, payment id:"
+msgstr "Pedido reembolsado, id do pagamento:"
+
+#: includes/LknWCGatewayCieloCredit.php:1702
+#: includes/LknWCGatewayCieloDebit.php:3215
+msgid "Refund processing failed. Please check the transaction status."
+msgstr "Falha no processamento do reembolso. Verifique o status da transação."
+
+#: includes/LknWCGatewayCieloCredit.php:1717
+msgid "Credit Card number is required!"
+msgstr "Número de cartão de crédito é obrigatório!"
+
+#: includes/LknWCGatewayCieloCredit.php:1777
+#: includes/LknWCGatewayCieloDebit.php:3273
+msgid "Expiration date is required!"
+msgstr "Data de expiração é obrigatória!"
+
+#: includes/LknWCGatewayCieloCredit.php:1830
+msgid "Credit card is expired!"
+msgstr "Cartão de crédito está vencido!"
+
+#: includes/LknWCGatewayCieloCredit.php:1858
+#: includes/LknWCGatewayCieloDebit.php:3311
+msgid "CVV is required!"
+msgstr "CVV é obrigatório!"
+
+#: includes/LknWCGatewayCieloCredit.php:2016
+#: includes/LknWCGatewayCieloDebit.php:3486
+msgid ""
+"Please enter a valid amount to capture. The value cannot be below 0 or above "
+"the total order amount."
+msgstr ""
+"Informe um valor válido para captura. O valor não pode ser menor que 0 nem "
+"maior que o valor total do pedido."
+
+#: includes/LknWCGatewayCieloCredit.php:2017
+#: includes/LknWCGatewayCieloDebit.php:3487
+msgid "Confirm capture of"
+msgstr "Confirmar captura de"
+
+#: includes/LknWCGatewayCieloCredit.php:2018
+#: includes/LknWCGatewayCieloDebit.php:3488
+msgid "A refund will be processed of"
+msgstr "Um reembolso será processado no valor de"
+
+#: includes/LknWCGatewayCieloCredit.php:2019
+#: includes/LknWCGatewayCieloDebit.php:3489
+#: resources/js/debitCard/lkn-dc-script-prd.js:43
+#: resources/js/debitCard/lkn-dc-script-sdb.js:44
+#: resources/js/frontend/lkn-dc-script-prd.js:36
+#: resources/js/frontend/lkn-dc-script-prd.js:55
+#: resources/js/frontend/lkn-dc-script-sdb.js:34
+#: resources/js/frontend/lkn-dc-script-sdb.js:53
+msgid "Processing..."
+msgstr "Processando..."
+
+#: includes/LknWCGatewayCieloCredit.php:2020
+#: includes/LknWCGatewayCieloDebit.php:3490
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Error:"
+msgstr "Erro:"
+
+#: includes/LknWCGatewayCieloCredit.php:2021
+#: includes/LknWCGatewayCieloDebit.php:3491
+msgid "Error processing capture."
+msgstr "Erro ao processar a captura."
+
+#. translators: %s is the maximum amount that can be captured
+#: includes/LknWCGatewayCieloCredit.php:2024
+#: includes/LknWCGatewayCieloDebit.php:3494
+#, php-format
+msgid ""
+"Warning: The capture amount cannot exceed %s. Lower amounts generate "
+"automatic refund for the difference. Once processed, the capture cannot be "
+"changed or repeated for this order."
+msgstr ""
+"Aviso: o valor da captura não pode exceder %s. Valores menores geram "
+"reembolso automático da diferença. Uma vez processada, a captura não pode "
+"ser alterada ou repetida para este pedido."
+
+#: includes/LknWCGatewayCieloCredit.php:2030
+#: includes/LknWCGatewayCieloDebit.php:3500
+msgid "Amount to capture:"
+msgstr "Valor para capturar:"
+
+#: includes/LknWCGatewayCieloCredit.php:2052
+#: includes/LknWCGatewayCieloDebit.php:3524
+msgid "Pro version is not active"
+msgstr "A versão PRO não está ativa"
+
+#: includes/LknWCGatewayCieloCredit.php:2057
+#: includes/LknWCGatewayCieloDebit.php:3529
+msgid "Security verification failed"
+msgstr "Falha na verificação de segurança"
+
+#: includes/LknWCGatewayCieloCredit.php:2070
+#: includes/LknWCGatewayCieloDebit.php:3542
+msgid "Required data not provided"
+msgstr "Dados obrigatórios não fornecidos"
+
+#: includes/LknWCGatewayCieloCredit.php:2080
+#: includes/LknWCGatewayCieloDebit.php:3552
+msgid "Incorrect payment gateway"
+msgstr "Gateway de pagamento incorreto"
+
+#: includes/LknWCGatewayCieloCredit.php:2086
+#: includes/LknWCGatewayCieloDebit.php:3558
+msgid "Partial capture is only available for orders with manual capture"
+msgstr ""
+"A captura parcial está disponível apenas para pedidos com captura manual"
+
+#: includes/LknWCGatewayCieloCredit.php:2092
+#: includes/LknWCGatewayCieloCredit.php:2100
+#: includes/LknWCGatewayCieloDebit.php:3564
+#: includes/LknWCGatewayCieloDebit.php:3572
+msgid "Partial capture has already been performed for this order"
+msgstr "A captura parcial já foi realizada para este pedido"
+
+#. translators: %1$s is the captured amount, %2$s is the total order amount
+#: includes/LknWCGatewayCieloCredit.php:2127
+#: includes/LknWCGatewayCieloDebit.php:3599
+#, php-format
+msgid "Automatic refund due to partial capture. Captured: %1$s of %2$s"
+msgstr "Reembolso automático devido à captura parcial. Capturado: %1$s de %2$s"
+
+#. translators: %s is the refund error message
+#: includes/LknWCGatewayCieloCredit.php:2139
+#: includes/LknWCGatewayCieloDebit.php:3611
+#, php-format
+msgid "Capture completed but failed to create refund: %s"
+msgstr "Captura concluída, mas falha ao criar reembolso: %s"
+
+#. translators: %1$s is the gateway ID, %2$s is the captured amount, %3$s is the refunded amount
+#: includes/LknWCGatewayCieloCredit.php:2155
+#: includes/LknWCGatewayCieloDebit.php:3627
+#, php-format
+msgid ""
+"[%1$s] Partial capture completed. Captured amount: %2$s. Refunded amount: "
+"%3$s"
+msgstr ""
+"[%1$s] Captura parcial concluída. Valor capturado: %2$s. Valor reembolsado: "
+"%3$s"
+
+#. translators: %s is the captured amount
+#: includes/LknWCGatewayCieloCredit.php:2166
+#: includes/LknWCGatewayCieloDebit.php:3638
+#, php-format
+msgid "Partial capture of %s completed successfully!"
+msgstr "Captura parcial de %s concluída com sucesso!"
+
+#. translators: %s is the refunded amount
+#: includes/LknWCGatewayCieloCredit.php:2173
+#: includes/LknWCGatewayCieloDebit.php:3645
+#, php-format
+msgid "Refund of %s processed."
+msgstr "Reembolso de %s processado."
+
+#. translators: %s is the error message
+#: includes/LknWCGatewayCieloCredit.php:2220
+#: includes/LknWCGatewayCieloDebit.php:3692
+#, php-format
+msgid "Error in partial capture: %s"
+msgstr "Erro na captura parcial: %s"
+
+#: includes/LknWCGatewayCieloCredit.php:2316
+#: includes/LknWCGatewayCieloDebit.php:3788
+msgid "Partial capture completed successfully. Captured amount:"
+msgstr "Captura parcial concluída com sucesso. Valor capturado:"
+
+#: includes/LknWCGatewayCieloCredit.php:2335
+#: includes/LknWCGatewayCieloCredit.php:2339
+#: includes/LknWCGatewayCieloDebit.php:3806
+#: includes/LknWCGatewayCieloDebit.php:3810
+msgid "Unknown error in partial capture"
+msgstr "Erro desconhecido na captura parcial"
+
+#: includes/LknWCGatewayCieloCredit.php:2345
+#: includes/LknWCGatewayCieloDebit.php:3816
+msgid "Partial capture failed"
+msgstr "Falha na captura parcial"
+
+#: includes/LknWCGatewayCieloDebit.php:75
+msgid "Cielo - Debit and credit card"
+msgstr "Cielo - Cartão de débito e crédito"
+
+#: includes/LknWCGatewayCieloDebit.php:77
+msgid "Allows debit and credit card payment with Cielo API 3.0."
+msgstr ""
+"Permite pagamentos com cartão de débito e crédito através da Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:256
+msgid "Brief BIN query test"
+msgstr "Teste rápido de consulta de BIN"
+
+#: includes/LknWCGatewayCieloDebit.php:257
+msgid ""
+"Before enabling, let’s confirm the BIN query is actually active on your "
+"Cielo account. Enter the first 6 digits of the card (the BIN) and run the "
+"test."
+msgstr ""
+"Antes de habilitar, vamos confirmar se a consulta de BIN está realmente "
+"ativa na sua conta Cielo. Informe os 6 primeiros dígitos do cartão (o BIN) e "
+"execute o teste."
+
+#: includes/LknWCGatewayCieloDebit.php:258
+msgid "First 6 digits of the card (BIN)"
+msgstr "6 primeiros dígitos do cartão (BIN)"
+
+#: includes/LknWCGatewayCieloDebit.php:259
+msgid "0000 00"
+msgstr "0000 00"
+
+#: includes/LknWCGatewayCieloDebit.php:260
+msgid "You are in sandbox. You can test with the BIN of one of these cards:"
+msgstr "Você está em sandbox. Você pode testar com o BIN de um destes cartões:"
+
+#: includes/LknWCGatewayCieloDebit.php:261
+msgid "Test"
+msgstr "Testar"
+
+#: includes/LknWCGatewayCieloDebit.php:262
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: includes/LknWCGatewayCieloDebit.php:263
+msgid "Testing…"
+msgstr "Testando…"
+
+#: includes/LknWCGatewayCieloDebit.php:265
+msgid "BIN query is active"
+msgstr "A consulta de BIN está ativa"
+
+#: includes/LknWCGatewayCieloDebit.php:266
+msgid "BIN query failed"
+msgstr "Falha na consulta de BIN"
+
+#: includes/LknWCGatewayCieloDebit.php:267
+msgid "Configure the feature in Cielo"
+msgstr "Configure o recurso na Cielo"
+
+#: includes/LknWCGatewayCieloDebit.php:268
+msgid "Enable the BIN query feature on your Cielo account and try again."
+msgstr ""
+"Habilite o recurso de consulta de BIN na sua conta Cielo e tente novamente."
+
+#: includes/LknWCGatewayCieloDebit.php:269
+msgid "Resource active"
+msgstr "Recurso ativo"
+
+#: includes/LknWCGatewayCieloDebit.php:270
+msgid "Resource failed"
+msgstr "Recurso com falha"
+
+#: includes/LknWCGatewayCieloDebit.php:330
+msgid "Enable Debit and Credit Card Payments"
+msgstr "Habilita pagamentos via cartão de débito e crédito"
+
+#: includes/LknWCGatewayCieloDebit.php:332
+#: includes/LknWCGatewayCieloDebit.php:335
+msgid "Enable this option to allow debit and credit card payments via Cielo."
+msgstr ""
+"Habilite esta opção para permitir pagamentos com cartão de débito e crédito "
+"via Cielo."
+
+#: includes/LknWCGatewayCieloDebit.php:333
+msgid "Select to enable debit and credit card payment options for your store."
+msgstr ""
+"Selecione para habilitar opções de pagamento com cartão de débito e crédito "
+"para sua loja."
+
+#: includes/LknWCGatewayCieloDebit.php:342
+msgid "Debit and credit card"
+msgstr "Cartão de débito e crédito"
+
+#: includes/LknWCGatewayCieloDebit.php:343
+msgid "The name displayed to customers on the checkout page."
+msgstr "O nome exibido aos clientes na página de finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:354
+msgid "This description appears below the payment method name during checkout."
+msgstr ""
+"Esta descrição aparece abaixo do nome do método de pagamento durante a "
+"finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:361
+msgid "Client Id"
+msgstr "Client Id"
+
+#: includes/LknWCGatewayCieloDebit.php:363
+#: includes/LknWCGatewayCieloDebit.php:373
+msgid "Cielo 3DS 2.2 registration required (ask for eCommerce support)."
+msgstr ""
+"Necessário cadastro de Cielo 3DS 2.2 (solicitar para o suporte ecommerce)"
+
+#: includes/LknWCGatewayCieloDebit.php:364
+msgid ""
+"Enter your Cielo 3DS 2.2 client identifier, required for authentication."
+msgstr ""
+"Informe seu identificador de cliente Cielo 3DS 2.2, obrigatório para "
+"autenticação."
+
+#: includes/LknWCGatewayCieloDebit.php:367
+msgid "Cielo 3DS 2.2 client identifier (used in authentication)."
+msgstr "Identificador de cliente Cielo 3DS 2.2 (usado na autenticação)."
+
+#: includes/LknWCGatewayCieloDebit.php:371
+msgid "Client Secret"
+msgstr "Client Secret"
+
+#: includes/LknWCGatewayCieloDebit.php:374
+msgid "Enter your Cielo 3DS 2.2 secret key, required for authentication."
+msgstr ""
+"Informe sua chave secreta Cielo 3DS 2.2, obrigatória para autenticação."
+
+#: includes/LknWCGatewayCieloDebit.php:377
+msgid "Cielo 3DS 2.2 secret key (used in authentication)."
+msgstr "Chave secreta Cielo 3DS 2.2 (usada na autenticação)."
+
+#: includes/LknWCGatewayCieloDebit.php:384
+msgid "Your Merchant Id used for Cielo API 3.0 authentication."
+msgstr "Seu Merchant Id usado para autenticação na Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:387
+msgid "Merchant Id credential for API authentication."
+msgstr "Credencial Merchant Id para autenticação na API."
+
+#: includes/LknWCGatewayCieloDebit.php:394
+msgid "Your Merchant Key used for Cielo API 3.0 authentication."
+msgstr "Sua Merchant Key usada para autenticação na Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:397
+msgid "Merchant Key credential for API authentication."
+msgstr "Credencial Merchant Key para autenticação na API."
+
+#: includes/LknWCGatewayCieloDebit.php:408
+#: includes/LknWCGatewayCieloDebit.php:410
+msgid "Choose between Production or Sandbox environment for the Cielo API."
+msgstr "Escolha entre o ambiente de Produção ou Sandbox para a Cielo API."
+
+#: includes/LknWCGatewayCieloDebit.php:414
+msgid "Establishment Code"
+msgstr "Código de estabelecimento"
+
+#: includes/LknWCGatewayCieloDebit.php:416
+msgid "Establishment code for Cielo 3DS E-Commerce 3.0."
+msgstr "Código de estabelecimento para Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:417
+msgid "Code identifying your establishment for Cielo 3DS E-Commerce 3.0."
+msgstr ""
+"Código que identifica seu estabelecimento para Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:420
+msgid "Establishment code used in Cielo 3DS E-Commerce 3.0 configuration."
+msgstr ""
+"Código do estabelecimento usado na configuração do Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:424
+#: includes/LknWCGatewayCieloGooglePay.php:250
+msgid "Merchant Name"
+msgstr "Nome do mercador"
+
+#: includes/LknWCGatewayCieloDebit.php:426
+msgid "Establishment name registered on Cielo 3DS E-Commerce 3.0."
+msgstr "O nome do estabelecimento registrado no Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:427
+msgid "Name of your establishment registered in Cielo 3DS E-Commerce 3.0."
+msgstr "Nome do seu estabelecimento registrado no Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:430
+msgid "Merchant name registered for 3DS E-Commerce 3.0."
+msgstr "Nome do estabelecimento registrado para 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:434
+msgid "Establishment Category Code"
+msgstr "Código de categoria do estabelecimento"
+
+#: includes/LknWCGatewayCieloDebit.php:436
+msgid "Establishment category code for Cielo 3DS E-Commerce 3.0."
+msgstr "Código de categoria do estabelecimento para Cielo 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:437
+msgid "Category code (MCC) of your establishment for Cielo 3DS E-Commerce 3.0."
+msgstr ""
+"Código de categoria (MCC) do seu estabelecimento para Cielo 3DS E-Commerce "
+"3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:440
+msgid "Merchant Category Code (MCC) for 3DS E-Commerce 3.0."
+msgstr "Merchant Category Code (MCC) para 3DS E-Commerce 3.0."
+
+#: includes/LknWCGatewayCieloDebit.php:448
+msgid ""
+"Description that appears on the customer invoice, only letters and spaces "
+"allowed."
+msgstr ""
+"Descrição que aparece na fatura do cliente, permitidos apenas letras e "
+"espaços."
+
+#: includes/LknWCGatewayCieloDebit.php:453
+msgid "Text shown on invoice, must not contain special characters or numbers."
+msgstr ""
+"Texto exibido na fatura, não deve conter caracteres especiais ou números."
+
+#: includes/LknWCGatewayCieloDebit.php:466
+msgid "Enable this to allow installment payments."
+msgstr "Habilite isto para permitir pagamentos em parcelas."
+
+#: includes/LknWCGatewayCieloDebit.php:468
+msgid "Allows customers to pay in installments for amounts over R$10.00."
+msgstr ""
+"Permite que os clientes paguem em parcelas para valores acima de R$10,00."
+
+#: includes/LknWCGatewayCieloDebit.php:476
+#: includes/LknWCGatewayCieloDebit.php:479
+msgid "Show placeholder texts inside the card input fields at checkout."
+msgstr ""
+"Mostrar textos de exemplo dentro dos campos de entrada do cartão na "
+"finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:477
+msgid "Enable to improve user experience with input hints."
+msgstr "Habilite para melhorar a experiência do usuário com dicas de entrada."
+
+#: includes/LknWCGatewayCieloDebit.php:484
+msgid ""
+"Enable this only if your checkout page is facing nonce verification issues."
+msgstr ""
+"Habilite isto apenas se sua página de finalização estiver enfrentando "
+"problemas de verificação de nonce."
+
+#: includes/LknWCGatewayCieloDebit.php:488
+#: includes/LknWCGatewayCieloDebit.php:490
+msgid "Activate this to fix nonce validation problems on the checkout page."
+msgstr ""
+"Ative isto para corrigir problemas de validação de nonce na página de "
+"finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:494
+msgid "Card ineligible for authentication"
+msgstr "Cartão inelegível para autenticação"
+
+#: includes/LknWCGatewayCieloDebit.php:496
+msgid "Allow payments without 3DS verification"
+msgstr "Permitir pagamentos sem verificação 3DS"
+
+#: includes/LknWCGatewayCieloDebit.php:497
+#: includes/LknWCGatewayCieloDebit.php:501
+msgid ""
+"For ineligible cards, allows the transaction to proceed without "
+"authentication — less secure but higher conversion."
+msgstr ""
+"Para cartões inelegíveis, permite que a transação prossiga sem autenticação "
+"— menos segura, mas com maior conversão."
+
+#: includes/LknWCGatewayCieloDebit.php:498
+msgid "Enable to allow transactions with cards that do not support 3DS."
+msgstr "Habilite para permitir transações com cartões que não suportam 3DS."
+
+#: includes/LknWCGatewayCieloDebit.php:508
+#: includes/LknWCGatewayCieloDebit.php:512
+msgid ""
+"Displays a card with visual animations during the order payment checkout."
+msgstr ""
+"Exibe um cartão com animações visuais durante a finalização do pagamento do "
+"pedido."
+
+#: includes/LknWCGatewayCieloDebit.php:509
+msgid "Enable to improve the visual experience at checkout."
+msgstr "Habilite para melhorar a experiência visual na finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:516
+msgid "Finish Order Button"
+msgstr "Botão de finalizar pedido"
+
+#: includes/LknWCGatewayCieloDebit.php:518
+msgid "Show \"Finish order\" button at checkout"
+msgstr "Mostrar botão \"Finalizar pedido\" na finalização"
+
+#: includes/LknWCGatewayCieloDebit.php:519
+msgid ""
+"Displays a custom finish-order button at checkout (Blocks and modern "
+"layout). Uncheck to use only the native WooCommerce button."
+msgstr ""
+"Exibe um botão personalizado de finalizar pedido na finalização (Blocos e "
+"layout moderno). Desmarque para usar apenas o botão nativo do WooCommerce."
+
+#: includes/LknWCGatewayCieloDebit.php:520
+msgid "Disable if your theme already provides a suitable checkout button."
+msgstr "Desative se seu tema já fornece um botão de finalização adequado."
+
+#: includes/LknWCGatewayCieloDebit.php:523
+msgid "Controls the display of the custom finish-order button at checkout."
+msgstr ""
+"Controla a exibição do botão personalizado de finalizar pedido na "
+"finalização."
+
+#: includes/LknWCGatewayCieloDebit.php:543
+msgid "Card Type Mode"
+msgstr "Modo de tipo de cartão"
+
+#: includes/LknWCGatewayCieloDebit.php:546
+msgid "Defines which card types are accepted by this gateway."
+msgstr "Define quais tipos de cartão são aceitos por este gateway."
+
+#: includes/LknWCGatewayCieloDebit.php:547
+msgid ""
+"Choose whether to accept both credit and debit cards, or restrict to only "
+"one type."
+msgstr ""
+"Escolha se deseja aceitar cartões de crédito e débito, ou restringir a "
+"apenas um tipo."
+
+#: includes/LknWCGatewayCieloDebit.php:549
+msgid "Credit/Debit (both)"
+msgstr "Crédito/Débito (ambos)"
+
+#: includes/LknWCGatewayCieloDebit.php:550
+msgid "Only Credit"
+msgstr "Somente crédito"
+
+#: includes/LknWCGatewayCieloDebit.php:551
+msgid "Only Debit"
+msgstr "Somente débito"
+
+#: includes/LknWCGatewayCieloDebit.php:556
+msgid ""
+"Restricts the gateway to accept only credit, only debit, or both card types."
+msgstr ""
+"Restringe o gateway a aceitar apenas crédito, apenas débito, ou ambos os "
+"tipos de cartão."
+
+#: includes/LknWCGatewayCieloDebit.php:562
+msgid "Hide Card Type Selector"
+msgstr "Ocultar seletor de tipo de cartão"
+
+#: includes/LknWCGatewayCieloDebit.php:564
+msgid "Do not show the card type selector on the checkout"
+msgstr "Não mostrar o seletor de tipo de cartão na finalização"
+
+#: includes/LknWCGatewayCieloDebit.php:565
+msgid ""
+"When enabled, the card type selector is hidden on the checkout. Available "
+"only when a single card type is accepted (\"Only Credit\" or \"Only Debit\")."
+msgstr ""
+"Quando habilitado, o seletor de tipo de cartão fica oculto na finalização. "
+"Disponível apenas quando um único tipo de cartão é aceito (\"Somente "
+"crédito\" ou \"Somente débito\")."
+
+#: includes/LknWCGatewayCieloDebit.php:566
+msgid ""
+"Hide the card type selector from customers on the checkout page. It is only "
+"available when only debit or only credit cards are accepted."
+msgstr ""
+"Oculta o seletor de tipo de cartão dos clientes na página de finalização. Só "
+"está disponível quando apenas cartões de débito ou apenas de crédito são "
+"aceitos."
+
+#: includes/LknWCGatewayCieloDebit.php:570
+msgid ""
+"Hide the card type selector on the checkout. Available only when only debit "
+"or only credit cards are accepted."
+msgstr ""
+"Oculta o seletor de tipo de cartão na finalização. Disponível apenas quando "
+"apenas cartões de débito ou apenas de crédito são aceitos."
+
+#: includes/LknWCGatewayCieloDebit.php:580
+msgid "Enable online BIN validation via Cielo API 3.0"
+msgstr "Habilitar validação de BIN online via Cielo API 3.0"
+
+#: includes/LknWCGatewayCieloDebit.php:593
+msgid "Allowed Card Brands"
+msgstr "Bandeiras de cartão permitidas"
+
+#: includes/LknWCGatewayCieloDebit.php:596
+msgid ""
+"Restrict the accepted card brands. Leave empty to allow all. You can type a "
+"custom brand."
+msgstr ""
+"Restrinja as bandeiras de cartão aceitas. Deixe vazio para permitir todas. "
+"Você pode digitar uma bandeira personalizada."
+
+#: includes/LknWCGatewayCieloDebit.php:597
+msgid "Brands allowed at checkout, based on the BIN lookup."
+msgstr "Bandeiras permitidas na finalização, com base na consulta de BIN."
+
+#: includes/LknWCGatewayCieloDebit.php:604
+msgid "Brands allowed at checkout. Leave empty to allow all."
+msgstr "Bandeiras permitidas na finalização. Deixe vazio para permitir todas."
+
+#: includes/LknWCGatewayCieloDebit.php:610
+msgid "Allowed Card Types"
+msgstr "Tipos de cartão permitidos"
+
+#: includes/LknWCGatewayCieloDebit.php:613
+msgid "Restrict the accepted card types. Leave empty to allow all."
+msgstr "Restrinja os tipos de cartão aceitos. Deixe vazio para permitir todos."
+
+#: includes/LknWCGatewayCieloDebit.php:614
+msgid "Card types allowed at checkout, based on the BIN lookup."
+msgstr ""
+"Tipos de cartão permitidos na finalização, com base na consulta de BIN."
+
+#: includes/LknWCGatewayCieloDebit.php:616
+#: includes/LknWCGatewayCieloDebit.php:2276
+msgid "Credit"
+msgstr "Crédito"
+
+#: includes/LknWCGatewayCieloDebit.php:617
+#: includes/LknWCGatewayCieloDebit.php:2277
+msgid "Debit"
+msgstr "Débito"
+
+#: includes/LknWCGatewayCieloDebit.php:618
+#: includes/LknWCGatewayCieloDebit.php:2278
+msgid "Multiple (credit and debit)"
+msgstr "Múltiplo (crédito e débito)"
+
+#: includes/LknWCGatewayCieloDebit.php:625
+msgid "Card types allowed at checkout. Leave empty to allow all."
+msgstr ""
+"Tipos de cartão permitidos na finalização. Deixe vazio para permitir todos."
+
+#: includes/LknWCGatewayCieloDebit.php:631
+msgid "Allowed Card Nationality"
+msgstr "Nacionalidade de cartão permitida"
+
+#: includes/LknWCGatewayCieloDebit.php:634
+msgid "Restrict by card nationality. Leave empty to allow all."
+msgstr ""
+"Restrinja por nacionalidade do cartão. Deixe vazio para permitir todas."
+
+#: includes/LknWCGatewayCieloDebit.php:635
+msgid "National (Brazil) or foreign cards, based on the BIN lookup."
+msgstr ""
+"Cartões nacionais (Brasil) ou estrangeiros, com base na consulta de BIN."
+
+#: includes/LknWCGatewayCieloDebit.php:637
+#: includes/LknWCGatewayCieloDebit.php:2281
+msgid "National"
+msgstr "Nacional"
+
+#: includes/LknWCGatewayCieloDebit.php:638
+#: includes/LknWCGatewayCieloDebit.php:2282
+msgid "Foreign"
+msgstr "Estrangeiro"
+
+#: includes/LknWCGatewayCieloDebit.php:645
+msgid "Card nationality allowed at checkout. Leave empty to allow all."
+msgstr ""
+"Nacionalidade de cartão permitida na finalização. Deixe vazio para permitir "
+"todas."
+
+#: includes/LknWCGatewayCieloDebit.php:651
+msgid "Corporate Cards"
+msgstr "Cartões corporativos"
+
+#: includes/LknWCGatewayCieloDebit.php:654
+msgid "Restrict by corporate card. Leave empty to allow all."
+msgstr "Restrinja por cartão corporativo. Deixe vazio para permitir todos."
+
+#: includes/LknWCGatewayCieloDebit.php:655
+msgid "Allow or block corporate cards, based on the BIN lookup."
+msgstr "Permita ou bloqueie cartões corporativos, com base na consulta de BIN."
+
+#: includes/LknWCGatewayCieloDebit.php:657
+#: includes/LknWCGatewayCieloDebit.php:2285
+msgid "Non-corporate"
+msgstr "Não corporativo"
+
+#: includes/LknWCGatewayCieloDebit.php:658
+#: includes/LknWCGatewayCieloDebit.php:2286
+msgid "Corporate"
+msgstr "Corporativo"
+
+#: includes/LknWCGatewayCieloDebit.php:665
+msgid "Corporate card handling at checkout. Leave empty to allow all."
+msgstr ""
+"Tratamento de cartões corporativos na finalização. Deixe vazio para permitir "
+"todos."
+
+#: includes/LknWCGatewayCieloDebit.php:671
+msgid "Prepaid Cards"
+msgstr "Cartões pré-pagos"
+
+#: includes/LknWCGatewayCieloDebit.php:674
+msgid "Restrict by prepaid card. Leave empty to allow all."
+msgstr "Restringir por cartão pré-pago. Deixe vazio para permitir todos."
+
+#: includes/LknWCGatewayCieloDebit.php:675
+msgid "Allow or block prepaid cards, based on the BIN lookup."
+msgstr "Permitir ou bloquear cartões pré-pagos, com base na consulta de BIN."
+
+#: includes/LknWCGatewayCieloDebit.php:677
+#: includes/LknWCGatewayCieloDebit.php:2289
+msgid "Non-prepaid"
+msgstr "Não pré-pago"
+
+#: includes/LknWCGatewayCieloDebit.php:678
+#: includes/LknWCGatewayCieloDebit.php:2290
+msgid "Prepaid"
+msgstr "Pré-pago"
+
+#: includes/LknWCGatewayCieloDebit.php:685
+msgid "Prepaid card handling at checkout. Leave empty to allow all."
+msgstr ""
+"Tratamento de cartão pré-pago na finalização. Deixe vazio para permitir "
+"todos."
+
+#: includes/LknWCGatewayCieloDebit.php:873
+msgid "Fields"
+msgstr "Campos"
+
+#: includes/LknWCGatewayCieloDebit.php:882
+#: includes/LknWCGatewayCieloGooglePay.php:274
+msgid "Checkout"
+msgstr "Finalizar"
+
+#: includes/LknWCGatewayCieloDebit.php:886
+msgid ""
+"Choose which checkout is previewed below so you can edit its labels/"
+"placeholders."
+msgstr ""
+"Escolha qual finalização é pré-visualizada abaixo para que você possa editar "
+"seus rótulos/placeholders."
+
+#: includes/LknWCGatewayCieloDebit.php:887
+msgid ""
+"Detected automatically from the WordPress checkout page. Block (Gutenberg) "
+"uses floating labels; the classic shortcode shows the label above the input, "
+"which allows setting a placeholder."
+msgstr ""
+"Detectado automaticamente a partir da página de finalização do WordPress. O "
+"Bloco (Gutenberg) usa rótulos flutuantes; o shortcode clássico mostra o "
+"rótulo acima do campo, o que permite definir um placeholder."
+
+#: includes/LknWCGatewayCieloDebit.php:889
+msgid "Block (Gutenberg)"
+msgstr "Bloco (Gutenberg)"
+
+#: includes/LknWCGatewayCieloDebit.php:890
+msgid "Shortcode/Classic"
+msgstr "Shortcode/Clássico"
+
+#: includes/LknWCGatewayCieloDebit.php:895
+msgid "Select which checkout the preview uses."
+msgstr "Selecione qual finalização a pré-visualização usa."
+
+#: includes/LknWCGatewayCieloDebit.php:905
+msgid "Preview"
+msgstr "Pré-visualização"
+
+#: includes/LknWCGatewayCieloDebit.php:907
+msgid ""
+"Below is the result: the checkout form rendered with the selected checkout "
+"and template."
+msgstr ""
+"Abaixo está o resultado: o formulário de finalização renderizado com a "
+"finalização e o modelo selecionados."
+
+#: includes/LknWCGatewayCieloDebit.php:908
+msgid ""
+"Click the pencil next to a label or placeholder to edit it, then use \"Save "
+"changes\" to apply."
+msgstr ""
+"Clique no lápis ao lado de um rótulo ou placeholder para editá-lo, depois "
+"use \"Salvar alterações\" para aplicar."
+
+#: includes/LknWCGatewayCieloDebit.php:1257
+msgid ""
+"Select between Standard, Modern and Compact versions for the checkout "
+"layout. Modern and Compact are PRO features."
+msgstr ""
+"Selecione entre as versões Padrão, Moderna e Compacta para o layout de "
+"finalização da compra. Moderna e Compacta são recursos PRO."
+
+#: includes/LknWCGatewayCieloDebit.php:1260
+msgid "Modern Version (PRO)"
+msgstr "Versão moderna (PRO)"
+
+#: includes/LknWCGatewayCieloDebit.php:1261
+msgid "Compact Version (PRO)"
+msgstr "Versão compacta (PRO)"
+
+#: includes/LknWCGatewayCieloDebit.php:1343
+msgid "Save Card Option"
+msgstr "Opção de Salvar Cartão"
+
+#: includes/LknWCGatewayCieloDebit.php:1345
+msgid ""
+"Allows you to configure if the customer card will be saved automatically, "
+"optionally, or disabled."
+msgstr ""
+"Permite configurar se o cartão do cliente será salvo automaticamente, "
+"opcionalmente ou desabilitado."
+
+#: includes/LknWCGatewayCieloDebit.php:1346
+msgid ""
+"Choose if the customer can opt to save the card, if it will be required, or "
+"if the feature will be disabled."
+msgstr ""
+"Escolha se o cliente pode optar por salvar o cartão, se ele será "
+"obrigatório, ou se o recurso será desabilitado."
+
+#: includes/LknWCGatewayCieloDebit.php:1348
+msgid "Optional (customer can choose to save the card at checkout)"
+msgstr "Opcional (o cliente pode escolher salvar o cartão na finalização)"
+
+#: includes/LknWCGatewayCieloDebit.php:1349
+msgid ""
+"Required (always save the card automatically, no option for the customer)"
+msgstr ""
+"Obrigatório (sempre salva o cartão automaticamente, sem opção para o cliente)"
+
+#: includes/LknWCGatewayCieloDebit.php:1350
+msgid "Disabled (do not save the card, default)"
+msgstr "Desabilitado (não salvar o cartão, padrão)"
+
+#: includes/LknWCGatewayCieloDebit.php:1354
+msgid ""
+"Allows you to define if the card will be saved automatically, optionally, or "
+"disabled."
+msgstr ""
+"Permite definir se o cartão será salvo automaticamente, opcionalmente ou "
+"desabilitado."
+
+#: includes/LknWCGatewayCieloDebit.php:1416
+#: includes/LknWCGatewayCieloEndpoint.php:320
+msgid "Auth token generation failed."
+msgstr "Geração de token de autenticação falhou."
+
+#: includes/LknWCGatewayCieloDebit.php:2135
+msgid "Invalid card type."
+msgstr "Tipo de cartão inválido."
+
+#: includes/LknWCGatewayCieloDebit.php:2139
+msgid "The selected card type is not accepted by this gateway."
+msgstr "O tipo de cartão selecionado não é aceito por este gateway."
+
+#: includes/LknWCGatewayCieloDebit.php:2192
+#: includes/LknWCGatewayCieloEndpoint.php:371
+#: resources/js/frontend/lkn-dc-script-prd.js:187
+#: resources/js/frontend/lkn-dc-script-sdb.js:185
+msgid ""
+"Could not validate the card with the card issuer. Please try again or use "
+"another card."
+msgstr ""
+"Não foi possível validar o cartão com o emissor. Tente novamente ou use "
+"outro cartão."
+
+#. translators: %1$s: detected card brand; %2$s: comma-separated list of allowed brands
+#: includes/LknWCGatewayCieloDebit.php:2201
+#, php-format
+msgid ""
+"The card brand \"%1$s\" is not accepted by this store. Accepted brands: %2$s."
+msgstr ""
+"A bandeira de cartão \"%1$s\" não é aceita por esta loja. Bandeiras aceitas: "
+"%2$s."
+
+#. translators: %1$s: detected card type; %2$s: comma-separated list of allowed card types
+#: includes/LknWCGatewayCieloDebit.php:2211
+#, php-format
+msgid ""
+"The card type \"%1$s\" is not accepted by this store. Accepted types: %2$s."
+msgstr ""
+"O tipo de cartão \"%1$s\" não é aceito por esta loja. Tipos aceitos: %2$s."
+
+#. translators: %1$s: detected nationality; %2$s: comma-separated list of allowed nationalities
+#: includes/LknWCGatewayCieloDebit.php:2223
+#, php-format
+msgid ""
+"The card nationality \"%1$s\" is not accepted by this store. Accepted: %2$s."
+msgstr ""
+"A nacionalidade do cartão \"%1$s\" não é aceita por esta loja. Aceitas: %2$s."
+
+#. translators: %1$s: detected corporate/non-corporate; %2$s: comma-separated list of allowed values
+#. translators: %1$s: detected prepaid/non-prepaid; %2$s: comma-separated list of allowed values
+#: includes/LknWCGatewayCieloDebit.php:2236
+#: includes/LknWCGatewayCieloDebit.php:2249
+#, php-format
+msgid "The card is not accepted by this store: it is \"%1$s\". Accepted: %2$s."
+msgstr "O cartão não é aceito por esta loja: ele é \"%1$s\". Aceitos: %2$s."
+
+#: includes/LknWCGatewayCieloDebit.php:2378
+msgid ""
+"Debit cards are not accepted for subscription payments. Please use a credit "
+"card."
+msgstr ""
+"Cartões de débito não são aceitos para pagamentos de assinatura. Use um "
+"cartão de crédito."
+
+#: includes/LknWCGatewayCieloDebit.php:2421
+msgid "Bin query is not enabled for this merchant."
+msgstr "A consulta de BIN não está habilitada para este lojista."
+
+#: includes/LknWCGatewayCieloDebit.php:2470
+#: includes/LknWCGatewayCieloDebit.php:3252
+msgid "Debit Card number is invalid!"
+msgstr "Número de cartão de débito inválido!"
+
+#: includes/LknWCGatewayCieloDebit.php:2541
+#: includes/LknWCGatewayCieloDebit.php:2707
+msgid "Invalid Cielo 3DS 2.2 authentication."
+msgstr "Autenticação Cielo 3DS 2.2 inválida."
+
+#: includes/LknWCGatewayCieloDebit.php:2573
+msgid "Order payment failed. Installment quantity invalid."
+msgstr "Pagamento de pedido falhou. Quantidade de parcelas inválida."
+
+#: includes/LknWCGatewayCieloDebit.php:2648
+msgid "Credit card payment processed without 3DS validation"
+msgstr "Pagamento com cartão de crédito processado sem validação 3DS"
+
+#: includes/LknWCGatewayCieloDebit.php:2651
+msgid "Credit card payment processed with 3DS validation"
+msgstr "Pagamento com cartão de crédito processado com validação 3DS"
+
+#: includes/LknWCGatewayCieloDebit.php:2652
+msgid "Debit card payment processed with 3DS validation"
+msgstr "Pagamento com cartão de débito processado com validação 3DS"
+
+#: includes/LknWCGatewayCieloDebit.php:2852
+msgid "Selected card not found."
+msgstr "Cartão selecionado não encontrado."
+
+#: includes/LknWCGatewayCieloDebit.php:2917
+msgid ""
+"Order payment failed. To make a successful payment using debit card, please "
+"review the gateway settings."
+msgstr ""
+"Pagamento de pedido falhou. Para realizar um pagamento utilizando cartão de "
+"débito, por favor revise as configurações do método de pagamento."
+
+#: includes/LknWCGatewayCieloDebit.php:3085
+msgid "Order payment failed. Make sure your debit card is valid."
+msgstr ""
+"Pagamento de pedido falhou. Certifique-se que seu cartão de débito é válido."
+
+#: includes/LknWCGatewayCieloDebit.php:3230
+msgid "Debit Card number is required!"
+msgstr "Número de cartão de débito é obrigatório!"
+
+#: includes/LknWCGatewayCieloDebit.php:3286
+msgid "Debit card is expired!"
+msgstr "Cartão de débito está vencido!"
+
+#: includes/LknWCGatewayCieloEndpoint.php:59
+#: includes/LknWCGatewayCieloEndpoint.php:87
+#: includes/LknWCGatewayCieloEndpoint.php:113
+msgid "Invalid security token."
+msgstr "Token de segurança inválido."
+
+#: includes/LknWCGatewayCieloEndpoint.php:160
+msgid "Failed to retrieve card type"
+msgstr "Falha ao recuperar o tipo de cartão"
+
+#: includes/LknWCGatewayCieloEndpoint.php:207
+#: includes/LknWCGatewayCieloEndpoint.php:270
+msgid "Security check failed."
+msgstr "Falha na verificação de segurança."
+
+#: includes/LknWCGatewayCieloEndpoint.php:213
+msgid "You do not have permission to run this test."
+msgstr "Você não tem permissão para executar este teste."
+
+#: includes/LknWCGatewayCieloEndpoint.php:226
+msgid "Please enter a valid card number (at least the first 6 digits)."
+msgstr "Insira um número de cartão válido (pelo menos os 6 primeiros dígitos)."
+
+#: includes/LknWCGatewayCieloEndpoint.php:248
+msgid ""
+"The online BIN query is working. The feature is enabled on your Cielo "
+"account."
+msgstr ""
+"A consulta de BIN online está funcionando. O recurso está habilitado na sua "
+"conta Cielo."
+
+#: includes/LknWCGatewayCieloEndpoint.php:253
+msgid ""
+"The online BIN query did not respond. Make sure the feature is enabled on "
+"your Cielo account and that your credentials are correct."
+msgstr ""
+"A consulta de BIN online não respondeu. Certifique-se de que o recurso está "
+"habilitado na sua conta Cielo e que suas credenciais estão corretas."
+
+#: includes/LknWCGatewayCieloEndpoint.php:262
+msgid "Missing security token."
+msgstr "Token de segurança ausente."
+
+#: includes/LknWCGatewayCieloEndpoint.php:277
+msgid "You do not have permission to clear order logs."
+msgstr "Você não tem permissão para limpar os registros de pedidos."
+
+#. translators: %d: number of order logs cleared
+#: includes/LknWCGatewayCieloEndpoint.php:307
+#, php-format
+msgid "%d order logs cleared successfully."
+msgstr "%d registros de pedidos limpos com sucesso."
+
+#: includes/LknWCGatewayCieloEndpoint.php:431
+msgid "Card brand not found"
+msgstr "Bandeira de cartão não encontrada"
+
+#: includes/LknWCGatewayCieloGooglePay.php:50
+msgid "Cielo - Google Pay"
+msgstr "Cielo - Google Pay"
+
+#: includes/LknWCGatewayCieloGooglePay.php:51
+msgid "Allows Google Pay payment with Cielo API 3.0."
+msgstr "Permite pagamentos via Google Pay com Cielo API 3.0."
+
+#: includes/LknWCGatewayCieloGooglePay.php:196
+msgid "Enable Google Pay Payments"
+msgstr "Habilitar Pagamentos Google Pay"
+
+#: includes/LknWCGatewayCieloGooglePay.php:198
+msgid "Enable or disable the Google Pay payment method."
+msgstr "Habilite ou desabilite o método de pagamento Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:199
+msgid "Check this option and save to enable the Google Pay settings."
+msgstr ""
+"Marque esta opção e salve para habilitar as configurações do Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:201
+msgid ""
+"Offer Google Pay to your customers via the Cielo API 3.0. <a href=\"https://"
+"www.youtube.com/watch?v=rP_UAPcIG4I\" target=\"_blank\">Learn more</a>."
+msgstr ""
+"Ofereça o Google Pay aos seus clientes através da API 3.0 da Cielo. <a "
+"href=\"https://www.youtube.com/watch?v=rP_UAPcIG4I\" target=\"_blank\">Saiba "
+"mais</a>."
+
+#: includes/LknWCGatewayCieloGooglePay.php:207
+msgid "Google Pay"
+msgstr "Google Pay"
+
+#: includes/LknWCGatewayCieloGooglePay.php:208
+msgid "Enter the title that will be shown to users at checkout."
+msgstr "Insira o título que será exibido aos usuários na finalização."
+
+#: includes/LknWCGatewayCieloGooglePay.php:212
+msgid ""
+"This text will appear as the payment method title during checkout. Choose "
+"something your customers will easily understand, like “Pay with Google Pay "
+"(Cielo)”."
+msgstr ""
+"Este texto aparecerá como o título do método de pagamento durante a "
+"finalização. Escolha algo que seus clientes entendam facilmente, como “Pagar "
+"com Google Pay (Cielo)”."
+
+#: includes/LknWCGatewayCieloGooglePay.php:223
+msgid ""
+"“Production” for your live credentials and “Development” for your test "
+"(Sandbox) keys."
+msgstr ""
+"“Produção” para suas credenciais reais e “Desenvolvimento” para suas chaves "
+"de teste (Sandbox)."
+
+#: includes/LknWCGatewayCieloGooglePay.php:224
+msgid "Fill in the data provided by CIELO."
+msgstr "Preencha os dados fornecidos pela CIELO."
+
+#: includes/LknWCGatewayCieloGooglePay.php:226
+msgid ""
+"Select the environment (Production or Sandbox) in which your Cielo API keys "
+"were generated."
+msgstr ""
+"Selecione o ambiente (Produção ou Sandbox) no qual suas chaves da API Cielo "
+"foram geradas."
+
+#: includes/LknWCGatewayCieloGooglePay.php:246
+msgid ""
+"This is your secret Merchant Key used to sign transactions with the Cielo "
+"API. Keep it safe and do not share it."
+msgstr ""
+"Esta é a sua Merchant Key secreta usada para assinar transações com a API "
+"Cielo. Mantenha-a segura e não a compartilhe."
+
+#: includes/LknWCGatewayCieloGooglePay.php:252
+msgid "Store name in Google Pay."
+msgstr "Nome da loja no Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:253
+msgid "Enter the data defined by Google Pay."
+msgstr "Insira os dados definidos pelo Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:256
+msgid "Enter the Google Merchant Name for your Google Pay integration."
+msgstr "Insira o Nome do Comerciante Google para sua integração Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:260
+msgid "Google Merchant Id"
+msgstr "ID do Comerciante Google"
+
+#: includes/LknWCGatewayCieloGooglePay.php:262
+msgid "Google Pay production key."
+msgstr "Chave de produção do Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:265
+msgid "Enter the Google Merchant ID for your Google Pay integration."
+msgstr "Insira o ID do Comerciante Google para sua integração Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:269
+msgid "Google Pay Button"
+msgstr "Botão do Google Pay"
+
+#: includes/LknWCGatewayCieloGooglePay.php:272
+msgid "Pay"
+msgstr "Pagar"
+
+#: includes/LknWCGatewayCieloGooglePay.php:273
+msgid "Buy"
+msgstr "Comprar"
+
+#: includes/LknWCGatewayCieloGooglePay.php:275
+msgid "Donate"
+msgstr "Doar"
+
+#: includes/LknWCGatewayCieloGooglePay.php:279
+msgid "Choose the text to be displayed on the Google Pay button."
+msgstr "Escolha o texto a ser exibido no botão do Google Pay."
+
+#: includes/LknWCGatewayCieloGooglePay.php:283
+msgid "Require 3DS"
+msgstr "Exigir 3DS"
+
+#: includes/LknWCGatewayCieloGooglePay.php:285
+msgid "Allow only payments with 3DS"
+msgstr "Permitir apenas pagamentos com 3DS"
+
+#: includes/LknWCGatewayCieloGooglePay.php:287
+msgid ""
+"When enabled, only transactions with 3DS authentication will be processed."
+msgstr ""
+"Quando habilitado, apenas transações com autenticação 3DS serão processadas."
+
+#: includes/LknWCGatewayCieloGooglePay.php:288
+msgid ""
+"This setting increases security but blocks some cards that do not support "
+"3DS."
+msgstr ""
+"Esta configuração aumenta a segurança, mas bloqueia alguns cartões que não "
+"suportam 3DS."
+
+#: includes/LknWCGatewayCieloGooglePay.php:290
+msgid ""
+"Enable to require 3DS authentication on all Google Pay transactions for "
+"greater security."
+msgstr ""
+"Habilite para exigir autenticação 3DS em todas as transações do Google Pay "
+"para maior segurança."
+
+#: includes/LknWCGatewayCieloGooglePay.php:444
+msgid "Payment data is missing, please try again."
+msgstr "Os dados de pagamento estão ausentes, tente novamente."
+
+#: includes/LknWCGatewayCieloGooglePay.php:466
+msgid "Invalid payment data structure."
+msgstr "Estrutura de dados de pagamento inválida."
+
+#: includes/LknWCGatewayCieloGooglePay.php:540
+msgid "Google Pay is not configured in Cielo."
+msgstr "O Google Pay não está configurado na Cielo."
+
+#: includes/LknWCGatewayCieloGooglePay.php:641
+#: includes/LknWCGatewayCieloGooglePay.php:656
+msgid "Order payment failed, please try again."
+msgstr "Falha no pagamento do pedido, tente novamente."
+
+#: includes/templates/admin/lkn-cielo-fields-preview.php:48
+msgid "Edit"
+msgstr "Editar"
+
+#: includes/templates/admin/lkn-cielo-fields-preview.php:84
+msgid "Pay for your purchase with a debit card through"
+msgstr "Pague sua compra com cartão de débito através de"
+
+#: includes/templates/adminSettingsCard.php:20
+msgid "Documentation"
+msgstr "Documentação"
+
+#: includes/templates/adminSettingsCard.php:23
+msgid "Hosting"
+msgstr "Hospedagem"
+
+#: includes/templates/adminSettingsCard.php:28
+msgid "WP Plugin"
+msgstr "Plugin WP"
+
+#: includes/templates/adminSettingsCard.php:31
+msgid "WP Support"
+msgstr "Suporte WP"
+
+#: includes/templates/adminSettingsCard.php:38
+msgid "Rate Plugin"
+msgstr "Avaliar Plugin"
+
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:48
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:103
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:274
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:106
+msgid "Visa"
+msgstr "Visa"
+
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:49
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:104
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:275
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:107
+msgid "Mastercard"
+msgstr "Mastercard"
+
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:50
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:106
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:276
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:109
+msgid "Elo"
+msgstr "Elo"
+
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:51
+msgid "Amex"
+msgstr "Amex"
+
+#: includes/templates/lkn-cielo-credit-payment-fields-modern-layout.php:52
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:107
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:110
+msgid "Other Card"
+msgstr "Outro Cartão"
+
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:91
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:70
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:94
+msgid "Add Card"
+msgstr "Adicionar Cartão"
+
+#: includes/templates/lkn-cielo-debit-payment-fields-compact-layout.php:376
+#: includes/templates/lkn-cielo-debit-payment-fields-default-layout.php:519
+#: includes/templates/lkn-cielo-debit-payment-fields-modern-layout.php:347
+msgid "Save card for safe and fast purchase"
+msgstr "Salve o cartão para uma compra segura e rápida"
+
+#: includes/templates/lkn-cielo-pix-template.php:30
+msgid "Share with"
+msgstr "Compartilhar com"
+
+#: includes/templates/lkn-cielo-pix-template.php:78
+msgid "Share"
+msgstr "Compartilhar"
+
+#: includes/templates/lkn-cielo-pix-template.php:98
+msgid "Copy"
+msgstr "Copiar"
+
+#: includes/views/notices/LknWcCieloDownloadNotice.php:7
+msgid "Recommendation:"
+msgstr "Recomendação:"
+
+#: includes/views/notices/LknWcCieloDownloadNotice.php:7
+msgid ""
+"Install the free fraud prevention plugin for WooCommerce and increase the "
+"security of your orders."
+msgstr ""
+"Instale o plugin gratuito de prevenção a fraudes para o WooCommerce e "
+"aumente a segurança dos seus pedidos."
+
+#: includes/views/notices/LknWcCieloDownloadNotice.php:7
+msgid "Download"
+msgstr "Baixar"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Open WhatsApp for support"
+msgstr "Abrir WhatsApp para suporte"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Support"
+msgstr "Suporte"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Search transactions..."
+msgstr "Pesquisar transações..."
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Previous"
+msgstr "Anterior"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Next"
+msgstr "Próximo"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Page"
+msgstr "Página"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "of"
+msgstr "de"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Showing"
+msgstr "Exibindo"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "to"
+msgstr "até"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "records"
+msgstr "registros"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "No transactions found"
+msgstr "Nenhuma transação encontrada"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "An error occurred while loading the data"
+msgstr "Ocorreu um erro ao carregar os dados"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Click to upgrade to Cielo Analytics PRO"
+msgstr "Clique para atualizar para o Cielo Analytics PRO"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Column Configuration"
+msgstr "Configuração de Colunas"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Restore Default"
+msgstr "Restaurar Padrão"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Move up"
+msgstr "Mover para cima"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Move down"
+msgstr "Mover para baixo"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "💡 Tips:"
+msgstr "💡 Dicas:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Check/uncheck the boxes to show/hide columns"
+msgstr "Marque/desmarque as caixas para mostrar/ocultar colunas"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Use ↑↓ or drag the cards to reorder the columns"
+msgstr "Use ↑↓ ou arraste os cartões para reordenar as colunas"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Settings are saved automatically"
+msgstr "As configurações são salvas automaticamente"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Configure column order and visibility"
+msgstr "Configure a ordem e a visibilidade das colunas"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Configure Columns"
+msgstr "Configurar Colunas"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "No data to export"
+msgstr "Não há dados para exportar"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Export data in CSV format"
+msgstr "Exportar dados no formato CSV"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Export CSV"
+msgstr "Exportar CSV"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Export data in Excel format"
+msgstr "Exportar dados no formato Excel"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Export XLS"
+msgstr "Exportar XLS"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Latest transactions:"
+msgstr "Últimas transações:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Load up to:"
+msgstr "Carregar até:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Query dates:"
+msgstr "Datas da consulta:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Start Date:"
+msgstr "Data Inicial:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "End Date:"
+msgstr "Data Final:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Filter"
+msgstr "Filtrar"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Today"
+msgstr "Hoje"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Last 7 days"
+msgstr "Últimos 7 dias"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Last 30 days"
+msgstr "Últimos 30 dias"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Custom"
+msgstr "Personalizado"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Items per page:"
+msgstr "Itens por página:"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Loading transactions..."
+msgstr "Carregando transações..."
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Try again"
+msgstr "Tente novamente"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "of the total of"
+msgstr "do total de"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "transactions"
+msgstr "transações"
+
+#: resources/js/analytics/lknCieloAnalyticsCompiled.js:2
+msgid "Load more transactions"
+msgstr "Carregar mais transações"
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:109
+#: resources/js/debitCard/lkn-dc-script-prd.js:330
+#: resources/js/debitCard/lkn-dc-script-sdb.js:109
+#: resources/js/debitCard/lkn-dc-script-sdb.js:330
+#: resources/js/frontend/lkn-dc-script-prd.js:366
+#: resources/js/frontend/lkn-dc-script-prd.js:657
+#: resources/js/frontend/lkn-dc-script-sdb.js:373
+#: resources/js/frontend/lkn-dc-script-sdb.js:665
+msgid ""
+"Authentication not completed. Your order was not placed. Please try again."
+msgstr ""
+"Autenticação não concluída. Seu pedido não foi realizado. Tente novamente."
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:138
+#: resources/js/debitCard/lkn-dc-script-sdb.js:138
+#: resources/js/frontend/lkn-dc-script-prd.js:379
+#: resources/js/frontend/lkn-dc-script-sdb.js:386
+msgid "Card Ineligible for Authentication"
+msgstr "Cartão não elegível para autenticação"
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:161
+#: resources/js/debitCard/lkn-dc-script-sdb.js:161
+#: resources/js/frontend/lkn-dc-script-prd.js:390
+#: resources/js/frontend/lkn-dc-script-sdb.js:397
+msgid "Authentication disabled by the store"
+msgstr "Autenticação desabilitada pela loja"
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:178
+#: resources/js/debitCard/lkn-dc-script-sdb.js:178
+#: resources/js/frontend/lkn-dc-script-prd.js:410
+#: resources/js/frontend/lkn-dc-script-sdb.js:417
+msgid "3DS authentication error"
+msgstr "Erro de autenticação 3DS"
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:182
+#: resources/js/debitCard/lkn-dc-script-sdb.js:182
+#: resources/js/frontend/lkn-dc-script-prd.js:414
+#: resources/js/frontend/lkn-dc-script-sdb.js:421
+msgid "Try again or contact the store."
+msgstr "Tente novamente ou entre em contato com a loja."
+
+#: resources/js/debitCard/lkn-dc-script-prd.js:185
+#: resources/js/debitCard/lkn-dc-script-sdb.js:185
+#: resources/js/frontend/lkn-dc-script-prd.js:417
+#: resources/js/frontend/lkn-dc-script-sdb.js:424
+msgid "3DS authentication error. Check your credentials."
+msgstr "Erro de autenticação 3DS. Verifique suas credenciais."
+
+#~ msgid ""
+#~ "To use the 3DS functionality it is necessary to register for 3DS 2.2 "
+#~ "(request to eCommerce Support)."
+#~ msgstr ""
+#~ "Para utilizar a funcionalidade 3DS é necessário ter o cadastro de 3DS 2.2 "
+#~ "(solicitar para o Suporte eCommerce)."
+
+#~ msgid "Sandbox"
+#~ msgstr "Teste"
+
+#~ msgid "Order refund failed"
+#~ msgstr "Falha ao reembolsar pedido, id do pagamento:"
+
+#~ msgid "You must have"
+#~ msgstr "Você precisa ter"
+
+#~ msgid "version"
+#~ msgstr "versão"
+
+#~ msgid ""
+#~ "plugin installed and activated for the CIELO API PIX, credit card, debit "
+#~ "payment for WooCommerce add-on to activate"
+#~ msgstr ""
+#~ "plugin instalado e ativo para o plugin Gateway de Pagamento com API Cielo "
+#~ "para WooCommerce ativar"
+
+#~ msgid "Invalid or expired license!"
+#~ msgstr "Licença inválida ou expirada!"
+
+#~ msgid "Order successfully captured!"
+#~ msgstr "Pedido capturado com sucesso!"
+
+#~ msgid ""
+#~ "Transaction capture is set to manual. Therefore, after the completion of "
+#~ "an authorized order, the administrator needs to capture the payment "
+#~ "within the order details by clicking the capture button. Otherwise, the "
+#~ "payment will be refunded to the buyer's card after 6 days from the order "
+#~ "date. If preferred, change it to"
+#~ msgstr ""
+#~ "A captura das transações esta configurada em manual. Portanto após a "
+#~ "conclusão do pedido autorizado, o administrador precisa capturar o "
+#~ "pagamento dentro dos detalhes do pedido no botão de captura. Caso "
+#~ "contrário o pagamento será devolvido para o cartão do comprador após 6 "
+#~ "dias da data do pedido. Se preferir altere para"
+
+#~ msgid "Allows pix payment with Cielo API 3.0."
+#~ msgstr "Permite pagamento via pix com a API 3.0 da Cielo."
+
+#~ msgid ""
+#~ "Before using Pix in production, make sure that Pix is enabled in your "
+#~ "registration. To confirm, just access the"
+#~ msgstr ""
+#~ "Antes de usar o Pix em produção, certifique-se de que o pix está liberado "
+#~ "em seu cadastro. Para confirmar basta acessar o"
+
+#~ msgid "portal Cielo"
+#~ msgstr "Cielo portal"
+
+#~ msgid "na área logada em Meu Cadastro > Autorizações > PIX"
+#~ msgstr "in the logged-in area under My Registration > Authorizations > PIX"
+
+#~ msgid "Enter the Merchant ID provided by Google Pay."
+#~ msgstr "Insira o ID do Comerciante fornecido pelo Google Pay."
+
+#~ msgid "Google Merchant Name"
+#~ msgstr "Nome do Comerciante Google"
+
+#~ msgid "Select the text you want to display on the Google Pay button."
+#~ msgstr "Selecione o texto que deseja exibir no botão Google Pay."
+
+#~ msgid ""
+#~ "When enabled, all Cielo transactions will be logged. You can access logs "
+#~ "via WooCommerce > Status > Logs."
+#~ msgstr ""
+#~ "Quando habilitado, todas as transações Cielo serão registradas. Você pode "
+#~ "acessar logs via WooCommerce > Status > Logs."
+
+#~ msgid ""
+#~ "Enable this to show the transaction details for Cielo payments directly "
+#~ "in each order's admin panel."
+#~ msgstr ""
+#~ "Habilite isto para mostrar os detalhes da transação para pagamentos Cielo "
+#~ "diretamente no painel admin de cada pedido."
+
+#~ msgid ""
+#~ "Use only if you no longer need the Cielo transaction logs for past orders."
+#~ msgstr ""
+#~ "Use apenas se não precisar mais dos logs de transação Cielo para pedidos "
+#~ "passados."
+
+#~ msgid ""
+#~ "This will permanently remove all stored logs from WooCommerce orders. "
+#~ "Ideal after resolving issues or for privacy."
+#~ msgstr ""
+#~ "Isto removerá permanentemente todos os logs armazenados dos pedidos "
+#~ "WooCommerce. Ideal após resolver problemas ou por privacidade."
+
+#~ msgid "Choose which layout the fields below refer to."
+#~ msgstr "Escolha a qual layout os campos abaixo se referem."
+
+#~ msgid "Only the selected layout shows its fields below."
+#~ msgstr "Apenas o layout selecionado exibe seus campos abaixo."
+
+#~ msgid "Label — %1$s (%2$s)"
+#~ msgstr "Rótulo — %1$s (%2$s)"
+
+#~ msgid "Placeholder — %1$s (%2$s)"
+#~ msgstr "Placeholder — %1$s (%2$s)"
+
+#~ msgid "Name on card"
+#~ msgstr "Nome impresso no cartão"

@@ -41,6 +41,10 @@ window.jQuery(function ($) {
         $form.card({
           container: container.selector,
           formSelectors: inputSelectors,
+          // A máscara/validação dos campos é responsabilidade do
+          // lkn-card-fields.js (padronizado: MM/AA, só dígitos, inputmode).
+          // Aqui mantemos apenas a animação visual do cartão.
+          formatting: false,
           placeholders: {
             number: '•••• •••• •••• ••••',
             name: 'NOME',

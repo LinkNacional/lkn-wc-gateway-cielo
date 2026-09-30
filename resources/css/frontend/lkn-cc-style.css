@@ -1,13 +1,13 @@
 #lkn_ccno {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 #lkn_cc_expdate {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 #lkn_cc_cvc {
-    line-height: 1.6em;
+    line-height: 1 !important;
 }
 
 .form-row {
@@ -16,21 +16,103 @@
 }
 
 .lkn-wc-gateway-cielo-input {
+    height: 50px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+    border-radius: 8px !important;
     padding: .5em .8em !important;
-    line-height: 1.6em;
-    font-size: 1rem !important;
+    line-height: 1 !important;
+    font-size: 14px !important;
     margin: 0px !important;
 }
 
 .input-select {
-    font-size: medium !important;
+    font-size: 14px !important;
     background-size: .8em !important;
     padding: .5em .8em !important;
 }
 
 .credit-card-description {
     text-align: center;
-    margin-bottom: 20px;
+    font-size: 11.2px;
+    color: #8e9ba8;
+    margin: 12px 0 0;
+}
+
+/* Descrição dos Blocos (crédito) — renderizada em TODOS os layouts; a regra
+   fica aqui (arquivo carregado em todos) e não no CSS do moderno, que só
+   carrega nesse layout. */
+.lkn-cielo-credit-description {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 0px 10px !important;
+    margin-top: 12px;
+}
+
+.lkn-cielo-credit-description p {
+    font-size: 11.2px !important;
+    color: #8e9ba8 !important;
+}
+
+/* Padronização: select do formulário clássico com 50px de altura e borda 8px. */
+#wc-lkn_cielo_credit-cc-form .input-select {
+    height: 50px !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    line-height: 1 !important;
+}
+
+/* Label do shortcode clássico (padrão e moderno) — 0.9rem. */
+#wc-lkn_cielo_credit-cc-form label {
+    font-size: 12.6px;
+}
+
+/* === Label flutuante (Blocos/Creditar) ======================================
+ * Mesmo padrão do débito: repouso centralizado (1.2rem); ao focar (ou com valor)
+ * sobe e diminui; volta ao repouso no blur vazio. O `is-active` é mantido pelo
+ * script lkn-cielo-floating-label.js. Cobre os layouts standard e modern. */
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input {
+    position: relative;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input input {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    /* Alinha o texto com a label flutuante (left: 12px). O WooCommerce Blocks
+       reduz o padding-left para 9px no estado ativo, desalinhando. */
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input label {
+    position: absolute;
+    left: 12px;
+    top: 25px !important;
+    transform: translateY(-50%) !important;
+    transform-origin: top left;
+    margin: 0;
+    font-size: 16.8px !important;
+    line-height: 22px;
+    transition: top .18s ease, transform .18s ease;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input.is-active input,
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input:focus-within input {
+    padding-top: 24px !important;
+    padding-bottom: 8px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+}
+
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input.is-active label,
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-text-input:focus-within label {
+    top: 8px !important;
+    transform: translateY(0) scale(.82) !important;
+}
+
+/* Selects (tipo de cartão / parcelas) no Gutenberg do crédito: 1.2rem. */
+#radio-control-wc-payment-method-options-lkn_cielo_credit__content .wc-block-components-sort-select__select {
+    font-size: 16.8px !important;
 }

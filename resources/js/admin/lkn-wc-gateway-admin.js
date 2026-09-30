@@ -4,46 +4,109 @@ document.addEventListener('DOMContentLoaded', function () {
   if (lknCieloAdminPage && (lknCieloAdminPage === 'lkn_cielo_credit' || lknCieloAdminPage === 'lkn_cielo_debit' || lknCieloAdminPage === 'lkn_wc_cielo_pix') || lknCieloAdminPage === 'lkn_cielo_google_pay') {
     let observer = null
 
-    function createNotice(targetDiv) {
+    // Bloco de destaque (mesmo padrão visual do plugin Rede)
+    function createFeatureMessage(iconHtml, title, text, href) {
+      const featureMessage = document.createElement(href ? 'a' : 'div')
+      featureMessage.className = 'custom-feature-message'
+      if (href) {
+        featureMessage.href = href
+        featureMessage.target = '_blank'
+        featureMessage.rel = 'noopener noreferrer'
+        featureMessage.style.textDecoration = 'none'
+        featureMessage.style.color = 'inherit'
+      }
+
+      const infoIcon = document.createElement('span')
+      infoIcon.className = 'feature-icon'
+      infoIcon.innerHTML = iconHtml
+
+      const contentDiv = document.createElement('div')
+      contentDiv.className = 'feature-message-content'
+      contentDiv.innerHTML = `<strong>${title}</strong><br>${text}`
+
+      featureMessage.appendChild(infoIcon)
+      featureMessage.appendChild(contentDiv)
+
+      return featureMessage
+    }
+
+    // Cartão promocional do plugin "Link de Pagamento de Faturas"
+    function createPromotionalCard() {
+      const vars = (typeof lknCieloCardVars !== 'undefined') ? lknCieloCardVars : {}
+
+      const promotionalCard = document.createElement('div')
+      promotionalCard.className = 'woo-better-promotional-card'
+
+      const backgroundDecor = document.createElement('div')
+      backgroundDecor.className = 'promotional-card-background-decor'
+      promotionalCard.appendChild(backgroundDecor)
+
+      const cardContent = document.createElement('div')
+      cardContent.className = 'promotional-card-content'
+
+      const cardTitle = document.createElement('h3')
+      cardTitle.className = 'promotional-card-title'
+      cardTitle.textContent = 'Plugin Link de Pagamento de Faturas'
+
+      const titleDivider = document.createElement('hr')
+      titleDivider.className = 'promotional-card-title-divider'
+      titleDivider.style.cssText = 'width: 100%; height: 1px; background: white; border: none; margin: 8px 0 16px 0;'
+
+      const cardDescription = document.createElement('p')
+      cardDescription.className = 'promotional-card-description'
+      cardDescription.textContent = 'O Plugin Link de Pagamento oferece a solução completa para o seu negócio. Gere links personalizados, aceite pagamento em múltiplos cartões, configure cobranças recorrentes, crie orçamentos e venda diretamente pelo WhatsApp!'
+
+      const buttonsContainer = document.createElement('div')
+      buttonsContainer.className = 'promotional-card-buttons'
+
+      const learnMoreButton = document.createElement('button')
+      learnMoreButton.className = 'promotional-card-button learn-more'
+      learnMoreButton.textContent = 'Saiba mais'
+      learnMoreButton.addEventListener('click', function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+        window.open('https://br.wordpress.org/plugins/invoice-payment-for-woocommerce/', '_blank')
+      })
+      buttonsContainer.appendChild(learnMoreButton)
+
+      if (!vars.invoice_plugin_installed) {
+        const installButton = document.createElement('button')
+        installButton.className = 'promotional-card-button install'
+        installButton.textContent = 'Instalar'
+        installButton.addEventListener('click', function (e) {
+          e.preventDefault()
+          e.stopPropagation()
+          const installUrl = `/wp-admin/update.php?action=install-plugin&plugin=${vars.plugin_slug}&_wpnonce=${vars.install_nonce}`
+          window.open(installUrl, '_blank')
+        })
+        buttonsContainer.appendChild(installButton)
+      }
+
+      cardContent.appendChild(cardTitle)
+      cardContent.appendChild(titleDivider)
+      cardContent.appendChild(cardDescription)
+      cardContent.appendChild(buttonsContainer)
+      promotionalCard.appendChild(cardContent)
+
+      return promotionalCard
+    }
+
+    function createCards(targetDiv) {
       if (!targetDiv) return
 
-      // Hospedagem grátis
-      const lknCieloNoticeDiv = document.createElement('div')
-      lknCieloNoticeDiv.setAttribute('style', 'background-color: #fcf9e8;color: #646970;border: solid 1px #d3d3d3;border-left: 4px #dba617 solid;font-size: 16px;margin-top: 10px;max-width: 370px; box-sizing: border-box;')
-      lknCieloNoticeDiv.setAttribute('id', 'lkn-cielo-hosting-notice')
-      lknCieloNoticeDiv.innerHTML = '<a href="https://cliente.linknacional.com.br/solicitar/wordpress-woo-gratis/" target="_blank" style="text-decoration:none; display: block;padding: 10px;">Parabéns! Você ganhou uma hospedagem WooCommerce grátis por 12 meses. Solicite agora!</a>'
-      
-      if(lknCieloAdminPage === 'lkn_cielo_google_pay'){
-        lknCieloNoticeDiv.innerHTML = '<a href="https://www.linknacional.com.br/hora-tecnica/" target="_blank" style="text-decoration:none; display: block;padding: 10px; width: 370px;">Precisa de ajuda? Agende hora técnica.</a>'
-      }
-      
-      targetDiv.append(lknCieloNoticeDiv)
-
-      if (typeof lknCieloProStatus === 'undefined' || lknCieloProStatus.isProActive != true) {
-        // PRO
-        const lknCieloProDiv = document.createElement('div')
-        lknCieloProDiv.setAttribute('style', 'padding: 10px 5px;background-color: #fcf9e8;color: #646970;border: solid 1px lightgrey;border-left-color: #dba617;border-left-width: 4px;font-size: 14px;margin-top: 10px;max-width: 370px; box-sizing: border-box;')
-        lknCieloProDiv.setAttribute('id', 'lkn-cielo-pro-notice')
-        lknCieloProDiv.innerHTML = '<div style="font-size: 21px;padding: 6px 0px 10px 0px;">Obtenha novas funcionalidades com Cielo API Pro</div>' +
-          '<a href="https://www.linknacional.com.br/wordpress/woocommerce/cielo/" target="_blank">Conheça e compre o plugin PRO</a>' +
-          '<ul style="margin: 10px 28px;list-style: disclosure-closed;">' +
-          '<li>Integração com PIX Cielo</li>' +
-          '<li>Captura manual da transação/pedido</li>' +
-          '<li>Ferramenta de reembolso total ou parcial</li>' +
-          '<li>Compatibilidade com pagamentos feitos em moedas internacionais</li>' +
-          '<li>Ajustes da taxa de juros de acordo com a parcela</li>' +
-          '<li>Habilita o parcelamento em até 18x (Visa, Elo, Amex, Hipercard, Mastercard)</li>' +
-          '<li>Configuração de quantidade máxima de parcelas</li>' +
-          '<li>Compatibilidade com a opção de Checkout do Elementor para WooCommerce</li>' +
-          '</ul>'
-        targetDiv.append(lknCieloProDiv)
-      }
+      const featureMessage = createFeatureMessage(
+        '✔️',
+        'Google Pay e Tabela de Transações:',
+        'Disponíveis exclusivamente para assinantes Pro e clientes de nossa hospedagem.'
+      )
+      targetDiv.append(featureMessage)
+      targetDiv.append(createPromotionalCard())
     }
 
     observer = new MutationObserver(function () {
       const targetDiv = document.getElementById('lknBlocksSettingsLogo')
       if (targetDiv) {
-        createNotice(targetDiv)
+        createCards(targetDiv)
         observer.disconnect() // Para o observer após encontrar o elemento
       }
     })
