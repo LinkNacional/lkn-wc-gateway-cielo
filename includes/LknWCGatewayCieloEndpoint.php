@@ -214,7 +214,7 @@ final class LknWCGatewayCieloEndpoint
             ));
         }
 
-        $digits  = isset($_POST['digits']) ? preg_replace('/\D/', '', wp_unslash($_POST['digits'])) : '';
+        $digits  = isset($_POST['digits']) ? preg_replace('/\D/', '', sanitize_text_field(wp_unslash($_POST['digits']))) : '';
         $gateway = isset($_POST['gateway']) ? sanitize_text_field(wp_unslash($_POST['gateway'])) : 'debit';
 
         if (! in_array($gateway, array('debit', 'credit'), true)) {
