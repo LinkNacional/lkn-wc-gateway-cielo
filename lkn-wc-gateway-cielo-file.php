@@ -65,7 +65,7 @@ if (! defined('LKN_WC_CIELO_BASE_FILE')) {
 }
 
 if (! defined('LKN_WC_CIELO_WPP_NUMBER')) {
-    define('LKN_WC_CIELO_WPP_NUMBER', '551135223406');
+    define('LKN_WC_CIELO_WPP_NUMBER', '5516996537244');
 }
 
 /**
