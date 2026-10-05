@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/wordpress/woocommerce/cielo/
 Tags: pagamento, cielo, pix, woocommerce, creditcard
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.38.0
+Stable tag: 1.38.1
 Requires PHP: 8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -116,6 +116,11 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+
+= 1.38.1 =
+** 05/10/2026 **
+* Fix: infinite redirect loop (ERR_TOO_MANY_REDIRECTS) when another LKN plugin also opens its onboarding screen in the same request.
+* Fix: the close button (✕) of the PRO update screen now permanently dismisses the follow-up notice.
 
 = 1.38.0 =
 ** 29/09/2026 **

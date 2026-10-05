@@ -17,7 +17,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  * Rename this for your plugin and update it as you release new versions.
  */
 if (! defined('LKN_WC_CIELO_VERSION')) {
-    define('LKN_WC_CIELO_VERSION', '1.38.0');
+    define('LKN_WC_CIELO_VERSION', '1.38.1');
 }
 
 /**
@@ -65,7 +65,7 @@ if (! defined('LKN_WC_CIELO_BASE_FILE')) {
 }
 
 if (! defined('LKN_WC_CIELO_WPP_NUMBER')) {
-    define('LKN_WC_CIELO_WPP_NUMBER', '551135223406');
+    define('LKN_WC_CIELO_WPP_NUMBER', '5516996537244');
 }
 
 /**

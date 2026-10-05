@@ -1,3 +1,7 @@
+# 1.38.1 - 05/10/2026
+* Correção: loop infinito de redirecionamento (ERR_TOO_MANY_REDIRECTS) quando outro plugin LKN também abre sua tela de onboarding na mesma requisição.
+* Correção: o botão de fechar (✕) da tela de atualização do PRO agora dispensa o aviso definitivamente.
+
 # 1.38.0 - 29/09/2026
 * Correção: As mensagens de recusa de pagamento agora seguem o padrão ABECS da Cielo.
 * Novo: recursos PRO replicados como campos de demonstração (selo PRO) no plano gratuito, interativos e sem gravar nas opções reais.
