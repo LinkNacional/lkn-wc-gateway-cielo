@@ -483,7 +483,7 @@ final class LknWCCieloProUpdateNotice
             delete_transient(self::SUCCESS_TRANSIENT);
         }
 
-        wp_localize_script('lkn-cielo-pro-update', 'LknProUpdate', $this->script_data($show_on_load, $error_message));
+        wp_localize_script('lkn-cielo-pro-update', 'LknCieloProUpdate', $this->script_data($show_on_load, $error_message));
     }
 
     /**
