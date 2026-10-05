@@ -121,7 +121,7 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 ** 05/10/2026 **
 * Fix: infinite redirect loop (ERR_TOO_MANY_REDIRECTS) when another LKN plugin also opens its onboarding screen in the same request.
 * Fix: the close button (✕) of the PRO update screen now permanently dismisses the follow-up notice.
-* Fix: the "Update PRO plugin" button no longer sends another LKN gateway's update request when both plugins are active (shared JS global name).
+* Fix: the "Update PRO plugin" button no longer interferes with another LKN gateway when both are active (JS global and click handler isolated per plugin).
 
 = 1.38.0 =
 ** 29/09/2026 **
