@@ -249,7 +249,7 @@ final class LknWCCieloProUpdateNotice
         $pro_name = __('CIELO API PRO', 'lkn-wc-gateway-cielo');
         $min_version = $this->min_pro_version();
         ?>
-        <div class="wrap lkn-pro-update-screen">
+        <div class="wrap lkn-pro-update-screen" data-lkn-pro-screen="<?php echo esc_attr(self::SCREEN_SLUG); ?>">
             <div class="lkn-pro-update-screen__card">
                 <a href="<?php echo esc_url($dismiss_url); ?>" class="lkn-pro-update-screen__close" aria-label="<?php esc_attr_e('Close and do not show again', 'lkn-wc-gateway-cielo'); ?>">
                     <span aria-hidden="true">&times;</span>
@@ -334,6 +334,7 @@ final class LknWCCieloProUpdateNotice
         $pro_name = __('CIELO API PRO', 'lkn-wc-gateway-cielo');
         ?>
         <div class="notice notice-warning is-dismissible lkn-pro-notice lkn-pro-notice--update"
+            data-lkn-pro-screen="<?php echo esc_attr(self::SCREEN_SLUG); ?>"
             data-dismissible="lkn-cielo-pro-update"
             data-action="<?php echo esc_attr(self::AJAX_DISMISS); ?>"
             data-nonce="<?php echo esc_attr($nonce); ?>">
@@ -497,6 +498,7 @@ final class LknWCCieloProUpdateNotice
 
         return array(
             'ajaxurl' => admin_url('admin-ajax.php'),
+            'screen' => self::SCREEN_SLUG,
             'action' => self::AJAX_UPDATE,
             'nonce' => wp_create_nonce(self::NONCE_UPDATE),
             'plugin' => self::PRO_BASENAME,
