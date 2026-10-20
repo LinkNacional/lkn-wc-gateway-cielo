@@ -433,7 +433,7 @@ final class LknWCGatewayCieloGooglePay extends WC_Payment_Gateway
         $nonceInactive = $this->get_option('nonce_compatibility', 'no');
         $nonce = isset($_POST['nonce_lkn_cielo_google_pay']) ? sanitize_text_field(wp_unslash($_POST['nonce_lkn_cielo_google_pay'])) : '';
 
-        if (! wp_verify_nonce($nonce, 'nonce_lkn_cielo_google_pay') && 'no' === $nonceInactive) {
+        if (! LknWcCieloHelper::verifyCheckoutNonce($nonce, 'nonce_lkn_cielo_google_pay') && 'no' === $nonceInactive) {
             $this->log->log('error', 'Nonce verification failed. Nonce: ' . var_export($nonce, true), array('source' => 'woocommerce-cielo-google-pay'));
             $this->add_notice_once(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'), 'error');
             $this->add_error(__('Nonce verification failed, try reloading the page', 'lkn-wc-gateway-cielo'));

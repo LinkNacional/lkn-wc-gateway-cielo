@@ -1,3 +1,6 @@
+# 1.38.2 - 20/10/2026
+* Correção: pagamento de crédito, débito e Google Pay não era processado quando o cliente criava a conta durante a finalização da compra (checkout de convidado desabilitado). O WooCommerce faz login no meio do request e invalidava o nonce do formulário, recusando o pedido com "Falha na verificação de nonce, tente recarregar a página". Agora o nonce é aceito nos dois contextos.
+
 # 1.38.1 - 05/10/2026
 * Correção: loop infinito de redirecionamento (ERR_TOO_MANY_REDIRECTS) quando outro plugin LKN também abre sua tela de onboarding na mesma requisição.
 * Correção: o botão de fechar (✕) da tela de atualização do PRO agora dispensa o aviso definitivamente.
