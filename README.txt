@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/wordpress/woocommerce/cielo/
 Tags: pagamento, cielo, pix, woocommerce, creditcard
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.38.1
+Stable tag: 1.38.2
 Requires PHP: 8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -116,6 +116,10 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+
+= 1.38.2 =
+** 20/10/2026 **
+* Fix: credit, debit and Google Pay payments were not processed when the customer created an account during checkout (guest checkout disabled). WooCommerce logs the customer in mid-request, which invalidated the gateway form nonce and rejected the order with "Nonce verification failed, try reloading the page". The nonce is now accepted in both contexts.
 
 = 1.38.1 =
 ** 05/10/2026 **
@@ -561,6 +565,9 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 * Plugin launch.
 
 == Upgrade Notice ==
+
+= 1.38.2 =
+* Fix: card and Google Pay payments are no longer rejected with a nonce error when the customer creates an account while placing the order.
 
 = 1.0.0 =
 * Plugin launch.
