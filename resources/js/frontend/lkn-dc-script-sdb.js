@@ -528,6 +528,24 @@ function lknLoadBpmpiScript () {
     })
 }
 
+// Submete o checkout sem passar pelo 3DS (cartão salvo, total R$0, formulário
+// de cartão oculto). Libera o botão travado por lknLockSubmitButton() ANTES de
+// clicar: clicar em um botão `disabled` é no-op e o checkout ficava preso em
+// "Processing..." sem nunca enviar o pedido.
+function lknSubmitWithout3DS() {
+  lknUnlockSubmitButton();
+
+  var btnSubmit = document.getElementById('place_order');
+  if (!btnSubmit) {
+    return;
+  }
+
+  btnSubmit.removeEventListener('click', lknDCProccessButton, true);
+  btnSubmit.disabled = false;
+  btnSubmit.setAttribute('type', 'submit');
+  btnSubmit.click();
+}
+
 function lknDCProccessButton() {
   // Reentrância: ignora se já há um fluxo 3DS em andamento (evita múltiplos
   // enrolls concorrentes, que causam erro cross-origin do 3DS).
@@ -559,17 +577,21 @@ function lknDCProccessButton() {
       return;
     }
 
+    // Cartão salvo: o formulário só carrega o índice do cartão (o número fica
+    // mascarado e o CVV não é pedido), então o 3DS não pode ser iniciado aqui —
+    // o gateway cobra pela tokenização salva. Submete direto, SEM 3DS.
+    var savedCardInput = document.getElementById('lkn_selected_saved_card_index')
+    if (savedCardInput && String(savedCardInput.value || '').trim() !== '') {
+      lknSubmitWithout3DS()
+      return;
+    }
+
     // Se o gateway está selecionado mas não há campo de cartão visível,
     // o pedido não precisa de 3DS (ex: produto gratuito, total R$0).
     // Submete o formulário normalmente.
     var lknDcnoEl = document.getElementById('lkn_dcno')
     if (!lknDcnoEl || !lknDcnoEl.value.trim() || !lknDcnoEl.offsetParent) {
-      var btnSubmitFree = document.getElementById('place_order')
-      if (btnSubmitFree) {
-        btnSubmitFree.removeEventListener('click', lknDCProccessButton, true)
-        btnSubmitFree.setAttribute('type', 'submit')
-        btnSubmitFree.click()
-      }
+      lknSubmitWithout3DS()
       return;
     }
 
@@ -693,14 +715,10 @@ document.addEventListener('click', function (event) {
   }
   lknCustomSubmitLockedUntil = Date.now() + 15000
 
-  // Desabilita o botão; o efeito cinza é aplicado via CSS (#cielo-debit-submit-btn:disabled).
-  lknLockSubmitButton();
-
-  // Reabilita o botão após o período de trava (fallback).
-  setTimeout(function () {
-    lknUnlockSubmitButton();
-  }, 15000)
-
+  // O trava/destrava fica com lknDCProccessButton(), que já chama
+  // lknLockSubmitButton(). Travar aqui ANTES dele marcava
+  // window.__lkn3DSInProgress e o fluxo saía pela guarda de reentrância sem
+  // iniciar o 3DS nem enviar o pedido (o botão ficava preso até o fallback).
   var placeOrder = document.getElementById('place_order')
 
   // Reaproveita o mesmo fluxo do botão nativo #place_order (3DS -> submit).
@@ -709,4 +727,12 @@ document.addEventListener('click', function (event) {
   } else if (placeOrder) {
     placeOrder.click()
   }
+
+  // Fallback: se o fluxo não travou o botão (ex.: envio direto sem 3DS), não
+  // deixa o clique preso. Nunca destrava com um 3DS em andamento.
+  setTimeout(function () {
+    if (!window.__lkn3DSInProgress) {
+      lknUnlockSubmitButton()
+    }
+  }, 15000)
 })
