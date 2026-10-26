@@ -1,3 +1,10 @@
+# 1.38.3 - 26/10/2026
+* Correção: a descrição do PIX (e o campo equivalente no plugin PRO) não fica mais congelada em inglês. O texto padrão deixou de ser gravado no banco: é resolvido pela tradução a cada requisição, então o idioma acompanha a instalação do WordPress. Textos personalizados com licença PRO ativa são mantidos como estão.
+* Ajuste: o visual dos cartões salvos do débito (lista e botão "Adicionar Cartão") saiu do `style` inline dos templates e do componente dos Blocos e passou para o CSS do plugin, com `!important`, para o tema não sobrescrever fundo, cor do texto, borda, raio e tipografia. Para personalizar, use `.lkn-cielo-saved-card-btn` com `!important`.
+* Correção: no checkout por shortcode, finalizar a compra com um cartão salvo selecionado deixava o botão preso em "Processing..." sem enviar o pedido. O botão era desabilitado e o envio era feito com um clique nele mesmo, que o navegador ignora enquanto desabilitado.
+* Correção: no checkout por shortcode, o botão "Finalizar" personalizado travava o envio antes de iniciar a autenticação 3DS, e nenhum pedido era enviado.
+* Correção: o cartão salvo exibido podia não ser o cartão cobrado quando havia um cartão expirado na lista (o índice do botão deixava de casar com o registro salvo). Quando o cartão selecionado não era encontrado, o fluxo seguia para a cobrança com token vazio em vez de interromper.
+
 # 1.38.2 - 20/10/2026
 * Correção: pagamento de crédito, débito e Google Pay não era processado quando o cliente criava a conta durante a finalização da compra (checkout de convidado desabilitado). O WooCommerce faz login no meio do request e invalidava o nonce do formulário, recusando o pedido com "Falha na verificação de nonce, tente recarregar a página". Agora o nonce é aceito nos dois contextos.
 
