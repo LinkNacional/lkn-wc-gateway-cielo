@@ -4,6 +4,7 @@
 * Correção: no checkout por shortcode, finalizar a compra com um cartão salvo selecionado deixava o botão preso em "Processing..." sem enviar o pedido. O botão era desabilitado e o envio era feito com um clique nele mesmo, que o navegador ignora enquanto desabilitado.
 * Correção: no checkout por shortcode, o botão "Finalizar" personalizado travava o envio antes de iniciar a autenticação 3DS, e nenhum pedido era enviado.
 * Correção: o cartão salvo exibido podia não ser o cartão cobrado quando havia um cartão expirado na lista (o índice do botão deixava de casar com o registro salvo). Quando o cartão selecionado não era encontrado, o fluxo seguia para a cobrança com token vazio em vez de interromper.
+* Ajuste: o selo "PRO" dos campos exclusivos do PRO agora aparece ao lado do título em todos os gateways (antes, nos campos do PIX, um aviso em vermelho era exibido embaixo do campo). O aviso virou tooltip do selo.
 
 # 1.38.2 - 20/10/2026
 * Correção: pagamento de crédito, débito e Google Pay não era processado quando o cliente criava a conta durante a finalização da compra (checkout de convidado desabilitado). O WooCommerce faz login no meio do request e invalidava o nonce do formulário, recusando o pedido com "Falha na verificação de nonce, tente recarregar a página". Agora o nonce é aceito nos dois contextos.

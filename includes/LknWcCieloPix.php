@@ -185,23 +185,14 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'isProActive' => $pro_plugin_exists && $pro_plugin_active ? true : false,
             ));
 
-            if (isset($_GET['section']) && sanitize_text_field(wp_unslash($_GET['section'])) === 'lkn_wc_cielo_pix') {
-                wp_enqueue_script('LknCieloPixSettingsPix', LKN_WC_GATEWAY_CIELO_URL . 'resources/js/admin/lkn-settings-pix.js', array(), $this->version, false);
-
-                wp_localize_script(
-                    'LknCieloPixSettingsPix',
-                    'lknCieloProSettingsVars',
-                    array(
-                        'proOnly' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
-                    )
-                );
-            }
             wp_enqueue_script('LknCieloPixSettingsLayoutScript', LKN_WC_GATEWAY_CIELO_URL . 'resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $this->version, false);
             $gateway_settings = $this->settings;
             wp_localize_script('LknCieloPixSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
+                // Tooltip do selo "PRO" (mesmo texto em todos os gateways).
+                'availableOnlyInPro' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
@@ -265,9 +256,14 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'default'     => __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo'),
                 'description' => __('Payment method description that the customer will see on your checkout.', 'lkn-wc-gateway-cielo'),
                 'desc_tip'    => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
-                'custom_attributes' => array(
-                    'required' => 'required',
-                    'data-title-description' => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'required' => 'required',
+                        'data-title-description' => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    // Selo "PRO" no título do campo; com a licença ativa o valor do
+                    // lojista é editável e persistido (ver process_admin_options()).
+                    LknWcCieloHelper::is_pro_license_active() ? array() : array('lkn-is-pro' => 'true')
                 ),
             ),
             'env' => array(
@@ -316,6 +312,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => esc_attr__('Choose the status that will be assigned automatically after payment confirmation.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => esc_attr__('Automatically sets the order status after payment.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'pix_layout' => array(
@@ -330,6 +327,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => __('Choose between the standard layout or the new layout for PIX.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('PIX layout shown to the customer at checkout.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'layout_location' => array(
@@ -344,6 +342,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => __('Set whether the PIX layout appears at the top or bottom of the checkout.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('Position of the PIX layout on the checkout page.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'show_button' => array(
@@ -355,6 +354,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'custom_attributes' => array(
                     'data-title-description' => __('Displays an additional button to generate the PIX', 'lkn-wc-gateway-cielo'),
                     'disabled' => 'disabled',
+                    'lkn-is-pro' => 'true',
                 ),
 
             ),

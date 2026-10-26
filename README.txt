@@ -123,7 +123,8 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 * Tweak: the debit saved-cards look (list and "Add Card" button) moved out of the inline `style` in the templates and in the Blocks component into the plugin CSS, with `!important`, so the theme cannot override background, text color, border, radius and typography.
 * Fix: on the shortcode checkout, placing an order with a saved card selected left the button stuck on "Processing..." and never sent the order. The submit button was disabled and then clicked while disabled, which the browser ignores.
 * Fix: on the shortcode checkout, the custom "Place order" button locked the submit before starting the 3DS authentication, so no order was sent when placing the order.
-* Fix: displayed saved cards could not match the charged card when an expired card was in the list (the button index stopped matching the stored record). When the selected card was not found, the flow proceeded to charge with an empty token instead of stopping.
+* Fix: the saved card charged could differ from the one displayed when an expired card was in the list (the button index stopped matching the stored record). When the selected card was not found, the flow proceeded to charge with an empty token instead of stopping.
+* Tweak: the "PRO" badge on PRO-only fields now sits next to the title on every gateway (the PIX fields used to show a red notice below the field). That notice became the badge tooltip.
 
 = 1.38.2 =
 ** 20/10/2026 **
