@@ -38,10 +38,21 @@ document.addEventListener('lknWcCieloFinishedAdminLayout', function () {
     'woocommerce_lkn_wc_cielo_pix_layout_location',
     'woocommerce_lkn_wc_cielo_pix_show_button'
   ]
-  
+
+  // Com o PRO instalado e a licença ativa a description é editável: o PHP
+  // persiste o valor do lojista e só restaura o estado original (frase padrão,
+  // resolvida no idioma do site) quando a licença não está ativa.
+  const proLicenseActive = !!(
+    typeof lknWcCieloTranslationsInput !== 'undefined' &&
+    lknWcCieloTranslationsInput.isProValid
+  )
+  const fieldsToDisable = proLicenseActive
+    ? proOnlyFields.filter(fieldId => fieldId !== 'woocommerce_lkn_wc_cielo_pix_description')
+    : proOnlyFields
+
   // Aplicar para todos
   setTimeout(function() {
-    proOnlyFields.forEach(disableFieldWithNotice)
+    fieldsToDisable.forEach(disableFieldWithNotice)
   }, 1000)
   
 })
