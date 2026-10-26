@@ -99,14 +99,7 @@ const lknDCContentCielo = props => {
 
   const renderSavedCards = () => (
     card_array.length > 0 ? (
-      <div className="lkn-cielo-saved-cards-list lkn-cielo-saved-cards-flex" style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        marginBottom: "30px",
-        gap: '10px',
-        width: '100%',
-        justifyContent: 'center',
-      }}>
+      <div className="lkn-cielo-saved-cards-list lkn-cielo-saved-cards-flex">
         {card_array.map((card, idx) => {
           const isSelected = selectedCardIndex === idx;
           const brandIcon = cardBrandIcons[card.brand] || cardBrandIcons.default;
@@ -123,25 +116,10 @@ const lknDCContentCielo = props => {
                 updatedebitObject('lkn_dc_expdate', card.expirationDate);
                 updatedebitObject('lkn_cc_type', lknDCForcedCardType || card.brand);
               }}
-              style={{
-                color:  "#2563eb",
-                fontWeight: 500,
-                fontSize: 16,
-                cursor: 'pointer',
-                padding: '10px 18px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                width: 225,
-                border: 'none',
-                transition: 'all 0.2s',
-                outline: isSelected ? '2px solid #2563eb' : 'none',
-
-              }}
             >
-              {brandIcon && <img src={brandIcon} alt={card.brand} style={{ height: 40, marginRight: 8 }} />}
-              <span style={{ fontWeight: 600 }}>{card.brand}</span>
-              <span style={{ marginLeft: 6 }}>{card.cardDigits.replace(/.*(\d{4})$/, '•••• $1')}</span>
+              {brandIcon && <img src={brandIcon} alt={card.brand} />}
+              <span className="lkn-cielo-saved-card-brand">{card.brand}</span>
+              <span className="lkn-cielo-saved-card-digits">{card.cardDigits.replace(/.*(\d{4})$/, '•••• $1')}</span>
             </button>
           );
         })}
@@ -156,23 +134,8 @@ const lknDCContentCielo = props => {
             updatedebitObject('lkn_dc_expdate', '');
             updatedebitObject('lkn_cc_type', lknDCForcedCardType || 'Credit');
           }}
-          style={{
-            fontWeight: 500,
-            color: '#2563eb',
-            fontSize: 16,
-            cursor: 'pointer',
-            padding: '10px 18px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            border: 'none',
-            width: 225,
-            display: 'flex',
-            justifyContent: 'center',
-            outline: showAddCardForm ? '2px solid #2563eb' : 'none',
-          }}
         >
-          <span style={{ fontSize: 22, marginRight: 8 }}>＋</span> Adicionar Cartão
+          <span className="lkn-cielo-add-card-icon">＋</span> Adicionar Cartão
         </button>
       </div>
     ) : null

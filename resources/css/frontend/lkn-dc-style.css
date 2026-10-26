@@ -171,3 +171,133 @@
 #radio-control-wc-payment-method-options-lkn_cielo_debit__content .wc-block-components-sort-select__select {
     font-size: 16.8px !important;
 }
+
+/* ==========================================================================
+ * Cartões salvos (débito) — lista de cartões e botão "Adicionar Cartão"
+ * --------------------------------------------------------------------------
+ * Esse visual vivia em style="" inline nos 3 templates do shortcode
+ * (default/modern/compact) e no componente React dos Blocos. Foi centralizado
+ * aqui para ter uma fonte de verdade e, principalmente, para o tema não
+ * sobrescrever fundo, cor do texto, borda, raio, tipografia, padding etc.
+ *
+ * Escopo: .lkn-cielo-saved-card-btn / .lkn-cielo-saved-card-* — não toca em
+ * nenhum outro botão do checkout.
+ *
+ * Para personalizar (ex.: trocar a cor), basta uma regra própria com
+ * !important e especificidade >= a daqui, carregada depois deste arquivo:
+ *   .lkn-cielo-saved-card-btn { color: #16a34a !important; }
+ * ========================================================================== */
+
+/* Lista (clássico/shortcode e Blocos). */
+.lkn-cielo-saved-cards-list,
+.lkn-cielo-saved-cards-flex {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin: 0 0 10px !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+/* Nos Blocos o espaço abaixo da lista era maior (30px). */
+#radio-control-wc-payment-method-options-lkn_cielo_debit__content .lkn-cielo-saved-cards-list {
+    margin-bottom: 30px !important;
+}
+
+/* Botão de cartão salvo. O bloco abaixo neutraliza o estilo de `button` do
+   tema (Astra, WooCommerce, etc.) antes de aplicar o visual do plugin. */
+.lkn-cielo-saved-card-btn {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    width: 225px !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 10px 18px !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    color: #2563eb !important;
+    font-family: inherit !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    font-style: normal !important;
+    line-height: 1.2 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    text-decoration: none !important;
+    text-align: left !important;
+    white-space: normal !important;
+    cursor: pointer !important;
+    outline: none !important;
+    transition: all .2s !important;
+}
+
+/* Selecionado (o PHP e o React marcam a mesma classe `.selected`). */
+.lkn-cielo-saved-card-btn.selected {
+    outline: 2px solid #2563eb !important;
+    outline-offset: 0 !important;
+    background-color: transparent !important;
+}
+
+/* Botão "Adicionar Cartão": conteúdo centralizado (sem a bandeira à esquerda). */
+.lkn-cielo-add-card-btn {
+    justify-content: center !important;
+}
+
+.lkn-cielo-saved-card-btn:focus,
+.lkn-cielo-saved-card-btn:hover {
+    background-color: transparent !important;
+    text-decoration: none !important;
+}
+
+/* Bandeira. */
+.lkn-cielo-saved-card-btn img {
+    display: inline-block !important;
+    height: 40px !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 8px 0 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+
+/* Nome da bandeira e os 4 últimos dígitos. */
+.lkn-cielo-saved-card-btn .lkn-cielo-saved-card-brand {
+    font-weight: 600 !important;
+}
+
+.lkn-cielo-saved-card-btn .lkn-cielo-saved-card-digits {
+    margin-left: 6px !important;
+}
+
+/* Símbolo "＋" do botão "Adicionar Cartão". */
+.lkn-cielo-saved-card-btn .lkn-cielo-add-card-icon {
+    font-size: 22px !important;
+    margin-right: 8px !important;
+    line-height: 1 !important;
+}
+
+/* Wrapper do botão "Adicionar Cartão" (só nos templates do shortcode). */
+.lkn-cielo-add-card-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    margin: 0 0 20px !important;
+    padding: 0 !important;
+}
