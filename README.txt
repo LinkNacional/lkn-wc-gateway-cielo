@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/wordpress/woocommerce/cielo/
 Tags: pagamento, cielo, pix, woocommerce, creditcard
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.38.2
+Stable tag: 1.38.3
 Requires PHP: 8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -116,6 +116,15 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+
+= 1.38.3 =
+** 26/10/2026 **
+* Fix: the Pix description (and the equivalent field in the PRO plugin) no longer stays frozen in English. The default text is no longer written to the database: it is resolved through the translation on every request, so the language follows the WordPress installation. Custom texts saved with an active PRO license are kept unchanged.
+* Tweak: the debit saved-cards look (list and "Add Card" button) moved out of the inline `style` in the templates and in the Blocks component into the plugin CSS, with `!important`, so the theme cannot override background, text color, border, radius and typography.
+* Fix: on the shortcode checkout, placing an order with a saved card selected left the button stuck on "Processing..." and never sent the order. The submit button was disabled and then clicked while disabled, which the browser ignores.
+* Fix: on the shortcode checkout, the custom "Place order" button locked the submit before starting the 3DS authentication, so no order was sent when placing the order.
+* Fix: the saved card charged could differ from the one displayed when an expired card was in the list (the button index stopped matching the stored record). When the selected card was not found, the flow proceeded to charge with an empty token instead of stopping.
+* Tweak: the "PRO" badge on PRO-only fields now sits next to the title on every gateway (the PIX fields used to show a red notice below the field). That notice became the badge tooltip.
 
 = 1.38.2 =
 ** 20/10/2026 **
@@ -565,6 +574,9 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 * Plugin launch.
 
 == Upgrade Notice ==
+
+= 1.38.3 =
+* Fix: the Pix description no longer stays frozen in English; it now follows the site language.
 
 = 1.38.2 =
 * Fix: card and Google Pay payments are no longer rejected with a nonce error when the customer creates an account while placing the order.

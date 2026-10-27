@@ -149,6 +149,8 @@ final class LknWCGatewayCieloCredit extends WC_Payment_Gateway
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
                 'compact' => __('Compact version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
+                // Tooltip do selo "PRO" (mesmo texto em todos os gateways).
+                'availableOnlyInPro' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',

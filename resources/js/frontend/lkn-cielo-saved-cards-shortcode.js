@@ -36,10 +36,10 @@
         var $selectedIndexInput = $fieldset.find('#lkn_selected_saved_card_index');
 
         function highlightButton($btn) {
-            $fieldset.find('.lkn-cielo-saved-card-btn')
-                .removeClass('selected')
-                .css('outline', 'none');
-            $btn.addClass('selected').css('outline', '2px solid #2563eb');
+            // Só a classe `.selected` importa: o outline (e o resto do visual)
+            // vem do CSS (lkn-dc-style.css), não de style inline.
+            $fieldset.find('.lkn-cielo-saved-card-btn').removeClass('selected');
+            $btn.addClass('selected');
         }
 
         // Click a saved card: hide form, set index, highlight

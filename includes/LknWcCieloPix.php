@@ -25,6 +25,19 @@ final class LknWcCieloPix extends WC_Payment_Gateway
     private $instructions;
     private $debug;
 
+    /**
+     * Frase padrão da description do PIX, sempre em inglês.
+     *
+     * Serve apenas como chave de comparação: o valor salvo na option é
+     * comparado com esta constante para detectar o "valor padrão" herdado de
+     * versões antigas (que gravavam o literal em inglês). A versão exibida é
+     * sempre obtida por get_default_description(), que passa por __() e
+     * acompanha o idioma do WordPress.
+     *
+     * @var string
+     */
+    private const DEFAULT_DESCRIPTION = 'After the purchase is completed, the PIX will be generated and made available for payment!';
+
     public function __construct()
     {
         $this->id = 'lkn_wc_cielo_pix';
@@ -64,13 +77,94 @@ final class LknWcCieloPix extends WC_Payment_Gateway
         // Define user set variables.
 
         $this->title = $this->get_option('title');
-        $this->description = $this->get_option('description');
+        // O textarea do admin mostra o valor de $this->settings: quando o que está
+        // salvo é a frase padrão (vazia ou o literal em inglês das versões
+        // antigas), exibe a versão traduzida sem gravar nada no banco.
+        $this->sync_default_description_display();
+        $this->description = $this->get_pix_description();
         $this->debug = $this->get_option('debug');
         $this->instructions = $this->get_option('instructions', $this->description);
         $this->log = new WC_Logger();
 
         if (function_exists('get_plugins')) {
             add_action('admin_enqueue_scripts', array($this, 'admin_load_script'));
+        }
+    }
+
+    /**
+     * Versão traduzida da description padrão do PIX.
+     *
+     * Resolvida a cada request por __(), então acompanha o locale do
+     * WordPress (site em pt_BR recebe português, em_US recebe inglês).
+     *
+     * @return string
+     */
+    private function get_default_description(): string
+    {
+        return __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo');
+    }
+
+    /**
+     * Description do PIX exibida no checkout, sempre no idioma do site.
+     *
+     * O valor padrão nunca precisa estar persistido: quando não há descrição
+     * salva (ou quando o que está salvo é a frase padrão em inglês, gravada por
+     * versões antigas), a frase é resolvida por __() a cada request. Assim a
+     * tradução fica dinâmica e não congela o idioma no banco.
+     *
+     * @return string
+     */
+    public function get_pix_description(): string
+    {
+        $saved = trim((string) $this->get_option('description', ''));
+
+        if ('' === $saved || self::DEFAULT_DESCRIPTION === $saved) {
+            return $this->get_default_description();
+        }
+
+        return $saved;
+    }
+
+    /**
+     * Normaliza a description antes de persistir.
+     *
+     * Qualquer valor que represente "usar a frase padrão" (vazio, o literal em
+     * inglês ou a própria frase já traduzida) é gravado como string vazia, para
+     * não congelar o idioma do site dentro da option.
+     *
+     * @param mixed $value Valor recebido do formulário.
+     * @return string
+     */
+    private function normalize_description($value): string
+    {
+        $value = trim((string) $value);
+
+        if ('' === $value || self::DEFAULT_DESCRIPTION === $value || $this->get_default_description() === $value) {
+            return '';
+        }
+
+        return $value;
+    }
+
+    /**
+     * Exibe a frase padrão da description já traduzida no formulário do admin.
+     *
+     * Altera apenas $this->settings (memória, usado para renderizar o campo);
+     * nunca toca na option. O valor padrão continua sem ser persistido, então o
+     * idioma exibido acompanha o locale do WordPress.
+     *
+     * @return void
+     */
+    private function sync_default_description_display(): void
+    {
+        if (! is_admin() || ! is_array($this->settings)) {
+            return;
+        }
+
+        $saved = isset($this->settings['description']) ? trim((string) $this->settings['description']) : '';
+
+        if ('' === $saved || self::DEFAULT_DESCRIPTION === $saved) {
+            $this->settings['description'] = $this->get_default_description();
         }
     }
 
@@ -91,23 +185,14 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'isProActive' => $pro_plugin_exists && $pro_plugin_active ? true : false,
             ));
 
-            if (isset($_GET['section']) && sanitize_text_field(wp_unslash($_GET['section'])) === 'lkn_wc_cielo_pix') {
-                wp_enqueue_script('LknCieloPixSettingsPix', LKN_WC_GATEWAY_CIELO_URL . 'resources/js/admin/lkn-settings-pix.js', array(), $this->version, false);
-
-                wp_localize_script(
-                    'LknCieloPixSettingsPix',
-                    'lknCieloProSettingsVars',
-                    array(
-                        'proOnly' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
-                    )
-                );
-            }
             wp_enqueue_script('LknCieloPixSettingsLayoutScript', LKN_WC_GATEWAY_CIELO_URL . 'resources/js/admin/lkn-wc-gateway-admin-layout.js', array('jquery'), $this->version, false);
             $gateway_settings = $this->settings;
             wp_localize_script('LknCieloPixSettingsLayoutScript', 'lknWcCieloTranslationsInput', array(
                 'modern' => __('Modern version', 'lkn-wc-gateway-cielo'),
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
+                // Tooltip do selo "PRO" (mesmo texto em todos os gateways).
+                'availableOnlyInPro' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'analytics_url' => admin_url('admin.php?page=wc-admin&path=%2Fanalytics%2Fcielo-transactions'),
@@ -171,9 +256,14 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'default'     => __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo'),
                 'description' => __('Payment method description that the customer will see on your checkout.', 'lkn-wc-gateway-cielo'),
                 'desc_tip'    => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
-                'custom_attributes' => array(
-                    'required' => 'required',
-                    'data-title-description' => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
+                'custom_attributes' => array_merge(
+                    array(
+                        'required' => 'required',
+                        'data-title-description' => __('Additional info shown next to the payment method.', 'lkn-wc-gateway-cielo'),
+                    ),
+                    // Selo "PRO" no título do campo; com a licença ativa o valor do
+                    // lojista é editável e persistido (ver process_admin_options()).
+                    LknWcCieloHelper::is_pro_license_active() ? array() : array('lkn-is-pro' => 'true')
                 ),
             ),
             'env' => array(
@@ -222,6 +312,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => esc_attr__('Choose the status that will be assigned automatically after payment confirmation.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => esc_attr__('Automatically sets the order status after payment.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'pix_layout' => array(
@@ -236,6 +327,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => __('Choose between the standard layout or the new layout for PIX.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('PIX layout shown to the customer at checkout.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'layout_location' => array(
@@ -250,6 +342,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'desc_tip'    => __('Set whether the PIX layout appears at the top or bottom of the checkout.', 'lkn-wc-gateway-cielo'),
                 'custom_attributes' => array(
                     'data-title-description' => __('Position of the PIX layout on the checkout page.', 'lkn-wc-gateway-cielo'),
+                    'lkn-is-pro' => 'true',
                 ),
             ),
             'show_button' => array(
@@ -261,6 +354,7 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                 'custom_attributes' => array(
                     'data-title-description' => __('Displays an additional button to generate the PIX', 'lkn-wc-gateway-cielo'),
                     'disabled' => 'disabled',
+                    'lkn-is-pro' => 'true',
                 ),
 
             ),
@@ -367,10 +461,10 @@ final class LknWcCieloPix extends WC_Payment_Gateway
     public function payment_fields(): void
     {
         wp_enqueue_style('lknWCGatewayCieloFixIconsStyle', plugin_dir_url(__FILE__) . '../resources/css/frontend/lkn-fix-icons-styles.css', array(), $this->version, 'all');
-        $description = $this->get_option('description', __('After the purchase is completed, the PIX will be generated and made available for payment!', 'lkn-wc-gateway-cielo'));
+        $description = $this->get_pix_description();
         echo "
             <div style=\"text-align:center;font-weight: bold;\">
-                <p>" . esc_attr($description) . "</p>
+                <p>" . esc_html($description) . "</p>
             </div>
         ";
 
@@ -753,9 +847,18 @@ final class LknWcCieloPix extends WC_Payment_Gateway
 
         if ($saved) {
 
+            // A description só é editável com o PRO instalado e a licença ativa.
+            // Os valores são comparados já normalizados: o textarea do admin
+            // mostra a frase padrão traduzida, então comparar as strings cruas
+            // acusaria alteração em todo salvamento.
             $new_description = $this->get_option('description');
-            if ($new_description !== $old_description && !empty($old_description) && !empty($new_description)) {
-                $this->update_option('description', $old_description);
+            $old_normalized = $this->normalize_description($old_description);
+            $new_normalized = $this->normalize_description($new_description);
+
+            if (! LknWcCieloHelper::is_pro_license_active() && $old_normalized !== $new_normalized) {
+                // Sem licença o campo volta ao estado original: restaura o valor
+                // anterior e avisa que a alteração não foi aceita.
+                $this->update_option('description', $old_normalized);
 
                 // Mostra a mensagem de erro
                 add_action('admin_notices', function () {
@@ -764,7 +867,10 @@ final class LknWcCieloPix extends WC_Payment_Gateway
                         </div>';
                 });
             } else {
-                $this->update_option('description', 'After the purchase is completed, the PIX will be generated and made available for payment!');
+                // Com licença vale o valor do lojista; sem licença, quando não
+                // houve tentativa de alteração, apenas normaliza a frase padrão
+                // para string vazia (ela é resolvida por __() no checkout).
+                $this->update_option('description', $new_normalized);
             }
 
             $new_payment_complete_status = $this->get_option('payment_complete_status');

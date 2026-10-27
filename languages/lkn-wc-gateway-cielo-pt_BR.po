@@ -1481,7 +1481,8 @@ msgstr "consulte a documentação"
 msgid " for more information."
 msgstr " para mais informações."
 
-#: includes/LknWcCieloPix.php:101
+#: includes/LknWcCieloPix.php:195 includes/LknWCGatewayCieloCredit.php:153
+#: includes/LknWCGatewayCieloDebit.php:214 includes/LknWCGatewayCieloGooglePay.php:101
 msgid "Available only in PRO"
 msgstr "Disponível apenas no PRO"
 

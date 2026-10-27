@@ -210,6 +210,8 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                 'standard' => __('Standard version', 'lkn-wc-gateway-cielo'),
                 'compact' => __('Compact version', 'lkn-wc-gateway-cielo'),
                 'becomePRO' => __('PRO', 'lkn-wc-gateway-cielo'),
+                // Tooltip do selo "PRO" (mesmo texto em todos os gateways).
+                'availableOnlyInPro' => __('Available only in PRO', 'lkn-wc-gateway-cielo'),
                 'enable' => __('Enable', 'lkn-wc-gateway-cielo'),
                 'disable' => __('Disable', 'lkn-wc-gateway-cielo'),
                 'mordernVersion' => plugin_dir_url(__FILE__) . '../resources/img/modern-version.png',
@@ -2007,7 +2009,12 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
                     }
                     // Remove cardToken from frontend data
                     unset($card['cardToken']);
-                    $cards_array[] = $card;
+                    // Preserva a chave original: o índice do cartão vai no POST
+                    // (lkn_selected_saved_card_index) e é usado pelo
+                    // process_payment() para ler o meta. Reindexar com `[]`
+                    // fazia o índice exibido não casar com o meta assim que um
+                    // cartão expirado fosse filtrado (cartão errado / "not found").
+                    $cards_array[$key] = $card;
                 }
             }
         }
@@ -2850,6 +2857,10 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
                 if (!$selectedCard) {
                     $this->add_error(__('Selected card not found.', 'lkn-wc-gateway-cielo'));
+
+                    // Sem `return` aqui o fluxo seguia com $selectedCard nulo: warning
+                    // nos acessos abaixo e uma cobrança enviada com CardToken vazio.
+                    return array('result' => 'failure');
                 }
     
                 $cardToken = $selectedCard['cardToken'];

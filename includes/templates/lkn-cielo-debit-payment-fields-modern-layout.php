@@ -60,7 +60,7 @@ $lkn_ph = function ($field, $default) use ($lkn_fields_gtw) {
 
         <!-- Saved Cards List (PRO feature - shortcode) -->
         <?php if (isset($show_saved_cards) && $show_saved_cards && ! empty($cards_array)) : ?>
-        <div class="lkn-cielo-saved-cards-list lkn-cielo-saved-cards-flex" style="display: flex; flex-wrap: wrap; margin-bottom: 10px; gap: 10px; width: 100%; justify-content: center;">
+        <div class="lkn-cielo-saved-cards-list lkn-cielo-saved-cards-flex">
             <?php foreach ($cards_array as $idx => $card) : 
                 $brand = isset($card['brand']) ? $card['brand'] : '';
                 $brand_lower = strtolower($brand);
@@ -79,19 +79,17 @@ $lkn_ph = function ($field, $default) use ($lkn_fields_gtw) {
                 data-card-brand="<?php echo esc_attr($brand); ?>"
                 data-card-digits="<?php echo esc_attr($card_digits); ?>"
                 data-card-description="<?php echo esc_attr($lkn_card_description); ?>"
-                data-card-expiration="<?php echo esc_attr($exp_date); ?>"
-                style="color: #2563eb; font-weight: 500; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; width: 225px; border: none; transition: all 0.2s; outline: <?php echo $is_default ? '2px solid #2563eb' : 'none'; ?>;">
-                <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>" style="height: 40px; margin-right: 8px;">
-                <span style="font-weight: 600;"><?php echo esc_html($brand); ?></span>
-                <span style="margin-left: 6px;"><?php echo esc_html($last_four); ?></span>
+                data-card-expiration="<?php echo esc_attr($exp_date); ?>">
+                <img src="<?php echo esc_url($icon_url); ?>" alt="<?php echo esc_attr($brand); ?>">
+                <span class="lkn-cielo-saved-card-brand"><?php echo esc_html($brand); ?></span>
+                <span class="lkn-cielo-saved-card-digits"><?php echo esc_html($last_four); ?></span>
             </button>
             <?php endforeach; ?>
         </div>
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div class="lkn-cielo-add-card-wrapper">
             <button type="button"
-                class="lkn-cielo-saved-card-btn lkn-cielo-add-card-btn<?php echo empty($default_card) ? ' selected' : ''; ?>"
-                style="font-weight: 500; color: #2563eb; font-size: 16px; cursor: pointer; padding: 10px 18px; display: flex; align-items: center; gap: 10px; border: none; width: 225px; justify-content: center; outline: <?php echo empty($default_card) ? '2px solid #2563eb' : 'none'; ?>;">
-                <span style="font-size: 22px; margin-right: 8px;">＋</span> <?php echo esc_html__('Add Card', 'lkn-wc-gateway-cielo'); ?>
+                class="lkn-cielo-saved-card-btn lkn-cielo-add-card-btn<?php echo '' === (string) $default_card ? ' selected' : ''; ?>">
+                <span class="lkn-cielo-add-card-icon">＋</span> <?php echo esc_html__('Add Card', 'lkn-wc-gateway-cielo'); ?>
             </button>
         </div>
         <input type="hidden" id="lkn_selected_saved_card_index" name="lkn_selected_saved_card_index" value="<?php echo esc_attr($default_card !== '' ? $default_card : ''); ?>">

@@ -698,7 +698,15 @@
               proLink.textContent = (typeof lknWcCieloTranslationsInput !== 'undefined' && lknWcCieloTranslationsInput.becomePRO)
                 ? lknWcCieloTranslationsInput.becomePRO
                 : 'PRO'
+              // Tooltip com o motivo do selo (mesmo texto em todos os gateways).
+              proLink.title = (typeof lknWcCieloTranslationsInput !== 'undefined' && lknWcCieloTranslationsInput.availableOnlyInPro)
+                ? lknWcCieloTranslationsInput.availableOnlyInPro
+                : 'Available only in PRO'
               titleInside.appendChild(proLink)
+
+              // O selo é posicionado à direita do cabeçalho (position: absolute).
+              // Reserva a largura dele para não sobrepor títulos longos.
+              titleInside.style.paddingRight = '60px'
 
               // Só bloqueia de fato os controles dos campos exclusivos do PRO (lkn-is-pro).
               // Os campos com lkn-pro-badge permanecem editáveis (são fakes/simulação).
