@@ -34,7 +34,7 @@ class AutoRefundOnCancelTest extends TestCase
         }
 
         if (! defined('LKN_WC_CIELO_VERSION')) {
-            define('LKN_WC_CIELO_VERSION', '1.38.3');
+            define('LKN_WC_CIELO_VERSION', '1.39.0');
         }
 
         if (! class_exists('WC_Payment_Gateway')) {
