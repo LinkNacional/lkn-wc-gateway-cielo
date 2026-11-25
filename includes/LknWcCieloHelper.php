@@ -126,6 +126,26 @@ final class LknWcCieloHelper
     }
 
     /**
+     * Permissão para processar estorno em nome do pedido.
+     *
+     * O estorno manual exige `manage_woocommerce`. O reembolso automático no
+     * cancelamento (recurso PRO) roda fora de uma sessão de admin — cancelamento
+     * pelo cliente na conta ou por um cron — e precisa passar por essa mesma
+     * validação. O PRO habilita o fluxo automático com o filtro
+     * `lkn_wc_cielo_user_can_refund`, que só deve ser ligado durante o estorno
+     * disparado pelo próprio cancelamento.
+     *
+     * @param int $orderId Pedido que está sendo estornado.
+     * @return bool
+     */
+    public static function currentUserCanRefund($orderId = 0): bool
+    {
+        $canRefund = current_user_can('manage_woocommerce');
+
+        return (bool) apply_filters('lkn_wc_cielo_user_can_refund', $canRefund, $orderId);
+    }
+
+    /**
      * Verifica se o gateway deve usar as mensagens padronizadas ABECS.
      *
      * Por padrão a opção segue a licença PRO: habilitada para quem tem a licença

@@ -272,6 +272,8 @@ final class LknWCCieloPayment
         $settings['show_card_brand_icons'] = 'yes';
         $settings['implant_css'] = '';
         $settings['payment_complete_status'] = 'processing';
+        // Reembolso automático no cancelamento é PRO: sem licença volta a 'no'.
+        $settings['auto_refund_on_cancel'] = 'no';
         $settings['auto_complete'] = '0';
         $settings['elementor_checkout_compatibility'] = 'no';
         $settings['zero_auth_validation'] = 'no';
