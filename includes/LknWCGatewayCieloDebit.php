@@ -1311,6 +1311,19 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
             ),
         );
 
+        $fields['auto_refund_on_cancel_fake'] = array(
+            'title'       => __('Automatic Refund on Cancellation', 'lkn-wc-gateway-cielo'),
+            'type'        => 'checkbox',
+            'label'       => __('Enable automatic refund when the order is cancelled', 'lkn-wc-gateway-cielo'),
+            'description' => __('If enabled, WooCommerce automatically refunds the full amount through this gateway when an order is cancelled.', 'lkn-wc-gateway-cielo'),
+            'desc_tip'    => __('Refunds the customer automatically when an order is moved to the cancelled status.', 'lkn-wc-gateway-cielo'),
+            'default'     => 'no',
+            'custom_attributes' => array_merge(
+                array('data-title-description' => __('Issues a full refund through Cielo when the order is cancelled.', 'lkn-wc-gateway-cielo')),
+                $lock
+            ),
+        );
+
         $fields['auto_complete_fake'] = array(
             'title'       => __('Autocomplete Orders', 'lkn-wc-gateway-cielo'),
             'type'        => 'select',
@@ -3127,8 +3140,9 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
      */
     public function process_refund($order_id, $amount = null, $reason = '')
     {
-        // Verify user has permission to process refunds
-        if (!current_user_can('manage_woocommerce')) {
+        // Verify user has permission to process refunds. O filtro cobre o
+        // reembolso automático no cancelamento (PRO), que roda sem sessão de admin.
+        if (!LknWcCieloHelper::currentUserCanRefund($order_id)) {
             if ('yes' === $this->get_option('debug')) {
                 $this->log->log('error', 'Refund attempt without proper permissions for order: ' . $order_id, array('source' => 'woocommerce-cielo-debit-security'));
             }
@@ -3187,7 +3201,7 @@ final class LknWCGatewayCieloDebit extends WC_Payment_Gateway
 
         // If filter was hooked and returned a value, verify user still has permission
         if (has_filter('lkn_wc_cielo_debit_refund')) {
-            if (!current_user_can('manage_woocommerce')) {
+            if (!LknWcCieloHelper::currentUserCanRefund($order_id)) {
                 if ('yes' === $debug) {
                     $this->log->log('error', 'Refund filter used without proper permissions for order: ' . $order_id, array('source' => 'woocommerce-cielo-debit-security'));
                 }

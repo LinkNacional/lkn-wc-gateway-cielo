@@ -1,3 +1,7 @@
+# 1.39.0 - 25/11/2026
+* Novo: opção "Reembolso automático no cancelamento" nos gateways de crédito e débito (PRO). Com ela habilitada, cancelar um pedido pago dispara o reembolso total pela Cielo. No plano gratuito a opção aparece como demonstração com o selo PRO, sem efeito.
+* Ajuste: a verificação de permissão do estorno passa pelo filtro `lkn_wc_cielo_user_can_refund`, permitindo que o PRO estorne pedidos fora de uma sessão de admin (cancelamento feito pelo cliente ou por cron).
+
 # 1.38.3 - 26/10/2026
 * Correção: a descrição do PIX (e o campo equivalente no plugin PRO) não fica mais congelada em inglês. O texto padrão deixou de ser gravado no banco: é resolvido pela tradução a cada requisição, então o idioma acompanha a instalação do WordPress. Textos personalizados com licença PRO ativa são mantidos como estão.
 * Ajuste: o visual dos cartões salvos do débito (lista e botão "Adicionar Cartão") saiu do `style` inline dos templates e do componente dos Blocos e passou para o CSS do plugin, com `!important`, para o tema não sobrescrever fundo, cor do texto, borda, raio e tipografia. Para personalizar, use `.lkn-cielo-saved-card-btn` com `!important`.

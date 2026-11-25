@@ -4,7 +4,7 @@ Donate link: https://www.linknacional.com.br/wordpress/woocommerce/cielo/
 Tags: pagamento, cielo, pix, woocommerce, creditcard
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 1.38.3
+Stable tag: 1.39.0
 Requires PHP: 8.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -116,6 +116,11 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 7. Debit card front page with payment fields.
 
 == Changelog ==
+
+= 1.39.0 =
+** 25/11/2026 **
+* New: "Automatic Refund on Cancellation" option on the credit and debit gateways (PRO). When enabled, cancelling a paid order issues a full refund through Cielo. On the free plan the option is shown with the PRO badge as a preview, without effect.
+* Tweak: the refund permission check now goes through the `lkn_wc_cielo_user_can_refund` filter, so the PRO can refund orders outside an admin session (customer-initiated cancellation or cron).
 
 = 1.38.3 =
 ** 26/10/2026 **
@@ -574,6 +579,9 @@ CIELO API PIX, credit card, debit payment for WooCommerceCIELO API PIX, credit c
 * Plugin launch.
 
 == Upgrade Notice ==
+
+= 1.39.0 =
+* New: automatic refund when an order is cancelled (PRO), plus the refund permission filter used by the PRO plugin.
 
 = 1.38.3 =
 * Fix: the Pix description no longer stays frozen in English; it now follows the site language.
