@@ -2979,18 +2979,14 @@ msgstr "Habilitar o reembolso automático quando o pedido for cancelado"
 msgid ""
 "If enabled, WooCommerce automatically refunds the full amount through this "
 "gateway when an order is cancelled."
-msgstr ""
-"Se habilitado, o WooCommerce reembolsa automaticamente o valor total por este "
-"meio de pagamento quando o pedido é cancelado."
+msgstr "Se habilitado, o WooCommerce reembolsa automaticamente o valor total por este meio de pagamento quando o pedido for cancelado."
 
 #: includes/LknWCGatewayCieloCredit.php:747
 #: includes/LknWCGatewayCieloDebit.php:1319
 msgid ""
 "Refunds the customer automatically when an order is moved to the cancelled "
 "status."
-msgstr ""
-"Reembolsa o cliente automaticamente quando o pedido passa para o status "
-"cancelado."
+msgstr "Reembolsa o cliente automaticamente quando o pedido passa para o status cancelado."
 
 #: includes/LknWCGatewayCieloCredit.php:750
 #: includes/LknWCGatewayCieloDebit.php:1322
