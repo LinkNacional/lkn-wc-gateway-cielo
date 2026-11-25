@@ -25,7 +25,7 @@ if (! defined('LKN_WC_CIELO_VERSION')) {
  * Usada para avisar (e forçar atualização) quando o PRO está desatualizado.
  */
 if (! defined('LKN_WC_CIELO_MIN_PRO_VERSION')) {
-    define('LKN_WC_CIELO_MIN_PRO_VERSION', '1.31.0');
+    define('LKN_WC_CIELO_MIN_PRO_VERSION', '1.32.0');
 }
 
 if (! defined('LKN_WC_CIELO_FILE')) {
